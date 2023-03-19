@@ -179,7 +179,7 @@ void qr(tpm_desc A, tpm_desc S)
             for (int i = 0; i < NEVENTS; i++)
             {
 #pragma omp atomic update
-              values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
+              values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
             }
             PAPI_unregister_thread();
           }
@@ -253,7 +253,7 @@ void qr(tpm_desc A, tpm_desc S)
             for (int i = 0; i < NEVENTS; i++)
             {
 #pragma omp atomic update
-              values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
+              values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
             }
             PAPI_unregister_thread();
           }
@@ -328,7 +328,7 @@ void qr(tpm_desc A, tpm_desc S)
               for (int i = 0; i < NEVENTS; i++)
               {
 #pragma omp atomic update
-                values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
+                values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
               }
               PAPI_unregister_thread();
             }
