@@ -16,26 +16,31 @@
  * =====================================================================================
  */
 
-typedef struct {
-  long long values[NEVENTS];
-  double arithm_intensity;
-  double mem_boundness;
-  double bmr;
-  double ilp;
+typedef struct
+{
+    long long values[NEVENTS];
+    double arithm_intensity;
+    double mem_boundness;
+    double bmr;
+    double ilp;
 } CounterData;
 
-void compute_derived_metrics(CounterData *data) {
-  data->arithm_intensity = (double)data->values[0] / (double)data->values[1];
-  data->mem_boundness = (double)data->values[2] / (double)data->values[3];
-  data->bmr = (double)data->values[4] / (double)data->values[5];
-  data->ilp = (double)data->values[1] / (double)data->values[3];
+void compute_derived_metrics(CounterData *data)
+{
+    data->arithm_intensity = (double)data->values[0] / (double)data->values[1];
+    data->mem_boundness = (double)data->values[2] / (double)data->values[3];
+    data->bmr = (double)data->values[4] / (double)data->values[5];
+    data->ilp = (double)data->values[1] / (double)data->values[3];
 }
 
-void accumulate_counters(long long dst[], long long src[][NEVENTS], int available_threads) {
-  memset(dst, 0, NEVENTS * sizeof(long long));
-  for (int i = 0; i < NEVENTS; i++) {
-    for (int j = 0; j < available_threads; j++) {
-      dst[i] += src[j][i];
+void accumulate_counters(long long dst[], long long src[][NEVENTS], int available_threads)
+{
+    memset(dst, 0, NEVENTS * sizeof(long long));
+    for (int i = 0; i < NEVENTS; i++)
+    {
+        for (int j = 0; j < available_threads; j++)
+        {
+            dst[i] += src[j][i];
+        }
     }
-  }
 }
