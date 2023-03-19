@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.2)
+project(tpm_trace)
+
+set(CMAKE_CXX_STANDARD 11)
+
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
+# set up path
+set(ROOT /home/xps/Work/Software)
+set(OMP_INSTALL ${ROOT}/llvm-project/build-openmp)
+set(OMP_LIB_PATH ${OMP_INSTALL}/lib)
+set(OMP_INCLUDE ${OMP_INSTALL}/include)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
+
+set(SOURCE_FILES
+    tpm_trace.c
+    tpm_trace.h
+    include/hashmap.c
+    include/hashmap.h
+)
+
+include_directories(${OMP_INCLUDE})
+add_library(tpm_trace SHARED ${SOURCE_FILES})
+target_link_libraries(tpm_trace -lzmq)
+install(TARGETS tpm_trace DESTINATION lib)
