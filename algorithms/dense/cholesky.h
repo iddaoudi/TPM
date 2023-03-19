@@ -16,8 +16,6 @@
  * =====================================================================================
  */
 
-#define NEVENTS 6
-
 void cholesky(tpm_desc A)
 {
   char *name_with_id_char = NULL;
