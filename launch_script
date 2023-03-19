@@ -4,7 +4,7 @@
 export OPENBLAS_NUM_THREADS=1
 
 # Parameters
-algo=qr
+algo=lu
 msize=2048
 bsize=256
 threads=1
@@ -26,10 +26,10 @@ export OMP_PROC_BIND=close
 ######################################################
 
 # LD_PRELOAD
-ROOT=/home/xps/Work/Software
+ROOT=/home/cc
 omp_so=${ROOT}/llvm-project/build-openmp/lib/libomp.so
 trace_so=${ROOT}/TPM/trace/libtpm_trace.so
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/xps/Work/Software/OpenBLAS/build/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROOT}/OpenBLAS/build/lib
 
 ######################################################
 
