@@ -26,19 +26,20 @@ void qr(tpm_desc A, tpm_desc S)
   int eventset = PAPI_NULL;
   long long values[NEVENTS];
   const int available_threads = omp_get_max_threads();
-  long long(*values_by_thread_geqrt)[NEVENTS] = malloc(available_threads * sizeof(*values_by_thread_geqrt));
-  long long(*values_by_thread_ormqr)[NEVENTS] = malloc(available_threads * sizeof(*values_by_thread_ormqr));
-  long long(*values_by_thread_tsqrt)[NEVENTS] = malloc(available_threads * sizeof(*values_by_thread_tsqrt));
-  long long(*values_by_thread_tsmqr)[NEVENTS] = malloc(available_threads * sizeof(*values_by_thread_tsmqr));
+  
+  long long(*values_by_thread_geqrt)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  long long(*values_by_thread_ormqr)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  long long(*values_by_thread_tsqrt)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  long long(*values_by_thread_tsmqr)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
 
   if (TPM_PAPI)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
 
-    memset(values_by_thread_geqrt, 0, sizeof(*values_by_thread_geqrt) * NEVENTS);
-    memset(values_by_thread_ormqr, 0, sizeof(*values_by_thread_ormqr) * NEVENTS);
-    memset(values_by_thread_tsqrt, 0, sizeof(*values_by_thread_tsqrt) * NEVENTS);
-    memset(values_by_thread_tsmqr, 0, sizeof(*values_by_thread_tsmqr) * NEVENTS);
+    memset(values_by_thread_geqrt, 0, available_threads * sizeof(long long[NEVENTS]));
+    memset(values_by_thread_ormqr, 0, available_threads * sizeof(long long[NEVENTS]));
+    memset(values_by_thread_tsqrt, 0, available_threads * sizeof(long long[NEVENTS]));
+    memset(values_by_thread_tsmqr, 0, available_threads * sizeof(long long[NEVENTS]));
   }
 
   // TPM library: initialization

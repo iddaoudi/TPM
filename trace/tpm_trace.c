@@ -135,6 +135,7 @@ extern void tpm_trace_finalize()
   hashmap_scan(map, tpm_map_iter, file);
   pthread_mutex_destroy(&mutex);
   hashmap_free(map);
+  fclose(file);
 
   // Send request to end energy measurements and close the socket connection
   tpm_zmq_send_signal(request, "energy 1");

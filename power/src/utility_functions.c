@@ -52,12 +52,13 @@ void file_dump(int active_packages, uint64_t *pkg_energy_start,
                uint64_t *pkg_energy_finish, uint64_t *dram_energy_start,
                uint64_t *dram_energy_finish)
 {
+  FILE *file;
   int counter = 0;
   while (counter != active_packages)
   {
     char name[TPM_FILENAME_STRING_SIZE];
     snprintf(name, TPM_FILENAME_STRING_SIZE, "pkg_%d.dat", counter);
-    FILE *file = fopen(name, "a");
+    file = fopen(name, "a");
     assert(file != NULL);
     fprintf(file, "%" PRIu64 " ",
             pkg_energy_finish[counter] - pkg_energy_start[counter]);
@@ -68,12 +69,13 @@ void file_dump(int active_packages, uint64_t *pkg_energy_start,
   {
     char name[TPM_FILENAME_STRING_SIZE];
     snprintf(name, TPM_FILENAME_STRING_SIZE, "dram_%d.dat", counter);
-    FILE *file = fopen(name, "a");
+    file = fopen(name, "a");
     assert(file != NULL);
     fprintf(file, "%" PRIu64 " ",
             dram_energy_finish[counter] - dram_energy_start[counter]);
     counter++;
   }
+  fclose(file);
 }
 
 int frequencies_vector_size_counter(unsigned long *frequencies_vector)

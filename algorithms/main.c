@@ -131,11 +131,19 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  PAPI_library_init(PAPI_VER_CURRENT);
+  int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
+  if (papi_version != PAPI_VER_CURRENT && papi_version > 0) {
+    printf("PAPI library version mismatch: %s\n", PAPI_strerror(papi_version));
+    exit(1);
+  } else if (papi_version < 0) {
+    printf("PAPI library init error: %s\n", PAPI_strerror(papi_version));
+    exit(1);
+  }
+
   if (TPM_PAPI)
   {
     int ret;
-    if ((ret = PAPI_thread_init(pthread_self())) != PAPI_OK)
+    if ((ret = PAPI_thread_init(pthread_self)) != PAPI_OK)
     {
       printf("PAPI thread init error: %s\n", PAPI_strerror(ret));
       exit(1);

@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <papi.h>
 #include <pthread.h>
+#include <papi.h>
 
 #define TPM_STRING_SIZE 64
 

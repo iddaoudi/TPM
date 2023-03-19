@@ -1,11 +1,11 @@
 # OMPT doesn't seem to be working properly with clang-15
 
 # Path
-ROOT=/home/xps/Work/Software
+ROOT=/home/cc
 
 # Compiler
-CC=clang
-CXX=clang++
+CC=gcc
+CXX=g++
 
 # C flags
 CFLAGS+=-std=gnu99 -ggdb -rdynamic -ldl -Iinclude -Idense -Isparse
@@ -20,7 +20,7 @@ LAPACKE_LIB=${ROOT}/OpenBLAS/build
 LAPACKE_LIBRARY=-lopenblas -I${LAPACKE_LIB}/include -L${LAPACKE_LIB}/lib
 
 # PAPI
-PAPI_LIBRARY=-lpapi -I/usr/local/include -L/usr/local/lib 
+PAPI_LIBRARY=-lpapi -lpthread -mcmodel=large 
 
 all: tpm_benchmark
 
