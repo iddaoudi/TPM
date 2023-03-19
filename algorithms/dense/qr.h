@@ -400,7 +400,6 @@ void qr(tpm_desc A, tpm_desc S)
     if ((file = fopen("counters.dat", "w")) == NULL)
     {
       perror("fopen failed");
-      printf("error\n");
       exit(1);
     }
     else
