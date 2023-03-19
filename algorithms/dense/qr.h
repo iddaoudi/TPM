@@ -18,8 +18,6 @@
 
 #define NEVENTS 6
 
-#include "counters.h"
-
 void qr(tpm_desc A, tpm_desc S)
 {
   char *name_with_id_char = NULL;

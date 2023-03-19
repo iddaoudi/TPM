@@ -50,6 +50,7 @@ int MSIZE, BSIZE, NTH, TPM_TRACE, TPM_TRACE, TPM_PAPI;
 #include "tile_address.h"
 #include "populate.h"
 #include "print.h"
+#include "counters.h"
 
 #include "cholesky.h"
 
