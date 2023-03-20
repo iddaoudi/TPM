@@ -149,7 +149,11 @@ extern void tpm_trace_finalize(double exec_time)
   tpm_zmq_send_signal(request, matrix);
   char *tile = tpm_task_and_cpu_string("tile", tile_size);
   tpm_zmq_send_signal(request, tile);
-  char* time = tpm_task_and_cpu_string("time", exec_time);
+  char* time = tpm_str_and_double_to_str("time", exec_time);
   tpm_zmq_send_signal(request, time);
   tpm_zmq_close(request, context);
+
+  free(matrix);
+  free(tile);
+  free(time);
 }

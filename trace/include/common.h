@@ -49,3 +49,18 @@ char *tpm_task_and_cpu_string(char *task, int cpu)
 
   return task_name;
 }
+
+char *tpm_str_and_double_to_str(char *str, double value)
+{
+    int len = snprintf(NULL, 0, "%s %.6g", str, value);
+    char *result = (char *)malloc((len + 1) * sizeof(char));
+
+    if (result == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    snprintf(result, len + 1, "%s %.6g", str, value);
+    return result;
+}
