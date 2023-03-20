@@ -34,7 +34,7 @@ void tpm_set_governor_policy(unsigned int cpu, char *new_governor)
   int ret = cpufreq_modify_policy_governor(cpu, new_governor);
   if (ret != 0)
   {
-    printf("No root access.\n");
+    printf("No root access on CPU %d\n", cpu);
     exit(EXIT_FAILURE);
   }
 }
@@ -44,7 +44,7 @@ void tpm_set_max_frequency(unsigned int cpu, unsigned long max_freq)
   int ret = cpufreq_modify_policy_max(cpu, max_freq);
   if (ret != 0)
   {
-    printf("No root access.\n");
+    printf("No root access on CPU %d\n", cpu);
     exit(EXIT_FAILURE);
   }
 }
