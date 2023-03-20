@@ -376,13 +376,13 @@ void qr(tpm_desc A, tpm_desc S)
     else
     {
       fprintf(file, "qr, geqrt, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              geqrt.mem_boundness, geqrt.arithm_intensity, geqrt.bmr, geqrt.ilp, geqrt.values[0] / l3_cache_size);
+              geqrt.mem_boundness, geqrt.arithm_intensity, geqrt.bmr, geqrt.ilp, (double)geqrt.values[0] / (double)l3_cache_size);
       fprintf(file, "qr, ormqr, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              ormqr.mem_boundness, ormqr.arithm_intensity, ormqr.bmr, ormqr.ilp, ormqr.values[0] / l3_cache_size);
+              ormqr.mem_boundness, ormqr.arithm_intensity, ormqr.bmr, ormqr.ilp, (double)ormqr.values[0] / (double)l3_cache_size);
       fprintf(file, "qr, tsqrt, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              tsqrt.mem_boundness, tsqrt.arithm_intensity, tsqrt.bmr, tsqrt.ilp, tsqrt.values[0] / l3_cache_size);
+              tsqrt.mem_boundness, tsqrt.arithm_intensity, tsqrt.bmr, tsqrt.ilp, (double)tsqrt.values[0] / (double)l3_cache_size);
       fprintf(file, "qr, tsmqr, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              tsmqr.mem_boundness, tsmqr.arithm_intensity, tsmqr.bmr, tsmqr.ilp, tsmqr.values[0] / l3_cache_size);
+              tsmqr.mem_boundness, tsmqr.arithm_intensity, tsmqr.bmr, tsmqr.ilp, (double)tsmqr.values[0] / (double)l3_cache_size);
 
       fclose(file);
     }
