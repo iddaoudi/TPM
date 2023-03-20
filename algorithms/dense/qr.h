@@ -368,13 +368,20 @@ void qr(tpm_desc A, tpm_desc S)
     }
 
     FILE *file;
-    if ((file = fopen("counters.dat", "a")) == NULL)
+    if ((file = fopen("counters_qr.dat", "a+")) == NULL)
     {
       perror("fopen failed");
       exit(1);
     }
     else
     {
+      fseek(file, 0, SEEK_SET);
+      int first_char = fgetc(file);
+      if (first_char == EOF)
+      {
+        fprintf(file, "algorithm, task, matrix_size, tile_size, mem_boundness, arithm_intensity, bmr, ilp, l3_cache_ratio\n");
+      }
+
       fprintf(file, "qr, geqrt, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
               geqrt.mem_boundness, geqrt.arithm_intensity, geqrt.bmr, geqrt.ilp, (double)geqrt.values[0] / (double)l3_cache_size);
       fprintf(file, "qr, ormqr, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
