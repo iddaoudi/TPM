@@ -192,13 +192,20 @@ int main(int argc, char *argv[])
     // Cholesky algorithm
     case ALGO_CHOLESKY:
       tpm_hermitian_positive_generator(*A);
-      time_start = omp_get_wtime();
-#pragma omp parallel if(!TPM_PAPI)
-#pragma omp master if(!TPM_PAPI)
+      if (TPM_PAPI)
       {
         cholesky(*A);
       }
-      time_finish = omp_get_wtime();
+      else
+      {
+        time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+        {
+          cholesky(*A);
+        }
+        time_finish = omp_get_wtime();
+      }
       break;
     // QR algorithm
     case ALGO_QR:
@@ -207,26 +214,40 @@ int main(int argc, char *argv[])
       tpm_desc *S = NULL;
       int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
-      time_start = omp_get_wtime();
-#pragma omp parallel if(!TPM_PAPI)
-#pragma omp master if(!TPM_PAPI)
+      if (TPM_PAPI)
       {
         qr(*A, *S);
       }
-      time_finish = omp_get_wtime();
+      else
+      {
+        time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+        {
+          qr(*A, *S);
+        }
+        time_finish = omp_get_wtime();
+      }
       free(S->matrix);
       tpm_matrix_desc_destroy(&S);
       break;
     // LU algorithm
     case ALGO_LU:
       tpm_hermitian_positive_generator(*A);
-      time_start = omp_get_wtime();
-#pragma omp parallel if(!TPM_PAPI)
-#pragma omp master if(!TPM_PAPI)
+      if (TPM_PAPI)
       {
         lu(*A);
       }
-      time_finish = omp_get_wtime();
+      else
+      {
+        time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+        {
+          lu(*A);
+        }
+        time_finish = omp_get_wtime();
+      }
       break;
     }
     free(A->matrix);
@@ -237,14 +258,22 @@ int main(int argc, char *argv[])
   case ALGO_SPARSELU:
   {
     double **M;
-#pragma omp parallel if(!TPM_PAPI)
-#pragma omp master if(!TPM_PAPI)
-    tpm_sparse_allocate(&M, MSIZE, BSIZE);
-
-    time_start = omp_get_wtime();
-    sparselu(M, MSIZE, BSIZE);
-    time_finish = omp_get_wtime();
-    free(M);
+    if (TPM_PAPI)
+    {
+      tpm_sparse_allocate(&M, MSIZE, BSIZE);
+      sparselu(M, MSIZE, BSIZE);
+      free(M);
+    }
+    else
+    {
+#pragma omp parallel
+#pragma omp master
+      tpm_sparse_allocate(&M, MSIZE, BSIZE);
+      time_start = omp_get_wtime();
+      sparselu(M, MSIZE, BSIZE);
+      time_finish = omp_get_wtime();
+      free(M);
+    }
     break;
   }
   default:
