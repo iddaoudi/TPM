@@ -30,6 +30,9 @@
 
 int start_experiment()
 {
+  int matrix_size = 0;
+  int tile_size = 0;
+
   void *context = zmq_ctx_new();
   void *server = zmq_socket(context, ZMQ_PULL);
 
@@ -105,6 +108,16 @@ int start_experiment()
       handle_energy_measurement(cpu, active_packages, pkg_energy_start, pkg_energy_finish, dram_energy_start, dram_energy_finish);
     }
 
+    if (strcmp(task, "matrix") == 0)
+    {
+      matrix_size = cpu;
+    }
+
+    if (strcmp(task, "tile") == 0)
+    {
+      tile_size = cpu;
+    }
+
     /* End measurements */
     if (strcmp(task_and_cpu, "end") == 0)
       break;
@@ -113,10 +126,12 @@ int start_experiment()
   /* Set back the original governor policy and frequency (max by default) */
   restore_original_governor_and_frequency(original_governor, original_frequency);
 
-  file_dump(active_packages, pkg_energy_start, pkg_energy_finish,
+  printf("HERE\n");
+
+  file_dump(algorithm, matrix_size, tile_size, selected_case, active_packages, pkg_energy_start, pkg_energy_finish,
             dram_energy_start, dram_energy_finish);
-  
-  //printf("%lu\n", selected_frequency);
+
+  // printf("%lu\n", selected_frequency);
 
   return 0;
 }

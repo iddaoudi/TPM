@@ -24,7 +24,7 @@
 void logs(unsigned long *frequencies_vector, int frequencies_vector_size,
           char **governors_vector, char *original_governor,
           unsigned long selected_frequency);
-void file_dump(int active_packages, uint64_t *pkg_energy_start,
+void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_case, int active_packages, uint64_t *pkg_energy_start,
                uint64_t *pkg_energy_finish, uint64_t *dram_energy_start,
                uint64_t *dram_energy_finish);
 int frequencies_vector_size_counter(unsigned long *frequencies_vector);

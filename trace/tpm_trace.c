@@ -142,8 +142,14 @@ extern void tpm_trace_finalize()
   pthread_mutex_destroy(&mutex);
   hashmap_free(map);
 
-  // Send request to end energy measurements and close the socket connection
+  // Send request to end energy measurements
   tpm_zmq_send_signal(request, "energy 1");
+
+  char *matrix = tpm_task_and_cpu_string("matrix", matrix_size);
+  tpm_zmq_send_signal(request, matrix);
+  char *tile = tpm_task_and_cpu_string("tile", tile_size);
+  tpm_zmq_send_signal(request, tile);
+
   tpm_zmq_send_signal(request, "end");
   tpm_zmq_close(request, context);
 }
