@@ -132,10 +132,13 @@ int main(int argc, char *argv[])
   }
 
   int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
-  if (papi_version != PAPI_VER_CURRENT && papi_version > 0) {
+  if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
+  {
     printf("PAPI library version mismatch: %s\n", PAPI_strerror(papi_version));
     exit(1);
-  } else if (papi_version < 0) {
+  }
+  else if (papi_version < 0)
+  {
     printf("PAPI library init error: %s\n", PAPI_strerror(papi_version));
     exit(1);
   }
@@ -150,9 +153,24 @@ int main(int argc, char *argv[])
     }
   }
 
-  // Launch algorithms
+  // Get the L3 cache size
+  long l3_cache_size;
+#ifdef _SC_LEVEL3_CACHE_SIZE
+  l3_cache_size = sysconf(_SC_LEVEL3_CACHE_SIZE);
+#else
+  printf("_SC_LEVEL3_CACHE_SIZE is not available.\n");
+  exit(1);
+#endif
+  if (l3_cache_size == -1)
+  {
+    perror("sysconf failed");
+    exit(1);
+  }
+
+  // Timers
   double time_start, time_finish;
 
+  // Launch algorithms
   switch (algo_type)
   {
   case ALGO_CHOLESKY:
@@ -237,5 +255,5 @@ int main(int argc, char *argv[])
 
   if (TPM_TRACE)
     tpm_upstream_finalize();
-  //printf("%f\n", time_finish - time_start);
+  // printf("%f\n", time_finish - time_start);
 }
