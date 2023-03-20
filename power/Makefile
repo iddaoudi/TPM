@@ -1,5 +1,5 @@
-CC=clang
-CXX=clang++
+CC=gcc
+CXX=g++
 
 CFLAGS+=-std=gnu99 -O2 -Iinclude -Icontrol
 

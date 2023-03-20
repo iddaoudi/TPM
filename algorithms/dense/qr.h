@@ -67,7 +67,7 @@ void qr(tpm_desc A, tpm_desc S)
 
       if (TPM_PAPI)
       {
-        memset(values, 0, sizeof(values));
+	memset(values, 0, sizeof(values));
         eventset = PAPI_NULL;
         int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
         int ret = PAPI_create_eventset(&eventset);
@@ -76,10 +76,20 @@ void qr(tpm_desc A, tpm_desc S)
           printf("GEQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
           exit(EXIT_FAILURE);
         }
-        PAPI_add_events(eventset, events, NEVENTS);
+	PAPI_add_events(eventset, events, NEVENTS);
 
         // Start PAPI counters
-        PAPI_start(eventset);
+	int eventset_state;
+	PAPI_state(eventset, &eventset_state);
+	if (eventset_state & PAPI_STOPPED) {
+		int ret_start = PAPI_start(eventset);
+		if (ret_start != PAPI_OK) {
+  			printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+  			exit(EXIT_FAILURE);
+		}
+	} else {
+  		printf("Event set is not in the PAPI_STOPPED state\n");
+	}
       }
       else if (TPM_TRACE)
       {
@@ -98,8 +108,13 @@ void qr(tpm_desc A, tpm_desc S)
 
       if (TPM_PAPI)
       {
-        // Start PAPI counters
-        PAPI_stop(eventset, values);
+	// Start PAPI counters
+        //PAPI_stop(eventset, values);
+	int ret_stop = PAPI_stop(eventset, values);
+	if (ret_stop != PAPI_OK) {
+  	    printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+  	    exit(EXIT_FAILURE);
+	}
 
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
@@ -107,6 +122,7 @@ void qr(tpm_desc A, tpm_desc S)
 #pragma omp atomic update
           values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
         }
+        printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
         PAPI_unregister_thread();
       }
       else if (TPM_TRACE)
@@ -138,7 +154,7 @@ void qr(tpm_desc A, tpm_desc S)
 
           if (TPM_PAPI)
           {
-            memset(values, 0, sizeof(values));
+	    memset(values, 0, sizeof(values));
             eventset = PAPI_NULL;
             int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
             int ret = PAPI_create_eventset(&eventset);
@@ -147,11 +163,21 @@ void qr(tpm_desc A, tpm_desc S)
               printf("ORMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
               exit(EXIT_FAILURE);
             }
-            PAPI_add_events(eventset, events, NEVENTS);
+	    PAPI_add_events(eventset, events, NEVENTS);
 
             // Start PAPI counters
-            PAPI_start(eventset);
-          }
+	    int eventset_state;
+	    PAPI_state(eventset, &eventset_state);
+	    if (eventset_state & PAPI_STOPPED) {
+	    	int ret_start = PAPI_start(eventset);
+	    	if (ret_start != PAPI_OK) {
+  	    		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+  	    		exit(EXIT_FAILURE);
+	    	}
+	    } else {
+  	    	printf("Event set is not in the PAPI_STOPPED state\n");
+	    }    
+	  }
           else if (TPM_TRACE)
           {
             // TPM library: send CPU and name
@@ -170,17 +196,22 @@ void qr(tpm_desc A, tpm_desc S)
 
           if (TPM_PAPI)
           {
-            // Start PAPI counters
-            PAPI_stop(eventset, values);
-
+	    // Start PAPI counters
+            //PAPI_stop(eventset, values);
+	    int ret_stop = PAPI_stop(eventset, values);
+	    if (ret_stop != PAPI_OK) {
+  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+  	        exit(EXIT_FAILURE);
+	    }
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
 #pragma omp atomic update
               values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
             }
+            printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             PAPI_unregister_thread();
-          }
+	  }
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
@@ -222,10 +253,20 @@ void qr(tpm_desc A, tpm_desc S)
               printf("TSQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
               exit(EXIT_FAILURE);
             }
-            PAPI_add_events(eventset, events, NEVENTS);
+	    PAPI_add_events(eventset, events, NEVENTS);
 
             // Start PAPI counters
-            PAPI_start(eventset);
+	    int eventset_state;
+	    PAPI_state(eventset, &eventset_state);
+	    if (eventset_state & PAPI_STOPPED) {
+	    	int ret_start = PAPI_start(eventset);
+	    	if (ret_start != PAPI_OK) {
+  	    		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+  	    		exit(EXIT_FAILURE);
+	    	}
+	    } else {
+  	    	printf("Event set is not in the PAPI_STOPPED state\n");
+	    }
           }
           else if (TPM_TRACE)
           {
@@ -244,8 +285,13 @@ void qr(tpm_desc A, tpm_desc S)
 
           if (TPM_PAPI)
           {
-            // Start PAPI counters
-            PAPI_stop(eventset, values);
+	    // Start PAPI counters
+            //PAPI_stop(eventset, values);
+	    int ret_stop = PAPI_stop(eventset, values);
+	    if (ret_stop != PAPI_OK) {
+  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+  	        exit(EXIT_FAILURE);
+	    }
 
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
@@ -253,8 +299,9 @@ void qr(tpm_desc A, tpm_desc S)
 #pragma omp atomic update
               values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
             }
+            printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             PAPI_unregister_thread();
-          }
+	  }
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
@@ -288,17 +335,27 @@ void qr(tpm_desc A, tpm_desc S)
             {
               memset(values, 0, sizeof(values));
               eventset = PAPI_NULL;
-              int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
+	      int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
               int ret = PAPI_create_eventset(&eventset);
               if (ret != PAPI_OK)
               {
                 printf("TSMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
                 exit(EXIT_FAILURE);
               }
-              PAPI_add_events(eventset, events, NEVENTS);
+	      PAPI_add_events(eventset, events, NEVENTS);
 
               // Start PAPI counters
-              PAPI_start(eventset);
+	      int eventset_state;
+	      PAPI_state(eventset, &eventset_state);
+	      if (eventset_state & PAPI_STOPPED) {
+	      	int ret_start = PAPI_start(eventset);
+	      	if (ret_start != PAPI_OK) {
+  	      		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+  	      		exit(EXIT_FAILURE);
+	      	}
+	      } else {
+  	      	printf("Event set is not in the PAPI_STOPPED state\n");
+	      }      
             }
             else if (TPM_TRACE)
             {
@@ -320,15 +377,20 @@ void qr(tpm_desc A, tpm_desc S)
             if (TPM_PAPI)
             {
               // Start PAPI counters
-              PAPI_stop(eventset, values);
-
+              //PAPI_stop(eventset, values);
+	      int ret_stop = PAPI_stop(eventset, values);
+	      if (ret_stop != PAPI_OK) {
+  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+  	        exit(EXIT_FAILURE);
+	      }
               // Accumulate events values
               for (int i = 0; i < NEVENTS; i++)
               {
 #pragma omp atomic update
                 values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
               }
-              PAPI_unregister_thread();
+              printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
+	      PAPI_unregister_thread();
             }
             else if (TPM_TRACE)
             {

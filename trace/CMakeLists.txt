@@ -11,8 +11,8 @@ set(OMP_INSTALL ${ROOT}/llvm-project/build-openmp)
 set(OMP_LIB_PATH ${OMP_INSTALL}/lib)
 set(OMP_INCLUDE ${OMP_INSTALL}/include)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 set(SOURCE_FILES
     tpm_trace.c
