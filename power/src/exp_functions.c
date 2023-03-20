@@ -83,11 +83,11 @@ int start_experiment()
   {
     char task_and_cpu[TPM_STRING_SIZE];
     char task[TPM_TASK_STRING_SIZE];
-    int cpu = 0;
+    double cpu = 0.0;
 
     /* Receive current task name and its CPU */
     zmq_recv(server, task_and_cpu, TPM_STRING_SIZE, 0);
-    sscanf(task_and_cpu, "%s %f", task, &cpu);
+    sscanf(task_and_cpu, "%s %lf", task, &cpu);
 
     /* Frequency control */
     if ((strcmp(task, "energy") != 0) && (strcmp(task, "matrix") != 0) && (strcmp(task, "tile") != 0) && (strcmp(task_and_cpu, "time") != 0))
