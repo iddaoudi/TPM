@@ -89,7 +89,7 @@ int start_experiment()
     sscanf(task_and_cpu, "%s %d", task, &cpu);
 
     /* Frequency control */
-    if ((strcmp(task, "energy") != 0) || (strcmp(task, "matrix") != 0) || (strcmp(task, "tile") != 0) || (strcmp(task_and_cpu, "end") != 0))
+    if ((strcmp(task, "energy") != 0) && (strcmp(task, "matrix") != 0) && (strcmp(task, "tile") != 0) && (strcmp(task_and_cpu, "end") != 0))
     {
       if (!strcmp(algorithm, "cholesky"))
         cholesky_control(selected_case, task, cpu, selected_frequency,
