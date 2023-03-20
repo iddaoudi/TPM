@@ -33,7 +33,7 @@
 // External functions for tracing
 void __attribute__((weak))
 tpm_start(char *algorithm, int matrix_size, int tile_size, int nthreads);
-void __attribute__((weak)) tpm_finalize();
+void __attribute__((weak)) tpm_finalize(double exec_time);
 void __attribute__((weak)) tpm_set_task_name(const char *name);
 void __attribute__((weak)) tpm_set_task_cpu_node(int cpu, int node, char *name);
 void __attribute__((weak)) tpm_get_task_time(struct timeval start, struct timeval end, char *name);
@@ -44,9 +44,9 @@ extern inline void tpm_downstream_start(char *algorithm, int matrix_size,
   tpm_start(algorithm, matrix_size, tile_size, nthreads);
 }
 
-extern inline void tpm_upstream_finalize()
+extern inline void tpm_upstream_finalize(double exec_time)
 {
-  tpm_finalize();
+  tpm_finalize(exec_time);
 }
 
 extern inline void tpm_upstream_set_task_name(const char *name)

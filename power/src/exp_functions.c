@@ -32,6 +32,7 @@ int start_experiment()
 {
   int matrix_size = 0;
   int tile_size = 0;
+  double exec_time = 0.0;
 
   void *context = zmq_ctx_new();
   void *server = zmq_socket(context, ZMQ_PULL);
@@ -86,51 +87,54 @@ int start_experiment()
 
     /* Receive current task name and its CPU */
     zmq_recv(server, task_and_cpu, TPM_STRING_SIZE, 0);
-    sscanf(task_and_cpu, "%s %d", task, &cpu);
+    sscanf(task_and_cpu, "%s %f", task, &cpu);
 
     /* Frequency control */
-    if ((strcmp(task, "energy") != 0) && (strcmp(task, "matrix") != 0) && (strcmp(task, "tile") != 0) && (strcmp(task_and_cpu, "end") != 0))
+    if ((strcmp(task, "energy") != 0) && (strcmp(task, "matrix") != 0) && (strcmp(task, "tile") != 0) && (strcmp(task_and_cpu, "time") != 0))
     {
       if (!strcmp(algorithm, "cholesky"))
-        cholesky_control(selected_case, task, cpu, selected_frequency,
+        cholesky_control(selected_case, task, (int)cpu, selected_frequency,
                          original_frequency);
       else if (!strcmp(algorithm, "qr"))
-        qr_control(selected_case, task, cpu, selected_frequency,
+        qr_control(selected_case, task, (int)cpu, selected_frequency,
                    original_frequency);
       else if (!strcmp(algorithm, "lu"))
-        lu_control(selected_case, task, cpu, selected_frequency,
+        lu_control(selected_case, task, (int)cpu, selected_frequency,
                    original_frequency);
       else if (!strcmp(algorithm, "sparselu"))
-        sparselu_control(selected_case, task, cpu, selected_frequency,
+        sparselu_control(selected_case, task, (int)cpu, selected_frequency,
                          original_frequency);
     }
 
     if (strcmp(task, "energy") == 0)
     {
       /* Handle energy measurement */
-      handle_energy_measurement(cpu, active_packages, pkg_energy_start, pkg_energy_finish, dram_energy_start, dram_energy_finish);
+      handle_energy_measurement((int)cpu, active_packages, pkg_energy_start, pkg_energy_finish, dram_energy_start, dram_energy_finish);
     }
 
     if (strcmp(task, "matrix") == 0)
     {
-      matrix_size = cpu;
+      matrix_size = (int)cpu;
     }
 
     if (strcmp(task, "tile") == 0)
     {
-      tile_size = cpu;
+      tile_size = (int)cpu;
     }
 
     /* End measurements */
-    if (strcmp(task_and_cpu, "end") == 0)
+    if (strcmp(task, "time") == 0)
+    {
+      exec_time = cpu;
       break;
+    }
   }
 
   /* Set back the original governor policy and frequency (max by default) */
   restore_original_governor_and_frequency(original_governor, original_frequency);
 
   file_dump(algorithm, matrix_size, tile_size, selected_case, active_packages, pkg_energy_start, pkg_energy_finish,
-            dram_energy_start, dram_energy_finish);
+            dram_energy_start, dram_energy_finish, exec_time);
 
   // printf("%lu\n", selected_frequency);
 

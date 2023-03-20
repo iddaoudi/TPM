@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+  double exec_time = time_finish - time_start;
   if (TPM_TRACE)
-    tpm_upstream_finalize();
-  // printf("%f\n", time_finish - time_start);
+    tpm_upstream_finalize(exec_time);
 }

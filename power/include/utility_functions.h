@@ -26,7 +26,7 @@ void logs(unsigned long *frequencies_vector, int frequencies_vector_size,
           unsigned long selected_frequency);
 void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_case, int active_packages, uint64_t *pkg_energy_start,
                uint64_t *pkg_energy_finish, uint64_t *dram_energy_start,
-               uint64_t *dram_energy_finish);
+               uint64_t *dram_energy_finish, double exec_time);
 int frequencies_vector_size_counter(unsigned long *frequencies_vector);
 unsigned long select_frequency(char *target_frequency, unsigned long *frequencies_vector, int frequencies_vector_size);
 
