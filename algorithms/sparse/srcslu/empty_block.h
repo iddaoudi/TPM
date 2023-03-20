@@ -8,7 +8,7 @@
  *
  *        Version:  1.0
  *        Created:  29/12/2022
- *       Revision:  none
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -38,7 +38,7 @@ double *tpm_allocate_empty_block(int tile_size)
   else
   {
     printf("Not enough memory\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   return (q);
 }

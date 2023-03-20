@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  19/03/2023
- *       Revision:  none
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -44,19 +44,19 @@ int start_experiment()
     exit(EXIT_FAILURE);
   }
 
-  /* Initialization */
+  // Initialization
   int active_packages = rapl_init();
 
-  /* Get current governor policy */
+  // Get current governor policy
   char *original_governor = tpm_query_current_governor_policy(0);
 
-  /* Get all possible frequencies (in KHz) and all available governors */
+  // Get all possible frequencies (in KHz) and all available governors
   unsigned long *frequencies_vector = tpm_query_available_frequencies(0);
   char **governors_vector = tpm_query_available_governors(0);
 
   int frequencies_vector_size =
       frequencies_vector_size_counter(frequencies_vector);
-  /* By default, the original frequency of every CPU is set to its maximum */
+  // By default, the original frequency of every CPU is set to its maximum
   unsigned long original_frequency = frequencies_vector[0];
   unsigned long selected_frequency = select_frequency(
       target_frequency, frequencies_vector, frequencies_vector_size);
@@ -76,7 +76,7 @@ int start_experiment()
   uint64_t dram_energy_start[active_packages];
   uint64_t dram_energy_finish[active_packages];
 
-  /* Change the governor */
+  // Change the governor
   set_initial_governor_and_frequency();
 
   while (1)
@@ -85,11 +85,11 @@ int start_experiment()
     char task[TPM_TASK_STRING_SIZE];
     double cpu = 0.0;
 
-    /* Receive current task name and its CPU */
+    // Receive current task name and its CPU
     zmq_recv(server, task_and_cpu, TPM_STRING_SIZE, 0);
     sscanf(task_and_cpu, "%s %lf", task, &cpu);
 
-    /* Frequency control */
+    // Frequency control
     if ((strcmp(task, "energy") != 0) && (strcmp(task, "matrix") != 0) && (strcmp(task, "tile") != 0) && (strcmp(task_and_cpu, "time") != 0))
     {
       if (!strcmp(algorithm, "cholesky"))
@@ -108,7 +108,7 @@ int start_experiment()
 
     if (strcmp(task, "energy") == 0)
     {
-      /* Handle energy measurement */
+      // Handle energy measurement
       handle_energy_measurement((int)cpu, active_packages, pkg_energy_start, pkg_energy_finish, dram_energy_start, dram_energy_finish);
     }
 
@@ -122,7 +122,7 @@ int start_experiment()
       tile_size = (int)cpu;
     }
 
-    /* End measurements */
+    // End measurements
     if (strcmp(task, "time") == 0)
     {
       exec_time = cpu;
@@ -130,7 +130,7 @@ int start_experiment()
     }
   }
 
-  /* Set back the original governor policy and frequency (max by default) */
+  // Set back the original governor policy and frequency (max by default)
   restore_original_governor_and_frequency(original_governor, original_frequency);
 
   file_dump(algorithm, matrix_size, tile_size, selected_case, active_packages, pkg_energy_start, pkg_energy_finish,

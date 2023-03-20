@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -70,7 +70,7 @@ void cholesky(tpm_desc A)
         if (ret != PAPI_OK)
         {
           printf("POTRF task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-          exit(1);
+          exit(EXIT_FAILURE);
         }
         PAPI_add_events(eventset, events, NEVENTS);
 
@@ -139,7 +139,7 @@ void cholesky(tpm_desc A)
             if (ret != PAPI_OK)
             {
               printf("TRSM task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-              exit(1);
+              exit(EXIT_FAILURE);
             }
             PAPI_add_events(eventset, events, NEVENTS);
 
@@ -212,7 +212,7 @@ void cholesky(tpm_desc A)
             if (ret != PAPI_OK)
             {
               printf("SYRK task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-              exit(1);
+              exit(EXIT_FAILURE);
             }
             PAPI_add_events(eventset, events, NEVENTS);
 
@@ -286,7 +286,7 @@ void cholesky(tpm_desc A)
               if (ret != PAPI_OK)
               {
                 printf("GEMM task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-                exit(1);
+                exit(EXIT_FAILURE);
               }
               PAPI_add_events(eventset, events, NEVENTS);
 
@@ -363,7 +363,7 @@ void cholesky(tpm_desc A)
     if ((file = fopen("counters_cholesky.dat", "a+")) == NULL)
     {
       perror("fopen failed");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
     else
     {

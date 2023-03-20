@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  none
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -119,7 +119,7 @@ static void tpm_sparse_generator(double *M[], int matrix_size, int tile_size)
         if (M[m * matrix_size + n] == NULL)
         {
           printf("Not enough memory\n");
-          exit(1);
+          exit(EXIT_FAILURE);
         }
         // Initializing matrix
         p = M[m * matrix_size + n];

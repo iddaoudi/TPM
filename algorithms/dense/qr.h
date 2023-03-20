@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -74,7 +74,7 @@ void qr(tpm_desc A, tpm_desc S)
         if (ret != PAPI_OK)
         {
           printf("GEQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-          exit(1);
+          exit(EXIT_FAILURE);
         }
         PAPI_add_events(eventset, events, NEVENTS);
 
@@ -145,7 +145,7 @@ void qr(tpm_desc A, tpm_desc S)
             if (ret != PAPI_OK)
             {
               printf("ORMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-              exit(1);
+              exit(EXIT_FAILURE);
             }
             PAPI_add_events(eventset, events, NEVENTS);
 
@@ -220,7 +220,7 @@ void qr(tpm_desc A, tpm_desc S)
             if (ret != PAPI_OK)
             {
               printf("TSQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-              exit(1);
+              exit(EXIT_FAILURE);
             }
             PAPI_add_events(eventset, events, NEVENTS);
 
@@ -293,7 +293,7 @@ void qr(tpm_desc A, tpm_desc S)
               if (ret != PAPI_OK)
               {
                 printf("TSMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-                exit(1);
+                exit(EXIT_FAILURE);
               }
               PAPI_add_events(eventset, events, NEVENTS);
 
@@ -371,7 +371,7 @@ void qr(tpm_desc A, tpm_desc S)
     if ((file = fopen("counters_qr.dat", "a+")) == NULL)
     {
       perror("fopen failed");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
     else
     {

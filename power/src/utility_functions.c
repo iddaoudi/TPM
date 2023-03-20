@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  19/03/2023
- *       Revision:  none
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -58,13 +58,17 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
   int file_already_exists = (stat("energy_data.csv", &buffer) == 0);
 
   file = fopen("energy_data.csv", "a");
-  assert(file != NULL);
+  if (file == NULL)
+  {
+    perror("fopen failed");
+    exit(EXIT_FAILURE);
+  }
 
   if (!file_already_exists)
   {
     fprintf(file, "algorithm, matrix_size, tile_size, case, PKG1, PKG2, DRAM1, DRAM2, time\n");
   }
-
+  // FIXME: assuming there is a maximum of 2 NUMA nodes
   uint64_t pkg_energy[2] = {0, 0};
   uint64_t dram_energy[2] = {0, 0};
 
@@ -100,8 +104,7 @@ unsigned long select_frequency(char *target_frequency,
   }
   else if (strcmp(target_frequency, "max") == 0)
   {
-    return frequencies_vector[0]; // first element is the last value inserted in
-                                  // the array
+    return frequencies_vector[0]; // first element is the last value inserted in the array
   }
   else if (strcmp(target_frequency, "min") == 0)
   {

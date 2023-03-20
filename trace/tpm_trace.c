@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  31/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -97,7 +97,7 @@ extern void tpm_trace_set_task_name(const char *name)
 extern void tpm_trace_set_task_cpu_node(int cpu, int node, char *input_name)
 {
   pthread_mutex_lock(&mutex);
-  char *task_and_cpu = tpm_task_and_cpu_string(input_name, cpu);
+  char *task_and_cpu = tpm_str_and_int_to_str(input_name, cpu);
   tpm_zmq_send_signal(request, task_and_cpu);
   tpm_task_t *task = hashmap_get(map, &(tpm_task_t){.name = input_name});
   if (task != NULL)
@@ -124,8 +124,8 @@ extern void tpm_trace_get_task_time(struct timeval start, struct timeval end, ch
 // Finalize the tracing and clean up resources
 extern void tpm_trace_finalize(double exec_time)
 {
-  int file_dump = 0;
-  if (file_dump)
+  int tasks_file_dump = 0;
+  if (tasks_file_dump)
   {
     char file_name[TPM_FILENAME_SIZE];
     snprintf(file_name, TPM_FILENAME_SIZE, "tasks_%s_%d_%d_%d.dat", algorithm,
@@ -133,7 +133,8 @@ extern void tpm_trace_finalize(double exec_time)
     file = fopen(file_name, "a");
     if (file == NULL)
     {
-      printf("fopen error\n");
+      perror("fopen failed");
+      exit(EXIT_FAILURE);
     }
     hashmap_scan(map, tpm_map_iter, file);
     fclose(file);
@@ -145,11 +146,11 @@ extern void tpm_trace_finalize(double exec_time)
   // Send request to end energy measurements
   tpm_zmq_send_signal(request, "energy 1");
 
-  char *matrix = tpm_task_and_cpu_string("matrix", matrix_size);
+  char *matrix = tpm_str_and_int_to_str("matrix", matrix_size);
   tpm_zmq_send_signal(request, matrix);
-  char *tile = tpm_task_and_cpu_string("tile", tile_size);
+  char *tile = tpm_str_and_int_to_str("tile", tile_size);
   tpm_zmq_send_signal(request, tile);
-  char* time = tpm_str_and_double_to_str("time", exec_time);
+  char *time = tpm_str_and_double_to_str("time", exec_time);
   tpm_zmq_send_signal(request, time);
   tpm_zmq_close(request, context);
 

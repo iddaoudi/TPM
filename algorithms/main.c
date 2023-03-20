@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -135,12 +135,12 @@ int main(int argc, char *argv[])
   if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
   {
     printf("PAPI library version mismatch: %s\n", PAPI_strerror(papi_version));
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   else if (papi_version < 0)
   {
     printf("PAPI library init error: %s\n", PAPI_strerror(papi_version));
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   if (TPM_PAPI)
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     if ((ret = PAPI_thread_init(pthread_self)) != PAPI_OK)
     {
       printf("PAPI thread init error: %s\n", PAPI_strerror(ret));
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
 
@@ -158,12 +158,12 @@ int main(int argc, char *argv[])
   l3_cache_size = sysconf(_SC_LEVEL3_CACHE_SIZE);
 #else
   printf("_SC_LEVEL3_CACHE_SIZE is not available.\n");
-  exit(1);
+  exit(EXIT_FAILURE);
 #endif
   if (l3_cache_size == -1)
   {
     perror("sysconf failed");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   // Timers

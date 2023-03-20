@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  gcc
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -47,6 +47,6 @@ void lu_control(int selected_case, const char *task, int cpu,
     tpm_set_max_frequency(cpu, original_frequency);
   }
 
-  /* Set back the original frequency on the CPU used by a task */
+  // Set back the original frequency on the CPU used by a task
   tpm_set_max_frequency(cpu, original_frequency);
 }

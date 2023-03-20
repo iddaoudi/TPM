@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -69,7 +69,7 @@ void lu(tpm_desc A)
         if (ret != PAPI_OK)
         {
           printf("GETRF task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-          exit(1);
+          exit(EXIT_FAILURE);
         }
         PAPI_add_events(eventset, events, NEVENTS);
 
@@ -138,7 +138,7 @@ void lu(tpm_desc A)
           if (ret != PAPI_OK)
           {
             printf("TRSM1 task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-            exit(1);
+            exit(EXIT_FAILURE);
           }
           PAPI_add_events(eventset, events, NEVENTS);
 
@@ -210,7 +210,7 @@ void lu(tpm_desc A)
           if (ret != PAPI_OK)
           {
             printf("TRSM2 task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-            exit(1);
+            exit(EXIT_FAILURE);
           }
           PAPI_add_events(eventset, events, NEVENTS);
 
@@ -283,7 +283,7 @@ void lu(tpm_desc A)
             if (ret != PAPI_OK)
             {
               printf("GEMM task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
-              exit(1);
+              exit(EXIT_FAILURE);
             }
             PAPI_add_events(eventset, events, NEVENTS);
 
@@ -359,7 +359,7 @@ void lu(tpm_desc A)
     if ((file = fopen("counters_lu.dat", "a+")) == NULL)
     {
       perror("fopen failed");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
     else
     {

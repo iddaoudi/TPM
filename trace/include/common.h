@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  none
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -27,7 +27,7 @@
 void *context = NULL;
 void *request = NULL;
 
-char *tpm_task_and_cpu_string(char *task, int cpu)
+char *tpm_str_and_int_to_str(char *task, int cpu)
 {
   int char_counter = 0;
   char *task_name = (char *)malloc(TPM_STRING_SIZE * sizeof(char));
@@ -52,15 +52,15 @@ char *tpm_task_and_cpu_string(char *task, int cpu)
 
 char *tpm_str_and_double_to_str(char *str, double value)
 {
-    int len = snprintf(NULL, 0, "%s %.6g", str, value);
-    char *result = (char *)malloc((len + 1) * sizeof(char));
+  int len = snprintf(NULL, 0, "%s %.6g", str, value);
+  char *result = (char *)malloc((len + 1) * sizeof(char));
 
-    if (result == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
+  if (result == NULL)
+  {
+    fprintf(stderr, "Memory allocation failed\n");
+    exit(EXIT_FAILURE);
+  }
 
-    snprintf(result, len + 1, "%s %.6g", str, value);
-    return result;
+  snprintf(result, len + 1, "%s %.6g", str, value);
+  return result;
 }

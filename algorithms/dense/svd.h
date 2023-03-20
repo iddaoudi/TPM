@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  17/03/2023
- *       Revision:  19/03/2023
+ *       Revision:  20/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -91,7 +91,7 @@ int svd()
             if (info > 0)
             {
                 printf("SVD computation did not converge.\n");
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         }
     }
