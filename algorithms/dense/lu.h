@@ -363,14 +363,14 @@ void lu(tpm_desc A)
     }
     else
     {
-      fprintf(file, "lu, getrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              getrf.mem_boundness, getrf.arithm_intensity, getrf.bmr, getrf.ilp, getrf.values[0]);
-      fprintf(file, "lu, trsm1, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              trsm1.mem_boundness, trsm1.arithm_intensity, trsm1.bmr, trsm1.ilp, trsm1.values[0]);
-      fprintf(file, "lu, trsm2, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              trsm2.mem_boundness, trsm2.arithm_intensity, trsm2.bmr, trsm2.ilp, trsm2.values[0]);
-      fprintf(file, "lu, gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, gemm.values[0]);
+      fprintf(file, "lu, getrf, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              getrf.mem_boundness, getrf.arithm_intensity, getrf.bmr, getrf.ilp, (double)getrf.values[0] / (double)l3_cache_size);
+      fprintf(file, "lu, trsm1, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              trsm1.mem_boundness, trsm1.arithm_intensity, trsm1.bmr, trsm1.ilp, (double)trsm1.values[0] / (double)l3_cache_size);
+      fprintf(file, "lu, trsm2, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              trsm2.mem_boundness, trsm2.arithm_intensity, trsm2.bmr, trsm2.ilp, (double)trsm2.values[0] / (double)l3_cache_size);
+      fprintf(file, "lu, gemm, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, (double)gemm.values[0] / (double)l3_cache_size);
 
       fclose(file);
     }

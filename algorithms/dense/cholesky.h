@@ -367,14 +367,14 @@ void cholesky(tpm_desc A)
     }
     else
     {
-      fprintf(file, "cholesky, potrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              potrf.mem_boundness, potrf.arithm_intensity, potrf.bmr, potrf.ilp, potrf.values[0]);
-      fprintf(file, "cholesky, trsm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              trsm.mem_boundness, trsm.arithm_intensity, trsm.bmr, trsm.ilp, trsm.values[0]);
-      fprintf(file, "cholesky, syrk, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              syrk.mem_boundness, syrk.arithm_intensity, syrk.bmr, syrk.ilp, syrk.values[0]);
-      fprintf(file, "cholesky, gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
-              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, gemm.values[0]);
+      fprintf(file, "cholesky, potrf, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              potrf.mem_boundness, potrf.arithm_intensity, potrf.bmr, potrf.ilp, (double)potrf.values[0] / (double)l3_cache_size);
+      fprintf(file, "cholesky, trsm, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              trsm.mem_boundness, trsm.arithm_intensity, trsm.bmr, trsm.ilp, (double)trsm.values[0] / (double)l3_cache_size);
+      fprintf(file, "cholesky, syrk, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              syrk.mem_boundness, syrk.arithm_intensity, syrk.bmr, syrk.ilp, (double)syrk.values[0] / (double)l3_cache_size);
+      fprintf(file, "cholesky, gemm, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
+              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, (double)gemm.values[0] / (double)l3_cache_size);
 
       fclose(file);
     }
