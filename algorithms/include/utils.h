@@ -22,6 +22,7 @@
 #include <omp.h>
 
 int MSIZE, BSIZE, NTH, TPM_TRACE, TPM_TRACE, TPM_PAPI;
+long l3_cache_size;
 
 #define A(m, n) tpm_tile_address(A, m, n)
 #define B(m, n) tpm_tile_address(B, m, n)

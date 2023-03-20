@@ -154,7 +154,6 @@ int main(int argc, char *argv[])
   }
 
   // Get the L3 cache size
-  long l3_cache_size;
 #ifdef _SC_LEVEL3_CACHE_SIZE
   l3_cache_size = sysconf(_SC_LEVEL3_CACHE_SIZE);
 #else

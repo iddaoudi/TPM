@@ -29,6 +29,7 @@ typedef struct
 
 void compute_derived_metrics(CounterData *data)
 {
+    // PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS
     data->arithm_intensity = (double)data->values[0] / (double)data->values[1];
     data->mem_boundness = (double)data->values[2] / (double)data->values[3];
     data->bmr = (double)data->values[4] / (double)data->values[5];
