@@ -193,8 +193,8 @@ int main(int argc, char *argv[])
     case ALGO_CHOLESKY:
       tpm_hermitian_positive_generator(*A);
       time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
+#pragma omp parallel if(!TPM_PAPI)
+#pragma omp master if(!TPM_PAPI)
       {
         cholesky(*A);
       }
@@ -208,8 +208,8 @@ int main(int argc, char *argv[])
       int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
       time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
+#pragma omp parallel if(!TPM_PAPI)
+#pragma omp master if(!TPM_PAPI)
       {
         qr(*A, *S);
       }
@@ -221,8 +221,8 @@ int main(int argc, char *argv[])
     case ALGO_LU:
       tpm_hermitian_positive_generator(*A);
       time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
+#pragma omp parallel if(!TPM_PAPI)
+#pragma omp master if(!TPM_PAPI)
       {
         lu(*A);
       }
@@ -237,8 +237,8 @@ int main(int argc, char *argv[])
   case ALGO_SPARSELU:
   {
     double **M;
-#pragma omp parallel
-#pragma omp master
+#pragma omp parallel if(!TPM_PAPI)
+#pragma omp master if(!TPM_PAPI)
     tpm_sparse_allocate(&M, MSIZE, BSIZE);
 
     time_start = omp_get_wtime();

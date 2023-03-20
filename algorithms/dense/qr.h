@@ -58,16 +58,16 @@ void qr(tpm_desc A, tpm_desc S)
       tpm_upstream_set_task_name(name_with_id_char);
     }
 
-#pragma omp task depend(inout                                             \
-                        : tileA [0:S.tile_size * S.tile_size]) depend(out \
-                                                                      : tileS [0:A.tile_size * S.tile_size])
+#pragma omp task if (!TPM_PAPI) depend(inout                                             \
+                                       : tileA [0:S.tile_size * S.tile_size]) depend(out \
+                                                                                     : tileS [0:A.tile_size * S.tile_size])
     {
       double tho[S.tile_size];
       double work[S.tile_size * S.tile_size];
 
       if (TPM_PAPI)
       {
-	memset(values, 0, sizeof(values));
+        memset(values, 0, sizeof(values));
         eventset = PAPI_NULL;
         int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
         int ret = PAPI_create_eventset(&eventset);
@@ -76,20 +76,24 @@ void qr(tpm_desc A, tpm_desc S)
           printf("GEQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
           exit(EXIT_FAILURE);
         }
-	PAPI_add_events(eventset, events, NEVENTS);
+        PAPI_add_events(eventset, events, NEVENTS);
 
         // Start PAPI counters
-	int eventset_state;
-	PAPI_state(eventset, &eventset_state);
-	if (eventset_state & PAPI_STOPPED) {
-		int ret_start = PAPI_start(eventset);
-		if (ret_start != PAPI_OK) {
-  			printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
-  			exit(EXIT_FAILURE);
-		}
-	} else {
-  		printf("Event set is not in the PAPI_STOPPED state\n");
-	}
+        int eventset_state;
+        PAPI_state(eventset, &eventset_state);
+        if (eventset_state & PAPI_STOPPED)
+        {
+          int ret_start = PAPI_start(eventset);
+          if (ret_start != PAPI_OK)
+          {
+            printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+            exit(EXIT_FAILURE);
+          }
+        }
+        else
+        {
+          printf("Event set is not in the PAPI_STOPPED state\n");
+        }
       }
       else if (TPM_TRACE)
       {
@@ -108,18 +112,18 @@ void qr(tpm_desc A, tpm_desc S)
 
       if (TPM_PAPI)
       {
-	// Start PAPI counters
-        //PAPI_stop(eventset, values);
-	int ret_stop = PAPI_stop(eventset, values);
-	if (ret_stop != PAPI_OK) {
-  	    printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
-  	    exit(EXIT_FAILURE);
-	}
+        // Start PAPI counters
+        // PAPI_stop(eventset, values);
+        int ret_stop = PAPI_stop(eventset, values);
+        if (ret_stop != PAPI_OK)
+        {
+          printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+          exit(EXIT_FAILURE);
+        }
 
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
         {
-#pragma omp atomic update
           values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
         }
         printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
@@ -146,15 +150,15 @@ void qr(tpm_desc A, tpm_desc S)
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task depend(in                                                                                       \
-                        : tileA [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size]) depend(inout \
-                                                                                                           : tileB [0:S.tile_size * S.tile_size])
+#pragma omp task if (!TPM_PAPI) depend(in                                                                                       \
+                                       : tileA [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size]) depend(inout \
+                                                                                                                          : tileB [0:S.tile_size * S.tile_size])
         {
           double work[S.tile_size * S.tile_size];
 
           if (TPM_PAPI)
           {
-	    memset(values, 0, sizeof(values));
+            memset(values, 0, sizeof(values));
             eventset = PAPI_NULL;
             int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
             int ret = PAPI_create_eventset(&eventset);
@@ -163,21 +167,25 @@ void qr(tpm_desc A, tpm_desc S)
               printf("ORMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
               exit(EXIT_FAILURE);
             }
-	    PAPI_add_events(eventset, events, NEVENTS);
+            PAPI_add_events(eventset, events, NEVENTS);
 
             // Start PAPI counters
-	    int eventset_state;
-	    PAPI_state(eventset, &eventset_state);
-	    if (eventset_state & PAPI_STOPPED) {
-	    	int ret_start = PAPI_start(eventset);
-	    	if (ret_start != PAPI_OK) {
-  	    		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
-  	    		exit(EXIT_FAILURE);
-	    	}
-	    } else {
-  	    	printf("Event set is not in the PAPI_STOPPED state\n");
-	    }    
-	  }
+            int eventset_state;
+            PAPI_state(eventset, &eventset_state);
+            if (eventset_state & PAPI_STOPPED)
+            {
+              int ret_start = PAPI_start(eventset);
+              if (ret_start != PAPI_OK)
+              {
+                printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+                exit(EXIT_FAILURE);
+              }
+            }
+            else
+            {
+              printf("Event set is not in the PAPI_STOPPED state\n");
+            }
+          }
           else if (TPM_TRACE)
           {
             // TPM library: send CPU and name
@@ -196,22 +204,22 @@ void qr(tpm_desc A, tpm_desc S)
 
           if (TPM_PAPI)
           {
-	    // Start PAPI counters
-            //PAPI_stop(eventset, values);
-	    int ret_stop = PAPI_stop(eventset, values);
-	    if (ret_stop != PAPI_OK) {
-  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
-  	        exit(EXIT_FAILURE);
-	    }
+            // Start PAPI counters
+            // PAPI_stop(eventset, values);
+            int ret_stop = PAPI_stop(eventset, values);
+            if (ret_stop != PAPI_OK)
+            {
+              printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+              exit(EXIT_FAILURE);
+            }
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-#pragma omp atomic update
               values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
             }
             printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             PAPI_unregister_thread();
-	  }
+          }
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
@@ -235,9 +243,9 @@ void qr(tpm_desc A, tpm_desc S)
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task depend(inout                                                                                  \
-                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(out \
-                                                                                                           : tileS [0:S.tile_size * A.tile_size])
+#pragma omp task if (!TPM_PAPI) depend(inout                                                                                  \
+                                       : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(out \
+                                                                                                                          : tileS [0:S.tile_size * A.tile_size])
         {
           double work[S.tile_size * S.tile_size];
           double tho[S.tile_size];
@@ -253,20 +261,24 @@ void qr(tpm_desc A, tpm_desc S)
               printf("TSQRT task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
               exit(EXIT_FAILURE);
             }
-	    PAPI_add_events(eventset, events, NEVENTS);
+            PAPI_add_events(eventset, events, NEVENTS);
 
             // Start PAPI counters
-	    int eventset_state;
-	    PAPI_state(eventset, &eventset_state);
-	    if (eventset_state & PAPI_STOPPED) {
-	    	int ret_start = PAPI_start(eventset);
-	    	if (ret_start != PAPI_OK) {
-  	    		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
-  	    		exit(EXIT_FAILURE);
-	    	}
-	    } else {
-  	    	printf("Event set is not in the PAPI_STOPPED state\n");
-	    }
+            int eventset_state;
+            PAPI_state(eventset, &eventset_state);
+            if (eventset_state & PAPI_STOPPED)
+            {
+              int ret_start = PAPI_start(eventset);
+              if (ret_start != PAPI_OK)
+              {
+                printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+                exit(EXIT_FAILURE);
+              }
+            }
+            else
+            {
+              printf("Event set is not in the PAPI_STOPPED state\n");
+            }
           }
           else if (TPM_TRACE)
           {
@@ -285,23 +297,23 @@ void qr(tpm_desc A, tpm_desc S)
 
           if (TPM_PAPI)
           {
-	    // Start PAPI counters
-            //PAPI_stop(eventset, values);
-	    int ret_stop = PAPI_stop(eventset, values);
-	    if (ret_stop != PAPI_OK) {
-  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
-  	        exit(EXIT_FAILURE);
-	    }
+            // Start PAPI counters
+            // PAPI_stop(eventset, values);
+            int ret_stop = PAPI_stop(eventset, values);
+            if (ret_stop != PAPI_OK)
+            {
+              printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+              exit(EXIT_FAILURE);
+            }
 
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-#pragma omp atomic update
               values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
             }
             printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             PAPI_unregister_thread();
-	  }
+          }
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
@@ -325,9 +337,9 @@ void qr(tpm_desc A, tpm_desc S)
             tpm_upstream_set_task_name(name_with_id_char);
           }
 
-#pragma omp task depend(inout                                                                                 \
-                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(in \
-                                                                                                           : tileC [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size])
+#pragma omp task if (!TPM_PAPI) depend(inout                                                                                 \
+                                       : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(in \
+                                                                                                                          : tileC [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size])
           {
             double work[S.tile_size * S.tile_size];
 
@@ -335,27 +347,31 @@ void qr(tpm_desc A, tpm_desc S)
             {
               memset(values, 0, sizeof(values));
               eventset = PAPI_NULL;
-	      int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
+              int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
               int ret = PAPI_create_eventset(&eventset);
               if (ret != PAPI_OK)
               {
                 printf("TSMQR task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
                 exit(EXIT_FAILURE);
               }
-	      PAPI_add_events(eventset, events, NEVENTS);
+              PAPI_add_events(eventset, events, NEVENTS);
 
               // Start PAPI counters
-	      int eventset_state;
-	      PAPI_state(eventset, &eventset_state);
-	      if (eventset_state & PAPI_STOPPED) {
-	      	int ret_start = PAPI_start(eventset);
-	      	if (ret_start != PAPI_OK) {
-  	      		printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
-  	      		exit(EXIT_FAILURE);
-	      	}
-	      } else {
-  	      	printf("Event set is not in the PAPI_STOPPED state\n");
-	      }      
+              int eventset_state;
+              PAPI_state(eventset, &eventset_state);
+              if (eventset_state & PAPI_STOPPED)
+              {
+                int ret_start = PAPI_start(eventset);
+                if (ret_start != PAPI_OK)
+                {
+                  printf("PAPI_start error %d: %s\n", ret_start, PAPI_strerror(ret_start));
+                  exit(EXIT_FAILURE);
+                }
+              }
+              else
+              {
+                printf("Event set is not in the PAPI_STOPPED state\n");
+              }
             }
             else if (TPM_TRACE)
             {
@@ -377,20 +393,20 @@ void qr(tpm_desc A, tpm_desc S)
             if (TPM_PAPI)
             {
               // Start PAPI counters
-              //PAPI_stop(eventset, values);
-	      int ret_stop = PAPI_stop(eventset, values);
-	      if (ret_stop != PAPI_OK) {
-  	        printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
-  	        exit(EXIT_FAILURE);
-	      }
+              // PAPI_stop(eventset, values);
+              int ret_stop = PAPI_stop(eventset, values);
+              if (ret_stop != PAPI_OK)
+              {
+                printf("PAPI_stop error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+                exit(EXIT_FAILURE);
+              }
               // Accumulate events values
               for (int i = 0; i < NEVENTS; i++)
               {
-#pragma omp atomic update
                 values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
               }
               printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
-	      PAPI_unregister_thread();
+              PAPI_unregister_thread();
             }
             else if (TPM_TRACE)
             {
@@ -407,7 +423,6 @@ void qr(tpm_desc A, tpm_desc S)
 
   if (TPM_PAPI)
   {
-#pragma omp taskwait
     PAPI_shutdown();
 
     CounterData geqrt, ormqr, tsqrt, tsmqr;
