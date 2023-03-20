@@ -360,21 +360,28 @@ void qr(tpm_desc A, tpm_desc S)
     compute_derived_metrics(&tsqrt);
     compute_derived_metrics(&tsmqr);
 
+    // PAPI opens too much file descriptors without closing them
+    int file_desc;
+    for (file_desc = 3; file_desc < 1024; ++file_desc)
+    {
+      close(file_desc);
+    }
+
     FILE *file;
-    if ((file = fopen("counters.dat", "w")) == NULL)
+    if ((file = fopen("counters.dat", "a")) == NULL)
     {
       perror("fopen failed");
       exit(1);
     }
     else
     {
-      fprintf(file, "geqrt, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "qr, geqrt, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               geqrt.mem_boundness, geqrt.arithm_intensity, geqrt.bmr, geqrt.ilp, geqrt.values[0]);
-      fprintf(file, "ormqr, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "qr, ormqr, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               ormqr.mem_boundness, ormqr.arithm_intensity, ormqr.bmr, ormqr.ilp, ormqr.values[0]);
-      fprintf(file, "tsqrt, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "qr, tsqrt, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               tsqrt.mem_boundness, tsqrt.arithm_intensity, tsqrt.bmr, tsqrt.ilp, tsqrt.values[0]);
-      fprintf(file, "tsmqr, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "qr, tsmqr, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               tsmqr.mem_boundness, tsmqr.arithm_intensity, tsmqr.bmr, tsmqr.ilp, tsmqr.values[0]);
 
       fclose(file);

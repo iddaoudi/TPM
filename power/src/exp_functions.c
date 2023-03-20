@@ -115,7 +115,8 @@ int start_experiment()
 
   file_dump(active_packages, pkg_energy_start, pkg_energy_finish,
             dram_energy_start, dram_energy_finish);
-  printf("%lu\n", selected_frequency);
+  
+  //printf("%lu\n", selected_frequency);
 
   return 0;
 }

@@ -236,6 +236,6 @@ int main(int argc, char *argv[])
   }
 
   if (TPM_TRACE)
-    tpm_upstream_finalize();
-  printf("%f\n", time_finish - time_start);
+    tpm_upstream_finalize(MSIZE, BSIZE, x);
+  //printf("%f\n", time_finish - time_start);
 }

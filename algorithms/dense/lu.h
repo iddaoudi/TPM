@@ -348,6 +348,13 @@ void lu(tpm_desc A)
     compute_derived_metrics(&trsm2);
     compute_derived_metrics(&gemm);
 
+    // PAPI opens too much file descriptors without closing them
+    int file_desc;
+    for (file_desc = 3; file_desc < 1024; ++file_desc)
+    {
+      close(file_desc);
+    }
+
     FILE *file;
     if ((file = fopen("counters.dat", "w")) == NULL)
     {
@@ -356,13 +363,13 @@ void lu(tpm_desc A)
     }
     else
     {
-      fprintf(file, "getrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "lu, getrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               getrf.mem_boundness, getrf.arithm_intensity, getrf.bmr, getrf.ilp, getrf.values[0]);
-      fprintf(file, "trsm1, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "lu, trsm1, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               trsm1.mem_boundness, trsm1.arithm_intensity, trsm1.bmr, trsm1.ilp, trsm1.values[0]);
-      fprintf(file, "trsm2, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "lu, trsm2, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               trsm2.mem_boundness, trsm2.arithm_intensity, trsm2.bmr, trsm2.ilp, trsm2.values[0]);
-      fprintf(file, "gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "lu, gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, gemm.values[0]);
 
       fclose(file);
@@ -373,5 +380,4 @@ void lu(tpm_desc A)
   free(values_by_thread_trsm1);
   free(values_by_thread_trsm2);
   free(values_by_thread_gemm);
-
 }

@@ -53,30 +53,26 @@ void file_dump(int active_packages, uint64_t *pkg_energy_start,
                uint64_t *dram_energy_finish)
 {
   FILE *file;
-  int counter = 0;
-  while (counter != active_packages)
+  file = fopen("energy_data.csv", "a");
+  assert(file != NULL);
+
+  fprintf(file, "PKG1,PKG2,DRAM1,DRAM2\n");
+
+  uint64_t pkg_energy[2] = {0, 0};
+  uint64_t dram_energy[2] = {0, 0};
+
+  for (int counter = 0; counter < active_packages; counter++)
   {
-    char name[TPM_FILENAME_STRING_SIZE];
-    snprintf(name, TPM_FILENAME_STRING_SIZE, "pkg_%d.dat", counter);
-    file = fopen(name, "a");
-    assert(file != NULL);
-    fprintf(file, "%" PRIu64 " ",
-            pkg_energy_finish[counter] - pkg_energy_start[counter]);
-    counter++;
+    pkg_energy[counter] = pkg_energy_finish[counter] - pkg_energy_start[counter];
+    dram_energy[counter] = dram_energy_finish[counter] - dram_energy_start[counter];
   }
-  counter = 0;
-  while (counter != active_packages)
-  {
-    char name[TPM_FILENAME_STRING_SIZE];
-    snprintf(name, TPM_FILENAME_STRING_SIZE, "dram_%d.dat", counter);
-    file = fopen(name, "a");
-    assert(file != NULL);
-    fprintf(file, "%" PRIu64 " ",
-            dram_energy_finish[counter] - dram_energy_start[counter]);
-    counter++;
-  }
+
+  fprintf(file, "%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "\n",
+          pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1]);
+
   fclose(file);
 }
+
 
 int frequencies_vector_size_counter(unsigned long *frequencies_vector)
 {

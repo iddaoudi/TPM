@@ -352,6 +352,13 @@ void cholesky(tpm_desc A)
     compute_derived_metrics(&syrk);
     compute_derived_metrics(&gemm);
 
+    // PAPI opens too much file descriptors without closing them
+    int file_desc;
+    for (file_desc = 3; file_desc < 1024; ++file_desc)
+    {
+      close(file_desc);
+    }
+
     FILE *file;
     if ((file = fopen("counters.dat", "w")) == NULL)
     {
@@ -360,13 +367,13 @@ void cholesky(tpm_desc A)
     }
     else
     {
-      fprintf(file, "potrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "cholesky, potrf, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               potrf.mem_boundness, potrf.arithm_intensity, potrf.bmr, potrf.ilp, potrf.values[0]);
-      fprintf(file, "trsm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "cholesky, trsm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               trsm.mem_boundness, trsm.arithm_intensity, trsm.bmr, trsm.ilp, trsm.values[0]);
-      fprintf(file, "syrk, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "cholesky, syrk, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               syrk.mem_boundness, syrk.arithm_intensity, syrk.bmr, syrk.ilp, syrk.values[0]);
-      fprintf(file, "gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
+      fprintf(file, "cholesky, gemm, %d, %d, %f, %f, %f, %f, %lld\n", A.matrix_size, A.tile_size,
               gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, gemm.values[0]);
 
       fclose(file);

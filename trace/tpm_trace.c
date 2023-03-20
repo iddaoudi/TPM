@@ -124,18 +124,23 @@ extern void tpm_trace_get_task_time(struct timeval start, struct timeval end, ch
 // Finalize the tracing and clean up resources
 extern void tpm_trace_finalize()
 {
-  char file_name[TPM_FILENAME_SIZE];
-  snprintf(file_name, TPM_FILENAME_SIZE, "tasks_%s_%d_%d_%d.dat", algorithm,
-           matrix_size, tile_size, n_threads);
-  file = fopen(file_name, "a");
-  if (file == NULL)
+  int file_dump = 0;
+  if (file_dump)
   {
-    printf("file problem\n");
+    char file_name[TPM_FILENAME_SIZE];
+    snprintf(file_name, TPM_FILENAME_SIZE, "tasks_%s_%d_%d_%d.dat", algorithm,
+             matrix_size, tile_size, n_threads);
+    file = fopen(file_name, "a");
+    if (file == NULL)
+    {
+      printf("fopen error\n");
+    }
+    hashmap_scan(map, tpm_map_iter, file);
+    fclose(file);
   }
-  hashmap_scan(map, tpm_map_iter, file);
+
   pthread_mutex_destroy(&mutex);
   hashmap_free(map);
-  fclose(file);
 
   // Send request to end energy measurements and close the socket connection
   tpm_zmq_send_signal(request, "energy 1");
