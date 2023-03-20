@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <cpufreq.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <zmq.h>
 
 #define MAX_GOVERNORS 8
 #define MAX_FREQUENCIES 20

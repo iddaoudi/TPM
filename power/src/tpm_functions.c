@@ -16,12 +16,6 @@
  * =====================================================================================
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <cpufreq.h>
-#include <zmq.h>
-
 #include "tpm_functions.h"
 
 struct cpufreq_available_governors *governor;

@@ -19,6 +19,8 @@
 #ifndef EXP_GLOBALS_H
 #define EXP_GLOBALS_H
 
+#include <stddef.h>
+
 #define TPM_STRING_SIZE 16
 #define TPM_TASK_STRING_SIZE 8
 #define TPM_FILENAME_STRING_SIZE 16

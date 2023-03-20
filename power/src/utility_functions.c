@@ -16,12 +16,6 @@
  * =====================================================================================
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <inttypes.h>
-#include <sys/stat.h>
-
 #include "utility_functions.h"
 #include "exp_globals.h"
 

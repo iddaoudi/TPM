@@ -17,7 +17,6 @@
  */
 
 #include "exp_globals.h"
-#include <stddef.h>
 
 int MAX_CPUS = 0;
 char *input_governor = NULL;

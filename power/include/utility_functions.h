@@ -17,6 +17,12 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <inttypes.h>
+#include <sys/stat.h>
 
 #ifndef UTILITY_FUNCTIONS_H
 #define UTILITY_FUNCTIONS_H
