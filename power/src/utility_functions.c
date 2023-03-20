@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
+#include <sys/stat.h>
 
 #include "utility_functions.h"
 #include "exp_globals.h"
@@ -53,10 +54,16 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
                uint64_t *dram_energy_finish)
 {
   FILE *file;
+  struct stat buffer;
+  int file_already_exists = (stat("energy_data.csv", &buffer) == 0);
+
   file = fopen("energy_data.csv", "a");
   assert(file != NULL);
 
-  fprintf(file, "algorithm, matrix_size, tile_size, case, PKG1, PKG2, DRAM1, DRAM2\n");
+  if (!file_already_exists)
+  {
+    fprintf(file, "algorithm, matrix_size, tile_size, case, PKG1, PKG2, DRAM1, DRAM2\n");
+  }
 
   uint64_t pkg_energy[2] = {0, 0};
   uint64_t dram_energy[2] = {0, 0};
@@ -67,8 +74,8 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
     dram_energy[counter] = dram_energy_finish[counter] - dram_energy_start[counter];
   }
 
-fprintf(file, "%s, %d, %d, %d, %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
-        algorithm, matrix_size, tile_size, selected_case, pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1]);
+  fprintf(file, "%s, %d, %d, %d, %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+          algorithm, matrix_size, tile_size, selected_case, pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1]);
 
   fclose(file);
 }
