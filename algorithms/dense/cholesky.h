@@ -98,7 +98,7 @@ void cholesky(tpm_desc A)
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
         {
-          values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
+          values_by_thread_potrf[omp_get_thread_num()][i] += values[i];
         }
         printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
       }
@@ -164,7 +164,7 @@ void cholesky(tpm_desc A)
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-              values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
+              values_by_thread_trsm[omp_get_thread_num()][i] += values[i];
             }
             printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
@@ -232,7 +232,7 @@ void cholesky(tpm_desc A)
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-              values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
+              values_by_thread_syrk[omp_get_thread_num()][i] += values[i];
             }
             printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
@@ -302,7 +302,7 @@ void cholesky(tpm_desc A)
               // Accumulate events values
               for (int i = 0; i < NEVENTS; i++)
               {
-                values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
+                values_by_thread_gemm[omp_get_thread_num()][i] += values[i];
               }
               printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             }
