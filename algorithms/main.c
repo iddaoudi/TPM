@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  20/03/2023
+ *       Revision:  21/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -189,6 +189,7 @@ int main(int argc, char *argv[])
 
     switch (algo_type)
     {
+
     // Cholesky algorithm
     case ALGO_CHOLESKY:
       tpm_hermitian_positive_generator(*A);
@@ -200,6 +201,7 @@ int main(int argc, char *argv[])
       }
       time_finish = omp_get_wtime();
       break;
+
     // QR algorithm
     case ALGO_QR:
       tpm_hermitian_positive_generator(*A);
@@ -217,6 +219,7 @@ int main(int argc, char *argv[])
       free(S->matrix);
       tpm_matrix_desc_destroy(&S);
       break;
+
     // LU algorithm
     case ALGO_LU:
       tpm_hermitian_positive_generator(*A);
@@ -233,6 +236,7 @@ int main(int argc, char *argv[])
     tpm_matrix_desc_destroy(&A);
     break;
   }
+
   // SparseLU algorithm
   case ALGO_SPARSELU:
   {

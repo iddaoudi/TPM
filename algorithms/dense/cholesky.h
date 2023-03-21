@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  20/03/2023
+ *       Revision:  21/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -34,6 +34,8 @@ void cholesky(tpm_desc A)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
 
+    int ret = PAPI_create_eventset(&eventset);
+    PAPI_add_events(eventset, events, NEVENTS);
     memset(values_by_thread_potrf, 0, available_threads * sizeof(long long[NEVENTS]));
     memset(values_by_thread_trsm, 0, available_threads * sizeof(long long[NEVENTS]));
     memset(values_by_thread_syrk, 0, available_threads * sizeof(long long[NEVENTS]));
@@ -64,27 +66,20 @@ void cholesky(tpm_desc A)
       if (TPM_PAPI)
       {
         memset(values, 0, sizeof(values));
-        eventset = PAPI_NULL;
-        int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
-        int ret = PAPI_create_eventset(&eventset);
-        if (ret != PAPI_OK)
+        // Start PAPI counters
+        int ret_start = PAPI_start(eventset);
+        if (ret_start != PAPI_OK)
         {
-          printf("POTRF task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
+          printf("PAPI_start POTRF error %d: %s\n", ret_start, PAPI_strerror(ret_start));
           exit(EXIT_FAILURE);
         }
-        PAPI_add_events(eventset, events, NEVENTS);
-
-        // Start PAPI counters
-        PAPI_start(eventset);
       }
       else if (TPM_TRACE)
       {
         // TPM library: send CPU and name
         unsigned int cpu, node;
         getcpu(&cpu, &node);
-
         tpm_upstream_set_task_cpu_node(cpu, node, name_with_id_char);
-
         gettimeofday(&start, NULL);
       }
 
@@ -94,21 +89,22 @@ void cholesky(tpm_desc A)
       if (TPM_PAPI)
       {
         // Start PAPI counters
-        PAPI_stop(eventset, values);
-
+        int ret_stop = PAPI_stop(eventset, values);
+        if (ret_stop != PAPI_OK)
+        {
+          printf("PAPI_stop POTRF error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+          exit(EXIT_FAILURE);
+        }
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
         {
-#pragma omp atomic update
-          values_by_thread_potrf[omp_get_thread_num()][i] += values[i];
+          values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
         }
         printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
-        PAPI_unregister_thread();
       }
       else if (TPM_TRACE)
       {
         gettimeofday(&end, NULL);
-
         // TPM library: send time and name
         tpm_upstream_get_task_time(start, end, name_with_id_char);
       }
@@ -134,27 +130,20 @@ void cholesky(tpm_desc A)
           if (TPM_PAPI)
           {
             memset(values, 0, sizeof(values));
-            eventset = PAPI_NULL;
-            int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
-            int ret = PAPI_create_eventset(&eventset);
-            if (ret != PAPI_OK)
+            // Start PAPI counters
+            int ret_start = PAPI_start(eventset);
+            if (ret_start != PAPI_OK)
             {
-              printf("TRSM task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
+              printf("PAPI_start TRSM error %d: %s\n", ret_start, PAPI_strerror(ret_start));
               exit(EXIT_FAILURE);
             }
-            PAPI_add_events(eventset, events, NEVENTS);
-
-            // Start PAPI counters
-            PAPI_start(eventset);
           }
           else if (TPM_TRACE)
           {
             // TPM library: send CPU and name
             unsigned int cpu, node;
             getcpu(&cpu, &node);
-
             tpm_upstream_set_task_cpu_node(cpu, node, name_with_id_char);
-
             gettimeofday(&start, NULL);
           }
 
@@ -166,21 +155,22 @@ void cholesky(tpm_desc A)
           if (TPM_PAPI)
           {
             // Start PAPI counters
-            PAPI_stop(eventset, values);
-
+            int ret_stop = PAPI_stop(eventset, values);
+            if (ret_stop != PAPI_OK)
+            {
+              printf("PAPI_stop TRSM error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+              exit(EXIT_FAILURE);
+            }
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-#pragma omp atomic update
-              values_by_thread_trsm[omp_get_thread_num()][i] += values[i];
+              values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
             }
             printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
-            PAPI_unregister_thread();
           }
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
-
             // TPM library: send time and name
             tpm_upstream_get_task_time(start, end, name_with_id_char);
           }
@@ -208,27 +198,20 @@ void cholesky(tpm_desc A)
           if (TPM_PAPI)
           {
             memset(values, 0, sizeof(values));
-            eventset = PAPI_NULL;
-            int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
-            int ret = PAPI_create_eventset(&eventset);
-            if (ret != PAPI_OK)
+            // Start PAPI counters
+            int ret_start = PAPI_start(eventset);
+            if (ret_start != PAPI_OK)
             {
-              printf("SYRK task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
+              printf("PAPI_start SYRK error %d: %s\n", ret_start, PAPI_strerror(ret_start));
               exit(EXIT_FAILURE);
             }
-            PAPI_add_events(eventset, events, NEVENTS);
-
-            // Start PAPI counters
-            PAPI_start(eventset);
           }
           else if (TPM_TRACE)
           {
             // TPM library: send CPU and name
             unsigned int cpu, node;
             getcpu(&cpu, &node);
-
             tpm_upstream_set_task_cpu_node(cpu, node, name_with_id_char);
-
             gettimeofday(&start, NULL);
           }
 
@@ -240,16 +223,18 @@ void cholesky(tpm_desc A)
           if (TPM_PAPI)
           {
             // Start PAPI counters
-            PAPI_stop(eventset, values);
-
+            int ret_stop = PAPI_stop(eventset, values);
+            if (ret_stop != PAPI_OK)
+            {
+              printf("PAPI_stop SYRK error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+              exit(EXIT_FAILURE);
+            }
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-#pragma omp atomic update
-              values_by_thread_syrk[omp_get_thread_num()][i] += values[i];
+              values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
             }
             printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
-            PAPI_unregister_thread();
           }
           else if (TPM_TRACE)
           {
@@ -283,27 +268,20 @@ void cholesky(tpm_desc A)
             if (TPM_PAPI)
             {
               memset(values, 0, sizeof(values));
-              eventset = PAPI_NULL;
-              int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
-              int ret = PAPI_create_eventset(&eventset);
-              if (ret != PAPI_OK)
+              // Start PAPI counters
+              int ret_start = PAPI_start(eventset);
+              if (ret_start != PAPI_OK)
               {
-                printf("GEMM task - PAPI_create_eventset error %d: %s\n", ret, PAPI_strerror(ret));
+                printf("PAPI_start GEMM error %d: %s\n", ret_start, PAPI_strerror(ret_start));
                 exit(EXIT_FAILURE);
               }
-              PAPI_add_events(eventset, events, NEVENTS);
-
-              // Start PAPI counters
-              PAPI_start(eventset);
             }
             else if (TPM_TRACE)
             {
               // TPM library: send CPU and name
               unsigned int cpu, node;
               getcpu(&cpu, &node);
-
               tpm_upstream_set_task_cpu_node(cpu, node, name_with_id_char);
-
               gettimeofday(&start, NULL);
             }
 
@@ -315,21 +293,22 @@ void cholesky(tpm_desc A)
             if (TPM_PAPI)
             {
               // Start PAPI counters
-              PAPI_stop(eventset, values);
-
+              int ret_stop = PAPI_stop(eventset, values);
+              if (ret_stop != PAPI_OK)
+              {
+                printf("PAPI_stop GEMM error %d: %s\n", ret_stop, PAPI_strerror(ret_stop));
+                exit(EXIT_FAILURE);
+              }
               // Accumulate events values
               for (int i = 0; i < NEVENTS; i++)
               {
-#pragma omp atomic update
-                values_by_thread_gemm[omp_get_thread_num()][i] += values[i];
+                values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
               }
               printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
-              PAPI_unregister_thread();
             }
             else if (TPM_TRACE)
             {
               gettimeofday(&end, NULL);
-
               // TPM library: send time and name
               tpm_upstream_get_task_time(start, end, name_with_id_char);
             }
@@ -342,6 +321,7 @@ void cholesky(tpm_desc A)
   if (TPM_PAPI)
   {
 #pragma omp taskwait
+    PAPI_eventset_destroy(&eventset);
     PAPI_shutdown();
 
     CounterData potrf, trsm, syrk, gemm;
