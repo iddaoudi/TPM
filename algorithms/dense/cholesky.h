@@ -321,7 +321,7 @@ void cholesky(tpm_desc A)
   if (TPM_PAPI)
   {
 #pragma omp taskwait
-    PAPI_eventset_destroy(&eventset);
+    PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
     CounterData potrf, trsm, syrk, gemm;
