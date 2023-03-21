@@ -192,20 +192,13 @@ int main(int argc, char *argv[])
     // Cholesky algorithm
     case ALGO_CHOLESKY:
       tpm_hermitian_positive_generator(*A);
-      if (TPM_PAPI)
+      time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
       {
         cholesky(*A);
       }
-      else
-      {
-        time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
-        {
-          cholesky(*A);
-        }
-        time_finish = omp_get_wtime();
-      }
+      time_finish = omp_get_wtime();
       break;
     // QR algorithm
     case ALGO_QR:
@@ -214,40 +207,26 @@ int main(int argc, char *argv[])
       tpm_desc *S = NULL;
       int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
-      if (TPM_PAPI)
+      time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
       {
         qr(*A, *S);
       }
-      else
-      {
-        time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
-        {
-          qr(*A, *S);
-        }
-        time_finish = omp_get_wtime();
-      }
+      time_finish = omp_get_wtime();
       free(S->matrix);
       tpm_matrix_desc_destroy(&S);
       break;
     // LU algorithm
     case ALGO_LU:
       tpm_hermitian_positive_generator(*A);
-      if (TPM_PAPI)
+      time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
       {
         lu(*A);
       }
-      else
-      {
-        time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
-        {
-          lu(*A);
-        }
-        time_finish = omp_get_wtime();
-      }
+      time_finish = omp_get_wtime();
       break;
     }
     free(A->matrix);
@@ -281,7 +260,8 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  double exec_time = time_finish - time_start;
-  if (TPM_TRACE)
+  if (TPM_TRACE) {
+    double exec_time = time_finish - time_start;
     tpm_upstream_finalize(exec_time);
+  }
 }
