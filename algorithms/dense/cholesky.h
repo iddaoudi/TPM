@@ -19,7 +19,8 @@
 void cholesky(tpm_desc A)
 {
   char *name_with_id_char = NULL;
-  struct timeval start, end;
+  struct timeval start = (struct timeval){0};
+  struct timeval end = (struct timeval){0};
 
   int eventset = PAPI_NULL;
   long long values[NEVENTS];
@@ -33,7 +34,6 @@ void cholesky(tpm_desc A)
   if (TPM_PAPI)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
-
     int ret = PAPI_create_eventset(&eventset);
     PAPI_add_events(eventset, events, NEVENTS);
     memset(values_by_thread_potrf, 0, available_threads * sizeof(long long[NEVENTS]));
