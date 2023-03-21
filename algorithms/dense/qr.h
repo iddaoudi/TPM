@@ -105,7 +105,6 @@ void qr(tpm_desc A, tpm_desc S)
         {
           values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
         }
-        printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
       }
       else if (TPM_TRACE)
       {
@@ -172,7 +171,6 @@ void qr(tpm_desc A, tpm_desc S)
             {
               values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
             }
-            printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
           else if (TPM_TRACE)
           {
@@ -241,7 +239,6 @@ void qr(tpm_desc A, tpm_desc S)
             {
               values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
             }
-            printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
           else if (TPM_TRACE)
           {
@@ -311,7 +308,6 @@ void qr(tpm_desc A, tpm_desc S)
               {
                 values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
               }
-              printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             }
             else if (TPM_TRACE)
             {

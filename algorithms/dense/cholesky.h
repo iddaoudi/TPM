@@ -100,7 +100,6 @@ void cholesky(tpm_desc A)
         {
           values_by_thread_potrf[omp_get_thread_num()][i] += values[i];
         }
-        printf("* %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
       }
       else if (TPM_TRACE)
       {
@@ -166,7 +165,6 @@ void cholesky(tpm_desc A)
             {
               values_by_thread_trsm[omp_get_thread_num()][i] += values[i];
             }
-            printf("** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
           else if (TPM_TRACE)
           {
@@ -234,7 +232,6 @@ void cholesky(tpm_desc A)
             {
               values_by_thread_syrk[omp_get_thread_num()][i] += values[i];
             }
-            printf("*** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
           }
           else if (TPM_TRACE)
           {
@@ -304,7 +301,6 @@ void cholesky(tpm_desc A)
               {
                 values_by_thread_gemm[omp_get_thread_num()][i] += values[i];
               }
-              printf("**** %lld %lld %lld %lld %lld %lld\n", values[0], values[1], values[2], values[3], values[4], values[5]);
             }
             else if (TPM_TRACE)
             {
