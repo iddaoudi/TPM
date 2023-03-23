@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  21/03/2023
+ *       Revision:  23/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -335,7 +335,7 @@ void lu(tpm_desc A)
     }
 
     FILE *file;
-    if ((file = fopen("counters_lu.dat", "a+")) == NULL)
+    if ((file = fopen("counters_lu.csv", "a+")) == NULL)
     {
       perror("fopen failed");
       exit(EXIT_FAILURE);

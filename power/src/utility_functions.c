@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  19/03/2023
- *       Revision:  20/03/2023
+ *       Revision:  23/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -49,7 +49,7 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
 {
   char filename[20];
   int TPM_ITER = atoi(getenv("TPM_ITER"));
-  sprintf(filename, "energy_data_%d.csv", TPM_ITER);
+  sprintf(filename, "energy_data_%s_%d.csv", algorithm, TPM_ITER);
   
   FILE *file;
   struct stat buffer;
