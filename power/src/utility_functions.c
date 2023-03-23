@@ -47,7 +47,7 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
                uint64_t *pkg_energy_finish, uint64_t *dram_energy_start,
                uint64_t *dram_energy_finish, double exec_time)
 {
-  char filename[20];
+  char filename[64];
   int TPM_ITER = atoi(getenv("TPM_ITER"));
   sprintf(filename, "energy_data_%s_%d.csv", algorithm, TPM_ITER);
   
