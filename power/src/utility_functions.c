@@ -47,11 +47,15 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
                uint64_t *pkg_energy_finish, uint64_t *dram_energy_start,
                uint64_t *dram_energy_finish, double exec_time)
 {
+  char filename[20];
+  int TPM_ITER = atoi(getenv("TPM_ITER"));
+  sprintf(filename, "energy_data_%d.csv", TPM_ITER);
+  
   FILE *file;
   struct stat buffer;
-  int file_already_exists = (stat("energy_data.csv", &buffer) == 0);
+  int file_already_exists = (stat(filename, &buffer) == 0);
 
-  file = fopen("energy_data.csv", "a");
+  file = fopen(filename, "a");
   if (file == NULL)
   {
     perror("fopen failed");

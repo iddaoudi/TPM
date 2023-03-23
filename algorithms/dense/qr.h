@@ -347,7 +347,7 @@ void qr(tpm_desc A, tpm_desc S)
     }
 
     FILE *file;
-    if ((file = fopen("counters_qr.dat", "a+")) == NULL)
+    if ((file = fopen("counters_qr.csv", "a+")) == NULL)
     {
       perror("fopen failed");
       exit(EXIT_FAILURE);
