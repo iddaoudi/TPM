@@ -4,13 +4,13 @@
 export OPENBLAS_NUM_THREADS=1
 
 # Parameters
-algo=lu
-msize=2048
-bsize=256
-threads=1
-numa=8
-targets=("1") # "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
-iteration=("1") # "2" "3" "4" "5")
+algo=(cholesky)
+msize=(16384 32768)
+bsize=(1024 2048)
+threads=32
+numa=16
+targets=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
+iteration=("1" "2" "3") # "4" "5")
 
 export TPM_PAPI=1
 export TPM_TRACE=0
@@ -48,6 +48,10 @@ then
     echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
     echo "TPM bash log: Trace OK"
     echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+else
+	threads=1
+	targets=("1")
+	iteration=("1") 
 fi
 
 # Compile source part
@@ -71,8 +75,6 @@ fi
 
 ######################################################
 
-FILE_NAME=
-
 for algorithm in ${algo[*]}
 do
 	for thread in ${threads[*]}
@@ -86,6 +88,7 @@ do
 				    for target in ${targets[*]}
                     do
 					    echo "TPM bash log: Launching" $algorithm "run with parameters" $matrix $tile "in scenario" $target "for" $thread "threads in iteration" $iter
+					    export TPM_ITER=$iter
 					    export OMP_NUM_THREADS=$thread
 
                         if [[ "$algorithm" == "lu" ]];
@@ -95,40 +98,36 @@ do
 					    # Start server
 					    if [[ ${TPM_POWER} -eq 1 ]]
 					    then
-					    	sudo -E power/tpm_server $thread $governor $frequency $target ${algo} &
+							sudo -E power/tpm_server $thread $governor $frequency $target ${algo} &
 	                        sleep 1
                             echo "BASH LAUNCHED SERVER"
-					    fi
+						fi
 					    # Launch runs
 					    if [[ $thread -gt $numa ]]
 					    then
 					    	if [[ ${TPM_TRACE} -eq 1 ]]
 					    	then
-					    		result=$(LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile)
+					    		LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
                             else
-					    		result=$(LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile)
+					    		LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 					    	fi
 					    else
 					    	if [[ ${TPM_TRACE} -eq 1 ]]
 					    	then
-                                result=$(LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile)
+                                LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
                             else
 					    		LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 					    	fi
 					    fi
-					    FILE_NAME=time_${algorithm}_${matrix}_${tile}_${thread}
-#cat <<EOF >> ${FILE_NAME}.dat
-#$result
-#EOF
+					    echo "TPM bash log: "$algorithm "run with parameters" $matrix $tile "in scenario" $target "for" $thread "threads in iteration" $iter " done!"
                     done
-#mkdir results/${TPM_MACHINE}_${algorithm}_${matrix}_${tile}_${thread}_${frequency}_${iter}
-#mv *.dat results/${TPM_MACHINE}_${algorithm}_${matrix}_${tile}_${thread}_${frequency}_${iter}
 				done
 			done
 		done
 	done
 done
-echo "Finished"
+
+echo "Experiments finished!"
 if [[ ${TPM_POWER} -eq 1 ]]
 then
 	ps -ef | grep tpm_server | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9

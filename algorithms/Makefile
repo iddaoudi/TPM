@@ -8,7 +8,7 @@ CC=gcc
 CXX=g++
 
 # C flags
-CFLAGS+=-std=gnu99 -ggdb -rdynamic -ldl -Iinclude -Idense -Isparse
+CFLAGS+=-std=gnu99 -O2 -rdynamic -ldl -Iinclude -Idense -Isparse
 FLAGS_OPENMP=-fopenmp
 
 # OpenMP
