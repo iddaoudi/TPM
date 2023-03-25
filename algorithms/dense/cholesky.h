@@ -236,7 +236,6 @@ void cholesky(tpm_desc A)
           else if (TPM_TRACE)
           {
             gettimeofday(&end, NULL);
-
             // TPM library: send time and name
             tpm_upstream_get_task_time(start, end, name_with_id_char);
           }
