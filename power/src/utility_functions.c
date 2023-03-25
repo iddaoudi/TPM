@@ -49,7 +49,7 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
 {
   char filename[64];
   int TPM_ITER = atoi(getenv("TPM_ITER"));
-  sprintf(filename, "energy_data_%s_%d.csv", algorithm, TPM_ITER);
+  sprintf(filename, "energy_data_%s_%d_%d.csv", algorithm, matrix_size, TPM_ITER);
   
   FILE *file;
   struct stat buffer;
