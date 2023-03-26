@@ -44,9 +44,6 @@ void qr_control(int selected_case, const char *task, int cpu,
   }
   else if (selected_case == 16)
   {
-    tpm_set_max_frequency(cpu, original_frequency);
+    tpm_set_max_frequency(cpu, selected_frequency);
   }
-
-  // Set back the original frequency on the CPU used by a task
-  tpm_set_max_frequency(cpu, original_frequency);
 }
