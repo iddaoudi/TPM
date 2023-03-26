@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  23/03/2023
+ *       Revision:  26/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -116,7 +116,7 @@ void lu(tpm_desc A)
       if (TPM_TRACE)
       {
         // TPM library: create a unique task name
-        name_with_id_char = tpm_unique_task_identifier("trsm1", k, m, n);
+        name_with_id_char = tpm_unique_task_identifier("trsm", k, m, n);
         tpm_upstream_set_task_name(name_with_id_char);
       }
 
@@ -182,7 +182,7 @@ void lu(tpm_desc A)
       if (TPM_TRACE)
       {
         // TPM library: create a unique task name
-        name_with_id_char = tpm_unique_task_identifier("trsm2", k, m, n);
+        name_with_id_char = tpm_unique_task_identifier("trsm", k, m, n);
         tpm_upstream_set_task_name(name_with_id_char);
       }
 

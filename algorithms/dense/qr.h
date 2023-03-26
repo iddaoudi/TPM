@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  23/03/2023
+ *       Revision:  26/03/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -60,9 +60,9 @@ void qr(tpm_desc A, tpm_desc S)
       tpm_upstream_set_task_name(name_with_id_char);
     }
 
-#pragma omp task firstprivate(eventset) depend(inout                                             \
-                                               : tileA [0:S.tile_size * S.tile_size]) depend(out \
-                                                                                             : tileS [0:A.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(inout                                             \
+                                                        : tileA [0:S.tile_size * S.tile_size]) depend(out \
+                                                                                                      : tileS [0:A.tile_size * S.tile_size])
     {
       double tho[S.tile_size];
       double work[S.tile_size * S.tile_size];
@@ -122,13 +122,13 @@ void qr(tpm_desc A, tpm_desc S)
         if (TPM_TRACE)
         {
           // TPM library: create a unique task name
-          name_with_id_char = tpm_unique_task_identifier("geqrt", k, m, n);
+          name_with_id_char = tpm_unique_task_identifier("ormqr", k, m, n);
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task firstprivate(eventset) depend(in                                                                                       \
-                                               : tileA [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size]) depend(inout \
-                                                                                                                                  : tileB [0:S.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(in                                                                                       \
+                                                        : tileA [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size]) depend(inout \
+                                                                                                                                           : tileB [0:S.tile_size * S.tile_size])
         {
           double work[S.tile_size * S.tile_size];
 
@@ -190,13 +190,13 @@ void qr(tpm_desc A, tpm_desc S)
         if (TPM_TRACE)
         {
           // TPM library: create a unique task name
-          name_with_id_char = tpm_unique_task_identifier("geqrt", k, m, n);
+          name_with_id_char = tpm_unique_task_identifier("tsqrt", k, m, n);
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task firstprivate(eventset) depend(inout                                                                                  \
-                                               : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(out \
-                                                                                                                                  : tileS [0:S.tile_size * A.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(inout                                                                                  \
+                                                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(out \
+                                                                                                                                           : tileS [0:S.tile_size * A.tile_size])
         {
           double work[S.tile_size * S.tile_size];
           double tho[S.tile_size];
@@ -258,13 +258,13 @@ void qr(tpm_desc A, tpm_desc S)
           if (TPM_TRACE)
           {
             // TPM library: create a unique task name
-            name_with_id_char = tpm_unique_task_identifier("geqrt", k, m, n);
+            name_with_id_char = tpm_unique_task_identifier("tsmqr", k, m, n);
             tpm_upstream_set_task_name(name_with_id_char);
           }
 
-#pragma omp task firstprivate(eventset) depend(inout                                                                                 \
-                                               : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(in \
-                                                                                                                                  : tileC [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(inout                                                                                 \
+                                                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(in \
+                                                                                                                                           : tileC [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size])
           {
             double work[S.tile_size * S.tile_size];
 
