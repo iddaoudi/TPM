@@ -1,80 +1,48 @@
 #!/bin/bash
 
-# Set OpenBLAS threads to 1
-export OPENBLAS_NUM_THREADS=1
+ROOT=
 
-# Parameters
+###################################################### Parameters
 algo=(cholesky)
-msize=(16384 32768)
-bsize=(1024 2048)
-threads=32
+msize=(2048)
+bsize=(512)
+threads=16
 numa=16
-targets=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
-iteration=("1" "2" "3") # "4" "5")
-
-export TPM_PAPI=1
-export TPM_TRACE=0
-export TPM_POWER=0
+export TPM_PAPI=0
+export TPM_TRACE=1
+export TPM_POWER=1
 
 frequency=min
 governor=ondemand
-
-export TPM_MACHINE=local
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
-
-######################################################
-
-# LD_PRELOAD
-ROOT=/home/cc
-omp_so=${ROOT}/llvm-project/build-openmp/lib/libomp.so
-trace_so=${ROOT}/TPM/trace/libtpm_trace.so
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROOT}/OpenBLAS/build/lib
-
-######################################################
-
-if [[ "$algo" -eq "qr" ]];
-then
-    ulimit -s unlimited
-fi
-
+export OPENBLAS_NUM_THREADS=1
+###################################################### Trace
 if [[ ${TPM_TRACE} -eq 1 ]]
 then
-    cd trace
-    rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile libtpm_trace.so
-    cmake .
-    make clean && make -s
-    cd -
-    echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
-    echo "TPM bash log: Trace OK"
-    echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+    cd trace && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile libtpm_trace.so && cmake . && make clean && make -s && cd -
+    echo "*** TPM bash log: Trace OK"
+	targets=("9") # "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
+	iteration=("1") # "2" "3")
 else
 	threads=1
 	targets=("1")
-	iteration=("1") 
+	iteration=("1")
 fi
-
-# Compile source part
-cd algorithms
-make clean && make -s
-cd -
-echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
-echo "TPM bash log: Algorithms OK"
-echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
-
-# Compile power control part
+###################################################### Power
 if [[ ${TPM_POWER} -eq 1 ]]
 then
-	cd power
-	make clean && make -s
-	cd -
-	echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
-	echo "TPM bash log: Power OK"
-	echo "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"
+	cd power && make clean && make -s && cd -
+	echo "*** TPM bash log: Power OK"
 fi
-
-######################################################
-
+###################################################### Algorithms
+cd algorithms && make clean && make -s && cd -
+echo "*** TPM bash log: Algorithms OK"
+###################################################### Libraries
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${ROOT}/OpenBLAS/build/lib
+omp_so=${ROOT}/llvm-project/build-openmp/lib/libomp.so
+trace_so=${ROOT}/TPM/trace/libtpm_trace.so
+###################################################### Experiments
 for algorithm in ${algo[*]}
 do
 	for thread in ${threads[*]}
@@ -87,7 +55,8 @@ do
 				do
 				    for target in ${targets[*]}
                     do
-					    echo "TPM bash log: Launching" $algorithm "run with parameters" $matrix $tile "in scenario" $target "for" $thread "threads in iteration" $iter
+					    echo "*** TPM bash log:" $iter "Launching" $algorithm $matrix $tile $thread "in scenario" $target
+
 					    export TPM_ITER=$iter
 					    export OMP_NUM_THREADS=$thread
 
@@ -95,13 +64,19 @@ do
                         then
                             targets=("1" "2" "3" "4" "5" "6" "7" "8")
                         fi
+						if [[ "$algorithm" == "qr" ]];
+						then
+    						ulimit -s unlimited
+						fi
+
 					    # Start server
 					    if [[ ${TPM_POWER} -eq 1 ]]
 					    then
 							sudo -E power/tpm_server $thread $governor $frequency $target ${algo} &
 	                        sleep 1
-                            echo "BASH LAUNCHED SERVER"
+                            echo "*** TPM bash log: power socket launched"
 						fi
+
 					    # Launch runs
 					    if [[ $thread -gt $numa ]]
 					    then
@@ -119,16 +94,15 @@ do
 					    		LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 					    	fi
 					    fi
-					    echo "TPM bash log: "$algorithm "run with parameters" $matrix $tile "in scenario" $target "for" $thread "threads in iteration" $iter " done!"
+					    echo "*** TPM bash log:" $iter "Launching" $algorithm $matrix $tile $thread "in scenario" $target "done"
                     done
 				done
 			done
 		done
 	done
 done
-
-echo "Experiments finished!"
 if [[ ${TPM_POWER} -eq 1 ]]
 then
 	ps -ef | grep tpm_server | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9
 fi
+echo "*** TPM bash log: experiments finished!"
