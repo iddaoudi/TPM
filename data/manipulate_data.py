@@ -7,7 +7,7 @@
 #
 #        Version:  1.0
 #        Created:  21/03/2023
-#       Revision:  23/03/2023
+#       Revision:  27/03/2023
 #       Compiler:  python3
 #
 #         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -20,16 +20,12 @@ import pandas as pd
 import sys
 
 def mean_of_files():
-    # Read the CSV files into separate dataframes
     dfs = []
     for file in sys.argv[2:]:
         df = pd.read_csv(file, sep='\s*,\s*', engine='python')
         dfs.append(df)
-    # Concatenate the dataframes vertically
     merged_df = pd.concat(dfs)
-    # Group the data by algorithm, matrix_size, tile_size, and case, and calculate the mean of PKG1, PKG2, DRAM1, DRAM2, and time
     grouped_df = merged_df.groupby(['algorithm', 'matrix_size', 'tile_size', 'case']).mean().reset_index()
-    # Write the result to a new CSV file
     grouped_df.to_csv('energy_data_qr_mean_32768.csv', index=False)
 
 # Counters file first, energy second
