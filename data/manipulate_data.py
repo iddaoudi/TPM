@@ -7,7 +7,7 @@
 #
 #        Version:  1.0
 #        Created:  21/03/2023
-#       Revision:  27/03/2023
+#       Revision:  14/04/2023
 #       Compiler:  python3
 #
 #         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -34,7 +34,7 @@ def concatenate_files():
     file2 = pd.read_csv(sys.argv[3], skipinitialspace=True)
     merged_file = pd.merge(
         file1, file2, on=["algorithm", "matrix_size", "tile_size"])
-    merged_file.to_csv("merged_file_qr.csv", index=False)
+    merged_file.to_csv("merged_file_cholesky.csv", index=False)
 
 def get_best_cases():
     data = pd.read_csv(sys.argv[2])
@@ -53,6 +53,30 @@ def get_best_cases():
             print(cases)
             print()
 
+def merge_files():
+    file1 = pd.read_csv(sys.argv[2]) # counters
+    file2 = pd.read_csv(sys.argv[3]) # energy and time
+
+    file1.columns = [col.strip() for col in file1.columns]
+
+    task_mapping = {task: f"task{i+1}" for i, task in enumerate(file1['task'].unique())}
+
+    file1['task'] = file1['task'].map(task_mapping)
+
+    file1_pivot = file1.pivot_table(
+        index=['algorithm', 'matrix_size', 'tile_size'],
+        columns='task',
+        values=['mem_boundness', 'arithm_intensity', 'bmr', 'ilp', 'l3_cache_ratio']
+    ).reset_index()
+
+    file1_pivot.columns = [
+        '_'.join(col).strip().replace(' ', '') if col[1] else col[0]
+        for col in file1_pivot.columns.values
+    ]
+
+    merged = pd.merge(file2, file1_pivot, on=['algorithm', 'matrix_size', 'tile_size'])
+    merged.to_csv('merged_qr_16384.csv', index=False)
+
 if __name__ == '__main__':
     key = int(sys.argv[1])
 
@@ -62,3 +86,5 @@ if __name__ == '__main__':
         ret = concatenate_files()
     if (key == 3):
         get_best_cases()
+    if (key == 4):
+        merge_files()

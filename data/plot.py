@@ -40,7 +40,6 @@ marker_symbols = {
     16: 'X',
 }
 
-
 def plot_function():
     for name, group in groups:
         case1 = group.loc[group['case'] == 1]
@@ -72,7 +71,6 @@ def plot_function():
             f'function_{name[0]}_{name[1]}_{name[2]}.png', bbox_inches='tight')
         plt.show()
 
-
 def plot_total():
     for name, group in groups:
         case1 = group.loc[group['case'] == 1]
@@ -102,7 +100,6 @@ def plot_total():
         plt.savefig(
             f'total_{name[0]}_{name[1]}_{name[2]}.png', bbox_inches='tight')
         plt.show()
-
 
 def plot_sum():
     for name, group in groups:
@@ -138,7 +135,6 @@ def plot_sum():
         plt.savefig(
             f'sum_{name[0]}_{name[1]}_{name[2]}.png', bbox_inches='tight')
         plt.show()
-
 
 def plt_counters():
     for (algorithm, matrix_size, tile_size) in df[['algorithm', 'matrix_size', 'tile_size']].drop_duplicates().values:
