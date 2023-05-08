@@ -1,4 +1,4 @@
-algorithm, task, matrix_size, tile_size, mem_boundness, arithm_intensity, bmr, ilp, l3_cache_ratio
+algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio
 cholesky,potrf,32768,512,0.288396,0.003186,inf,2.587977,0.167995
 cholesky,trsm,32768,512,0.336502,0.001275,inf,2.393117,4.997158
 cholesky,syrk,32768,512,0.322028,0.006031,inf,2.606293,9.530725
