@@ -20,6 +20,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import matplotlib.gridspec as gridspec
 
 marker_symbols = {
     1: 'o',
@@ -168,6 +169,99 @@ def plt_counters():
 
         fig.subplots_adjust(wspace=0.4, hspace=0.4)
         plt.savefig(f'counters_{algorithm}_{matrix_size}_{tile_size}.png')
+        
+# Using merged files
+def plot_multi():
+    data = pd.read_csv(sys.argv[2])
+
+    data['energy'] = data['PKG1'] + data['PKG2'] + data['DRAM1'] + data['DRAM2']
+    data['time_energy_product'] = data['time'] * data['energy']
+    data['ai'] = data['task1_arithm_intensity'] + data['task2_arithm_intensity'] + data['task3_arithm_intensity'] + data['task4_arithm_intensity']
+    data['mb'] = data['task1_mem_boundness'] + data['task2_mem_boundness'] + data['task3_mem_boundness'] + data['task4_mem_boundness']
+    data['ilp'] = data['task1_ilp'] + data['task2_ilp'] + data['task3_ilp'] + data['task4_ilp']
+
+    lower_mb = data['mb'].min() - 0.1
+    upper_mb = data['mb'].max() + 0.1
+    lower_ai = data['ai'].min() - 0.02
+    upper_ai = data['ai'].max() + 0.02
+    lower_bmr = data['ilp'].min() - 0.1
+    upper_bmr = data['ilp'].max() + 0.1
+
+    matrix_sizes = data['matrix_size'].unique()
+    tile_sizes = data['tile_size'].unique()
+    algorithm = data['algorithm'].unique()
+
+    for matrix_size in matrix_sizes:
+        fig, axes = plt.subplots(1, len(tile_sizes), figsize=(5 * len(tile_sizes), 5), sharey=True)
+        fig.subplots_adjust(wspace=0, hspace=0)
+        fig.suptitle(f'Matrix Size: {matrix_size}')
+
+        for index, tile_size in enumerate(tile_sizes):
+            filtered_data = data[(data['matrix_size'] == matrix_size) & (data['tile_size'] == tile_size)]
+
+            case_1_time = filtered_data.loc[filtered_data['case'] == 1, 'time'].values[0]
+            case_1_energy = filtered_data.loc[filtered_data['case'] == 1, 'energy'].values[0]
+
+            condition = (filtered_data['energy'] < case_1_energy) & (filtered_data['time'] <= case_1_time * 1.05)
+            best_case = filtered_data.loc[condition].sort_values(['energy', 'time']).iloc[0]
+
+            def color_map(row):
+                if row.name == best_case.name:
+                    return 'green'
+                elif row['energy'] < case_1_energy and row['time'] <= case_1_time * 1.05:
+                    return 'red'
+                else:
+                    return 'black'
+
+            colors = filtered_data.apply(color_map, axis=1)
+            metric = sys.argv[4]
+
+            if sys.argv[3] == "product":
+                ax1 = axes[index]
+                ax1.scatter(filtered_data['case'], filtered_data['time_energy_product'], c=colors, marker='o')
+                ax1.plot(filtered_data['case'], filtered_data['time_energy_product'], c='gray', linewidth=0.5)
+                ax1.set_ylabel('Time * Energy')
+
+                ax2 = ax1.twinx()
+                ax2.scatter(filtered_data['case'], filtered_data[metric], c=colors, marker='x')
+                ax2.set_ylabel(metric)
+                ax2.yaxis.set_label_position('right')
+                ax2.yaxis.tick_right()
+                #ax2.set_ylim([lower_ai, upper_ai])
+                
+            elif sys.argv[3] == "time":
+                ax1 = axes[index]
+                ax1.scatter(filtered_data['case'], filtered_data['time'], c=colors, marker='o')
+                ax1.plot(filtered_data['case'], filtered_data['time'], c='gray', linewidth=0.5)
+                ax1.set_ylabel('Time')
+
+                ax2 = ax1.twinx()
+                ax2.scatter(filtered_data['case'], filtered_data[metric], c=colors, marker='x')
+                ax2.set_ylabel(metric)
+                ax2.yaxis.set_label_position('right')
+                ax2.yaxis.tick_right()
+                #ax2.set_ylim([lower_ai, upper_ai])
+
+            elif sys.argv[3] == "energy":
+                ax1 = axes[index]
+                ax1.scatter(filtered_data['case'], filtered_data['energy'], c=colors, marker='o')
+                ax1.plot(filtered_data['case'], filtered_data['energy'], c='gray', linewidth=0.5)
+                ax1.set_ylabel('Energy (uJ)')   
+
+                ax2 = ax1.twinx()
+                ax2.scatter(filtered_data['case'], filtered_data[metric], c=colors, marker='x')
+                ax2.set_ylabel(metric)
+                ax2.yaxis.set_label_position('right')
+                ax2.yaxis.tick_right()
+                #ax2.set_ylim([lower_ai, upper_ai])
+
+            axes[index].set_title(f'Tile Size: {tile_size}')
+            axes[index].set_xlabel('Case')
+            axes[index].set_xticks(filtered_data['case'])
+
+        fig.tight_layout()
+        #plt.savefig(f'{sys.argv[3]}_{algorithm[0]}_{matrix_size}_ai.png')
+        plt.show()
 
 if __name__ == '__main__':
     key = int(sys.argv[1])
@@ -190,5 +284,7 @@ if __name__ == '__main__':
     elif key == 4:
         df = pd.read_csv(sys.argv[2], sep=', ', engine='python')
         plt_counters()
+    elif key == 5:
+        plot_multi()
 
 
