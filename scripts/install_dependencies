@@ -19,7 +19,7 @@ echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clang OK"
 sudo apt install numactl -y
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Numactl OK"
 
-cd ..
+cd ../..
 
 # LLVM OpenMP
 FILE=llvm-project/build-openmp/include/omp.h
@@ -53,4 +53,9 @@ else
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> OpenBLAS OK"
 fi
 
+sudo apt install libcpufreq-dev
+sudo apt install cpufrequtils
+sudo apt install libpapi-dev
+sudo apt install libzmq3-dev
+sudo apt install hwloc
 cd TPM/
