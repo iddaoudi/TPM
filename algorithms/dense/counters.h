@@ -20,11 +20,13 @@
 
 typedef struct
 {
-    long long values[NEVENTS];
+    // NEVENTS + 1 for the task weight
+	long long values[NEVENTS + 1];
     double arithm_intensity;
     double mem_boundness;
     double bmr;
     double ilp;
+	int weight;
 } CounterData;
 
 void compute_derived_metrics(CounterData *data)
@@ -34,12 +36,13 @@ void compute_derived_metrics(CounterData *data)
     data->mem_boundness = (double)data->values[2] / (double)data->values[3];
     data->bmr = (double)data->values[4] / (double)data->values[5];
     data->ilp = (double)data->values[1] / (double)data->values[3];
+	data->weight = (int)data->values[6];
 }
 
-void accumulate_counters(long long dst[], long long src[][NEVENTS], int available_threads)
+void accumulate_counters(long long dst[], long long src[][NEVENTS + 1], int available_threads)
 {
-    memset(dst, 0, NEVENTS * sizeof(long long));
-    for (int i = 0; i < NEVENTS; i++)
+    memset(dst, 0, (NEVENTS + 1) * sizeof(long long));
+    for (int i = 0; i < NEVENTS + 1; i++)
     {
         for (int j = 0; j < available_threads; j++)
         {

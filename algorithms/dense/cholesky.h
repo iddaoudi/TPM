@@ -26,20 +26,22 @@ void cholesky(tpm_desc A)
   long long values[NEVENTS];
   const int available_threads = omp_get_max_threads();
 
-  long long(*values_by_thread_potrf)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_trsm)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_syrk)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_gemm)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  // NEVENTS + 1 for the task weights
+  long long(*values_by_thread_potrf)[NEVENTS + 1] = malloc(available_threads * sizeof(long long[NEVENTS + 1]));
+  long long(*values_by_thread_trsm)[NEVENTS + 1] = malloc(available_threads * sizeof(long long[NEVENTS + 1]));
+  long long(*values_by_thread_syrk)[NEVENTS + 1] = malloc(available_threads * sizeof(long long[NEVENTS + 1]));
+  long long(*values_by_thread_gemm)[NEVENTS + 1] = malloc(available_threads * sizeof(long long[NEVENTS + 1]));
 
   if (TPM_PAPI)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
     int ret = PAPI_create_eventset(&eventset);
     PAPI_add_events(eventset, events, NEVENTS);
-    memset(values_by_thread_potrf, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_trsm, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_syrk, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_gemm, 0, available_threads * sizeof(long long[NEVENTS]));
+    
+	memset(values_by_thread_potrf, 0, available_threads * sizeof(long long[NEVENTS + 1]));
+    memset(values_by_thread_trsm, 0, available_threads * sizeof(long long[NEVENTS + 1]));
+    memset(values_by_thread_syrk, 0, available_threads * sizeof(long long[NEVENTS + 1]));
+    memset(values_by_thread_gemm, 0, available_threads * sizeof(long long[NEVENTS + 1]));
   }
 
   // TPM library: initialization
@@ -88,7 +90,7 @@ void cholesky(tpm_desc A)
 
       if (TPM_PAPI)
       {
-        // Start PAPI counters
+        // Stop PAPI counters
         int ret_stop = PAPI_stop(eventset, values);
         if (ret_stop != PAPI_OK)
         {
@@ -100,6 +102,7 @@ void cholesky(tpm_desc A)
         {
           values_by_thread_potrf[omp_get_thread_num()][i] += values[i];
         }
+		values_by_thread_potrf[omp_get_thread_num()][NEVENTS]++;
       }
       else if (TPM_TRACE)
       {
@@ -153,7 +156,7 @@ void cholesky(tpm_desc A)
 
           if (TPM_PAPI)
           {
-            // Start PAPI counters
+            // Stop PAPI counters
             int ret_stop = PAPI_stop(eventset, values);
             if (ret_stop != PAPI_OK)
             {
@@ -165,6 +168,7 @@ void cholesky(tpm_desc A)
             {
               values_by_thread_trsm[omp_get_thread_num()][i] += values[i];
             }
+			values_by_thread_trsm[omp_get_thread_num()][NEVENTS]++;
           }
           else if (TPM_TRACE)
           {
@@ -220,7 +224,7 @@ void cholesky(tpm_desc A)
 
           if (TPM_PAPI)
           {
-            // Start PAPI counters
+            // Stop PAPI counters
             int ret_stop = PAPI_stop(eventset, values);
             if (ret_stop != PAPI_OK)
             {
@@ -232,6 +236,7 @@ void cholesky(tpm_desc A)
             {
               values_by_thread_syrk[omp_get_thread_num()][i] += values[i];
             }
+			values_by_thread_syrk[omp_get_thread_num()][NEVENTS]++;
           }
           else if (TPM_TRACE)
           {
@@ -288,7 +293,7 @@ void cholesky(tpm_desc A)
 
             if (TPM_PAPI)
             {
-              // Start PAPI counters
+              // Stop PAPI counters
               int ret_stop = PAPI_stop(eventset, values);
               if (ret_stop != PAPI_OK)
               {
@@ -300,6 +305,7 @@ void cholesky(tpm_desc A)
               {
                 values_by_thread_gemm[omp_get_thread_num()][i] += values[i];
               }
+			  values_by_thread_gemm[omp_get_thread_num()][NEVENTS]++;
             }
             else if (TPM_TRACE)
             {
@@ -350,17 +356,17 @@ void cholesky(tpm_desc A)
       int first_char = fgetc(file);
       if (first_char == EOF)
       {
-        fprintf(file, "algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio\n");
+        fprintf(file, "algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio,weight\n");
       }
 
-      fprintf(file, "cholesky,potrf,%d,%d,%f,%f,%f,%f,%f\n", A.matrix_size, A.tile_size,
-              potrf.mem_boundness, potrf.arithm_intensity, potrf.bmr, potrf.ilp, (double)potrf.values[0] / (double)l3_cache_size);
-      fprintf(file, "cholesky,trsm,%d,%d,%f,%f,%f,%f,%f\n", A.matrix_size, A.tile_size,
-              trsm.mem_boundness, trsm.arithm_intensity, trsm.bmr, trsm.ilp, (double)trsm.values[0] / (double)l3_cache_size);
-      fprintf(file, "cholesky,syrk,%d,%d,%f,%f,%f,%f,%f\n", A.matrix_size, A.tile_size,
-              syrk.mem_boundness, syrk.arithm_intensity, syrk.bmr, syrk.ilp, (double)syrk.values[0] / (double)l3_cache_size);
-      fprintf(file, "cholesky,gemm,%d,%d,%f,%f,%f,%f,%f\n", A.matrix_size, A.tile_size,
-              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, (double)gemm.values[0] / (double)l3_cache_size);
+      fprintf(file, "cholesky,potrf,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
+              potrf.mem_boundness, potrf.arithm_intensity, potrf.bmr, potrf.ilp, (double)potrf.values[0] / (double)l3_cache_size, potrf.weight);
+      fprintf(file, "cholesky,trsm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
+              trsm.mem_boundness, trsm.arithm_intensity, trsm.bmr, trsm.ilp, (double)trsm.values[0] / (double)l3_cache_size, trsm.weight);
+      fprintf(file, "cholesky,syrk,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
+              syrk.mem_boundness, syrk.arithm_intensity, syrk.bmr, syrk.ilp, (double)syrk.values[0] / (double)l3_cache_size, syrk.weight);
+      fprintf(file, "cholesky,gemm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
+              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, (double)gemm.values[0] / (double)l3_cache_size, gemm.weight);
 
       fclose(file);
     }
