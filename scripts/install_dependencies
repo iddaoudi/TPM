@@ -52,9 +52,11 @@ fi
 sudo apt install libcpufreq-dev -y
 sudo apt install cpufrequtils -y
 sudo apt install libpapi-dev -y
+sudo apt install papi-tools -y
 sudo apt install libzmq3-dev -y
 sudo apt install hwloc -y
 sudo apt install acpi-support acpid acpi -y
 cd TPM/
 
 echo "*** Done, now need to move from intel_pstate to ACPI!"
+echo "*** Then, perform a << echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid >> to enable PAPI counters!"
