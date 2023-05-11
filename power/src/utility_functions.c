@@ -64,7 +64,7 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
 
   if (!file_already_exists)
   {
-    fprintf(file, "algorithm, matrix_size, tile_size, case, PKG1, PKG2, DRAM1, DRAM2, time\n");
+    fprintf(file, "algorithm,matrix_size,tile_size,case,PKG1,PKG2,DRAM1,DRAM2,time\n");
   }
   // FIXME: assuming there is a maximum of 2 NUMA nodes
   uint64_t pkg_energy[2] = {0, 0};
@@ -76,7 +76,7 @@ void file_dump(char *algorithm, int matrix_size, int tile_size, int selected_cas
     dram_energy[counter] = dram_energy_finish[counter] - dram_energy_start[counter];
   }
 
-  fprintf(file, "%s, %d, %d, %d, %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %f\n",
+  fprintf(file, "%s,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
           algorithm, matrix_size, tile_size, selected_case, pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1], exec_time);
 
   fclose(file);
