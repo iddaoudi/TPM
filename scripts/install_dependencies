@@ -11,10 +11,6 @@ echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Update and upgrade OK"
 sudo apt install cmake -y
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CMake OK"
 
-# CLANG
-sudo apt install clang -y
-echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clang OK"
-
 # NUMACTL
 sudo apt install numactl -y
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Numactl OK"
@@ -31,7 +27,7 @@ else
     cd llvm-project
     mkdir build-openmp
     cd build-openmp
-    cmake ../openmp -G "Unix Makefiles" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release  -DOPENMP_ENABLE_LIBOMPTARGET=OFF -DLIBOMP_OMPT_OPTIONAL=ON -DCMAKE_INSTALL_PREFIX=.
+    cmake ../openmp -G "Unix Makefiles" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release  -DOPENMP_ENABLE_LIBOMPTARGET=OFF -DLIBOMP_OMPT_OPTIONAL=ON -DCMAKE_INSTALL_PREFIX=.
     make -j16
     make install
     cd
@@ -47,15 +43,18 @@ else
     git clone https://github.com/xianyi/OpenBLAS.git
     cd OpenBLAS
     mkdir build
-    make -j 12 USE_THREAD=1 NUM_BUFFERS=512 NUM_THREADS=512 CC=clang CXX=clang++
+    make -j 12 USE_THREAD=1 NUM_BUFFERS=512 NUM_THREADS=512 CC=gcc CXX=g++
     make PREFIX=build/ install
     cd
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> OpenBLAS OK"
 fi
 
-sudo apt install libcpufreq-dev
-sudo apt install cpufrequtils
-sudo apt install libpapi-dev
-sudo apt install libzmq3-dev
-sudo apt install hwloc
+sudo apt install libcpufreq-dev -y
+sudo apt install cpufrequtils -y
+sudo apt install libpapi-dev -y
+sudo apt install libzmq3-dev -y
+sudo apt install hwloc -y
+sudo apt install acpi-support acpid acpi -y
 cd TPM/
+
+echo "*** Done, now need to move from intel_pstate to ACPI!"
