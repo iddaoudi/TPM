@@ -47,7 +47,7 @@ int start_experiment()
   // Initialization
   int active_packages = rapl_init();
 
-  // Get current governor policy
+  // Store original governor policy
   char *original_governor = tpm_query_current_governor_policy(0);
 
   // Get all possible frequencies (in KHz) and all available governors
@@ -56,8 +56,13 @@ int start_experiment()
 
   int frequencies_vector_size =
       frequencies_vector_size_counter(frequencies_vector);
+  // Store original frequency
   // By default, the original frequency of every CPU is set to its maximum
   unsigned long original_frequency = frequencies_vector[0];
+  
+  // Change the governor
+  change_governor();
+  // Select the wanted frequency depending on user input
   unsigned long selected_frequency = select_frequency(
       target_frequency, frequencies_vector, frequencies_vector_size);
   if (frequencies_vector_size == 0 || original_frequency == 0 || selected_frequency == -1)
@@ -76,9 +81,7 @@ int start_experiment()
   uint64_t dram_energy_start[active_packages];
   uint64_t dram_energy_finish[active_packages];
 
-  // Change the governor
-  set_initial_governor_and_frequency();
-
+  
   while (1)
   {
     char task_and_cpu[TPM_STRING_SIZE];

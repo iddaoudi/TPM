@@ -25,7 +25,7 @@
 #include "exp_globals.h"
 #include "tpm_functions.h"
 
-void set_initial_governor_and_frequency()
+void change_governor()
 {
   for (int i = 0; i < MAX_CPUS; i++)
     tpm_set_governor_policy(i, input_governor);
@@ -82,6 +82,11 @@ int main(int argc, char *argv[])
   target_frequency = argv[3];    // mid or max for now FIXME
   selected_case = atoi(argv[4]); // combination to select
   algorithm = argv[5];
+
+  if (strcmp(input_governor, "userspace") != 0)
+  {
+  	printf("*** TPM Power: Warning: the selected governor is %s\n", input_governor);
+  }
 
   int ret = start_experiment();
   if (ret != 0)

@@ -31,7 +31,7 @@
 
 int start_experiment();
 
-void set_initial_governor_and_frequency();
+void change_governor();
 void handle_energy_measurement(int cpu, int active_packages, uint64_t *pkg_energy_start, uint64_t *pkg_energy_finish, uint64_t *dram_energy_start, uint64_t *dram_energy_finish);
 void restore_original_governor_and_frequency(char *original_governor, unsigned long original_frequency);
 
