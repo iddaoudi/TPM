@@ -187,10 +187,6 @@ def plot_multi():
     matrix_sizes = data['matrix_size'].unique()
     tile_sizes = data['tile_size'].unique()
     algorithm = data['algorithm'].unique()
-
-    activate_weights = 0
-    if activate_weights == 1:
-        weights = calculate_task_ratio(sys.argv[5])
     
     data['energy'] = data['PKG1'] + data['PKG2'] + data['DRAM1'] + data['DRAM2']
     data['time_energy_product'] = data['time'] * data['energy']
@@ -201,19 +197,10 @@ def plot_multi():
         fig.suptitle(f'Matrix Size: {matrix_size}')
 
         for index, tile_size in enumerate(tile_sizes):
-            if activate_weights == 1:
-                # task1 = syrk = a, task2 = potrf = b, task3 = trsm = c, task4 = gemm = d
-                a = weights.loc[(weights['matrix_size'] == matrix_size) & (weights['tile_size'] == tile_size), 'syrk'].values[0]
-                b = weights.loc[(weights['matrix_size'] == matrix_size) & (weights['tile_size'] == tile_size), 'potrf'].values[0]
-                c = weights.loc[(weights['matrix_size'] == matrix_size) & (weights['tile_size'] == tile_size), 'trsm'].values[0]
-                d = weights.loc[(weights['matrix_size'] == matrix_size) & (weights['tile_size'] == tile_size), 'gemm'].values[0]
-            else:
-                a = b = c = d = 1
-            
-            data['ai'] = a*data['task1_arithm_intensity'] + b*data['task2_arithm_intensity'] + c*data['task3_arithm_intensity'] + d*data['task4_arithm_intensity']
-            data['mb'] = a*data['task1_mem_boundness'] + b*data['task2_mem_boundness'] + c*data['task3_mem_boundness'] + d*data['task4_mem_boundness']
-            data['ilp'] = a*data['task1_ilp'] + b*data['task2_ilp'] + c*data['task3_ilp'] + d*data['task4_ilp']
-            data['cmr'] = a*data['task1_l3_cache_ratio'] + b*data['task2_l3_cache_ratio'] + c*data['task3_l3_cache_ratio'] + d*data['task4_l3_cache_ratio']
+            data['ai'] = data['task1_arithm_intensity'] + data['task2_arithm_intensity'] + data['task3_arithm_intensity'] + data['task4_arithm_intensity']
+            data['mb'] = data['task1_mem_boundness'] + data['task2_mem_boundness'] + data['task3_mem_boundness'] + data['task4_mem_boundness']
+            data['ilp'] = data['task1_ilp'] + data['task2_ilp'] + data['task3_ilp'] + data['task4_ilp']
+            data['cmr'] = data['task1_l3_cache_ratio'] + data['task2_l3_cache_ratio'] + data['task3_l3_cache_ratio'] + data['task4_l3_cache_ratio']
             data['sum'] = data['ai'] + data['mb'] + data['ilp'] + data['cmr']
             
             filtered_data = data[(data['matrix_size'] == matrix_size) & (data['tile_size'] == tile_size)]
