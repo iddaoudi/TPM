@@ -60,6 +60,8 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
         compute_derived_metrics(&total_counters[i]);
     }
 
+    int TPM_PAPI_FREQ = atoi(getenv("TPM_PAPI_FREQ"));
+
     // PAPI opens too much file descriptors without closing them
     int file_desc;
     for (file_desc = 3; file_desc < 1024; ++file_desc)
@@ -67,7 +69,7 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
         close(file_desc);
     }
 
-    char filename[50]; // adjust the size to fit your needs
+    char filename[TPM_STRING_SIZE];
     sprintf(filename, "counters_%s.csv", algorithm);
 
     FILE *file;
@@ -82,12 +84,12 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
         int first_char = fgetc(file);
         if (first_char == EOF)
         {
-            fprintf(file, "algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio,weight\n");
+            fprintf(file, "algorithm,task,matrix_size,tile_size,frequency,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio,weight\n");
         }
 
         for (int i = 0; i < num_tasks; i++)
         {
-            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size,
+            fprintf(file, "%s,%s,%d,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size, TPM_PAPI_FREQ,
                     total_counters[i].mem_boundness, total_counters[i].arithm_intensity, total_counters[i].bmr, total_counters[i].ilp,
                     (double)total_counters[i].values[0] / (double)l3_cache_size, total_counters[i].weight);
         }

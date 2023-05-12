@@ -43,8 +43,8 @@ long l3_cache_size;
 #define tpm_forward 391
 #define tpm_backward 392
 
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #include "cvector.h"
 #include "descriptor.h"
