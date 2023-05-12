@@ -39,7 +39,7 @@ void compute_derived_metrics(CounterData *data)
     data->weight = (int)data->values[6];
 }
 
-void accumulate_counters(CounterData *dst, CounterData src[], int available_threads)
+void accumulate_counters(CounterData *dst, CounterData *src, int available_threads)
 {
     memset(dst->values, 0, (NEVENTS + 1) * sizeof(long long));
     for (int i = 0; i < NEVENTS + 1; i++)
@@ -89,7 +89,7 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
 
         for (int i = 0; i < num_tasks; i++)
         {
-            fprintf(file, "%s,%s,%d,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size, TPM_PAPI_FREQ,
+            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size,
                     total_counters[i].mem_boundness, total_counters[i].arithm_intensity, total_counters[i].bmr, total_counters[i].ilp,
                     (double)total_counters[i].values[0] / (double)l3_cache_size, total_counters[i].weight);
         }
