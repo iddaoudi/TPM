@@ -39,19 +39,7 @@ void compute_derived_metrics(CounterData *data)
     data->weight = (int)data->values[6];
 }
 
-void accumulate_counters(long long dst[], long long src[][NEVENTS + 1], int available_threads)
-{
-    memset(dst, 0, (NEVENTS + 1) * sizeof(long long));
-    for (int i = 0; i < NEVENTS + 1; i++)
-    {
-        for (int j = 0; j < available_threads; j++)
-        {
-            dst[i] += src[j][i];
-        }
-    }
-}
-
-void accumulate_counters2(CounterData *dst, CounterData src[], int available_threads)
+void accumulate_counters(CounterData *dst, CounterData src[], int available_threads)
 {
     memset(dst->values, 0, (NEVENTS + 1) * sizeof(long long));
     for (int i = 0; i < NEVENTS + 1; i++)
