@@ -83,7 +83,9 @@ int main(int argc, char *argv[])
   selected_case = atoi(argv[4]); // combination to select
   algorithm = argv[5];
 
-  if (strcmp(input_governor, "userspace") != 0)
+  // Based on the experiences made, it appears that the userspace governor isn't allowing any frequency scaling in real time, when the ondemand governor does.
+  // This requires further investigation that we are postponing for now. (something related to the ACPI driver configuration?)
+  if (strcmp(input_governor, "ondemand") != 0)
   {
   	printf("*** TPM Power: Warning: the selected governor is %s\n", input_governor);
   }
