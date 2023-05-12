@@ -83,11 +83,11 @@ for algorithm in ${algo[*]}; do
 								if [[ $papi_frequency = "min" ]]; then
 									lowest_freq=$(cpufreq-info -l | awk '{print $1}')
 									export PAPI_FREQ=$lowest_freq
-									cpufreq-set -c 0 -u $lowest_freq
+									sudo cpufreq-set -c 0 -u $lowest_freq
 								else
 									highest_freq=$(cpufreq-info -l | awk '{print $2}')
 									export PAPI_FREQ=$highest_freq
-									cpufreq-set -c 0 -u $highest_freq
+									sudo cpufreq-set -c 0 -u $highest_freq
 								fi
 								LD_PRELOAD=$omp_so numactl --physcpubind=0 --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 							done
