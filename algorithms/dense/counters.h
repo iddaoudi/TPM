@@ -60,6 +60,7 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
         compute_derived_metrics(&total_counters[i]);
     }
 
+    int TPM_ITER = atoi(getenv("TPM_ITER"));
     int TPM_PAPI_FREQ = atoi(getenv("TPM_PAPI_FREQ"));
 
     // PAPI opens too much file descriptors without closing them
@@ -70,7 +71,7 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
     }
 
     char filename[TPM_STRING_SIZE];
-    sprintf(filename, "counters_%s.csv", algorithm);
+    sprintf(filename, "counters_%s_%d.csv", algorithm, TPM_ITER);
 
     FILE *file;
     if ((file = fopen(filename, "a+")) == NULL)
