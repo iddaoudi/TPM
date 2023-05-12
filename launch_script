@@ -90,6 +90,11 @@ for algorithm in ${algo[*]}; do
 									sudo cpufreq-set -c 0 -u $highest_freq
 								fi
 								LD_PRELOAD=$omp_so numactl --physcpubind=0 --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
+								# Put back the default max frequency, which is the highest possible
+								if [[ $papi_frequency = "min" ]]; then
+									highest_freq=$(cpufreq-info -l | awk '{print $2}')
+									sudo cpufreq-set -c 0 -u $highest_freq
+								fi
 							done
 						# TRACE runs: according to the NUMA nodes
 						elif [[ ${TPM_TRACE} -eq 1 ]]; then
