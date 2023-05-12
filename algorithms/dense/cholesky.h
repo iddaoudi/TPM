@@ -321,9 +321,9 @@ void cholesky(tpm_desc A)
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
-    const char *tasks[] = {"potrf", "trsm", "syrk", "gemm"};
-    CounterData counters[] = {potrf, trsm, syrk, gemm};
-    int num_tasks = sizeof(tasks) / sizeof(tasks[0]);
-    dump_counters("cholesky", tasks, counters, num_tasks, A.matrix_size, A.tile_size, available_threads);
+    const char *task_names[] = {"potrf", "trsm", "syrk", "gemm"};
+    CounterData *counters[] = {potrf, trsm, syrk, gemm};
+    int num_tasks = sizeof(task_names) / sizeof(task_names[0]); // This gives the length of the tasks array
+    dump_counters("cholesky", task_names, counters, num_tasks, A.matrix_size, A.tile_size, l3_cache_size, available_threads);
   }
 }

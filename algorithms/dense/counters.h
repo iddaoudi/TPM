@@ -51,12 +51,12 @@ void accumulate_counters(CounterData *dst, CounterData src[], int available_thre
     }
 }
 
-void dump_counters(const char *algorithm, const char *tasks[], CounterData counters[], int num_tasks, int matrix_size, int tile_size, int available_threads)
+void dump_counters(const char *algorithm, const char *task_names[], CounterData *counters[], int num_tasks, int matrix_size, int tile_size, double l3_cache_size, int available_threads)
 {
     CounterData *total_counters = malloc(num_tasks * sizeof(CounterData));
     for (int i = 0; i < num_tasks; i++)
     {
-        accumulate_counters(&total_counters[i], &counters[i], available_threads);
+        accumulate_counters(&total_counters[i], counters[i], available_threads);
         compute_derived_metrics(&total_counters[i]);
     }
 
@@ -87,7 +87,7 @@ void dump_counters(const char *algorithm, const char *tasks[], CounterData count
 
         for (int i = 0; i < num_tasks; i++)
         {
-            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, tasks[i], matrix_size, tile_size,
+            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size,
                     total_counters[i].mem_boundness, total_counters[i].arithm_intensity, total_counters[i].bmr, total_counters[i].ilp,
                     (double)total_counters[i].values[0] / (double)l3_cache_size, total_counters[i].weight);
         }
