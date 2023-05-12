@@ -321,50 +321,9 @@ void cholesky(tpm_desc A)
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
-    CounterData total_potrf, total_trsm, total_syrk, total_gemm;
-
-    accumulate_counters(&total_potrf, potrf, available_threads);
-    accumulate_counters(&total_trsm, trsm, available_threads);
-    accumulate_counters(&total_syrk, syrk, available_threads);
-    accumulate_counters(&total_gemm, gemm, available_threads);
-
-    compute_derived_metrics(&total_potrf);
-    compute_derived_metrics(&total_trsm);
-    compute_derived_metrics(&total_syrk);
-    compute_derived_metrics(&total_gemm);
-
-    // PAPI opens too much file descriptors without closing them
-    int file_desc;
-    for (file_desc = 3; file_desc < 1024; ++file_desc)
-    {
-      close(file_desc);
-    }
-
-    FILE *file;
-    if ((file = fopen("counters_cholesky.csv", "a+")) == NULL)
-    {
-      perror("fopen failed");
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      fseek(file, 0, SEEK_SET);
-      int first_char = fgetc(file);
-      if (first_char == EOF)
-      {
-        fprintf(file, "algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio,weight\n");
-      }
-
-      fprintf(file, "cholesky,potrf,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              total_potrf.mem_boundness, total_potrf.arithm_intensity, total_potrf.bmr, total_potrf.ilp, (double)total_potrf.values[0] / (double)l3_cache_size, total_potrf.weight);
-      fprintf(file, "cholesky,trsm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              total_trsm.mem_boundness, total_trsm.arithm_intensity, total_trsm.bmr, total_trsm.ilp, (double)total_trsm.values[0] / (double)l3_cache_size, total_trsm.weight);
-      fprintf(file, "cholesky,syrk,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              total_syrk.mem_boundness, total_syrk.arithm_intensity, total_syrk.bmr, total_syrk.ilp, (double)total_syrk.values[0] / (double)l3_cache_size, total_syrk.weight);
-      fprintf(file, "cholesky,gemm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              total_gemm.mem_boundness, total_gemm.arithm_intensity, total_gemm.bmr, total_gemm.ilp, (double)total_gemm.values[0] / (double)l3_cache_size, total_gemm.weight);
-
-      fclose(file);
-    }
+    const char *tasks[] = {"potrf", "trsm", "syrk", "gemm"};
+    CounterData counters[] = {potrf, trsm, syrk, gemm};
+    int num_tasks = sizeof(tasks) / sizeof(tasks[0]);
+    dump_counters("cholesky", tasks, counters, num_tasks, A.matrix_size, A.tile_size, available_threads);
   }
 }

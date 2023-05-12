@@ -50,3 +50,49 @@ void accumulate_counters(CounterData *dst, CounterData src[], int available_thre
         }
     }
 }
+
+void dump_counters(const char *algorithm, const char *tasks[], CounterData counters[], int num_tasks, int matrix_size, int tile_size, int available_threads)
+{
+    CounterData *total_counters = malloc(num_tasks * sizeof(CounterData));
+    for (int i = 0; i < num_tasks; i++)
+    {
+        accumulate_counters(&total_counters[i], &counters[i], available_threads);
+        compute_derived_metrics(&total_counters[i]);
+    }
+
+    // PAPI opens too much file descriptors without closing them
+    int file_desc;
+    for (file_desc = 3; file_desc < 1024; ++file_desc)
+    {
+        close(file_desc);
+    }
+
+    char filename[50]; // adjust the size to fit your needs
+    sprintf(filename, "counters_%s.csv", algorithm);
+
+    FILE *file;
+    if ((file = fopen(filename, "a+")) == NULL)
+    {
+        perror("fopen failed");
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        fseek(file, 0, SEEK_SET);
+        int first_char = fgetc(file);
+        if (first_char == EOF)
+        {
+            fprintf(file, "algorithm,task,matrix_size,tile_size,mem_boundness,arithm_intensity,bmr,ilp,l3_cache_ratio,weight\n");
+        }
+
+        for (int i = 0; i < num_tasks; i++)
+        {
+            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, tasks[i], matrix_size, tile_size,
+                    total_counters[i].mem_boundness, total_counters[i].arithm_intensity, total_counters[i].bmr, total_counters[i].ilp,
+                    (double)total_counters[i].values[0] / (double)l3_cache_size, total_counters[i].weight);
+        }
+
+        fclose(file);
+    }
+    free(total_counters);
+}
