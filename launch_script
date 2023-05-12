@@ -4,13 +4,13 @@ ROOT=
 
 ###################################################### Parameters
 algo=(cholesky)
-msize=(2048)
-bsize=(512)
-threads=16
+msize=(16384 24576 32768)
+bsize=(512 1024 2048)
+threads=32
 numa=16
-export TPM_PAPI=0
-export TPM_TRACE=1
-export TPM_POWER=1
+export TPM_PAPI=1
+export TPM_TRACE=0
+export TPM_POWER=0
 
 frequency=min
 governor=ondemand
@@ -22,8 +22,8 @@ if [[ ${TPM_TRACE} -eq 1 ]]
 then
     cd trace && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile libtpm_trace.so && cmake . && make clean && make -s && cd -
     echo "*** TPM bash log: Trace OK"
-	targets=("9") # "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
-	iteration=("1") # "2" "3")
+	targets=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
+	iteration=("1" "2" "3")
 else
 	threads=1
 	targets=("1")
@@ -74,7 +74,7 @@ do
 					    then
 							sudo -E power/tpm_server $thread $governor $frequency $target ${algo} &
 	                        sleep 1
-                            echo "*** TPM bash log: power socket launched"
+                            echo "*** TPM bash log: Power socket launched"
 						fi
 
 					    # Launch runs
