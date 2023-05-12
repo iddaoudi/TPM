@@ -89,7 +89,7 @@ void dump_counters(const char *algorithm, const char *task_names[], CounterData 
 
         for (int i = 0; i < num_tasks; i++)
         {
-            fprintf(file, "%s,%s,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size,
+            fprintf(file, "%s,%s,%d,%d,%d,%f,%f,%f,%f,%f,%d\n", algorithm, task_names[i], matrix_size, tile_size, TPM_PAPI_FREQ,
                     total_counters[i].mem_boundness, total_counters[i].arithm_intensity, total_counters[i].bmr, total_counters[i].ilp,
                     (double)total_counters[i].values[0] / (double)l3_cache_size, total_counters[i].weight);
         }
