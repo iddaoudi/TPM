@@ -45,10 +45,10 @@ void cholesky(tpm_desc A)
 
     for (int i = 0; i < available_threads; i++)
     {
-      memset(potrf[i].values, 0, (NEVENTS + 1) * sizeof(long long));
-      memset(trsm[i].values, 0, (NEVENTS + 1) * sizeof(long long));
-      memset(syrk[i].values, 0, (NEVENTS + 1) * sizeof(long long));
-      memset(gemm[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(potrf2[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(trsm2[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(syrk2[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(gemm2[i].values, 0, (NEVENTS + 1) * sizeof(long long));
     }
     memset(values_by_thread_potrf, 0, available_threads * sizeof(long long[NEVENTS + 1]));
     memset(values_by_thread_trsm, 0, available_threads * sizeof(long long[NEVENTS + 1]));
