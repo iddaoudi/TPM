@@ -2,18 +2,19 @@
 
 ROOT=
 
-###################################################### Parameters
+###################################################### Parameters to modify
 algo=(cholesky)
 msize=(16384 24576 32768)
 bsize=(512 1024 2048)
-threads=32
-numa=16
-export TPM_PAPI=1
-export TPM_TRACE=0
-export TPM_POWER=0
-
-frequency=min
+threads=(24)
+numa=12
+export TPM_PAPI=0
+export TPM_TRACE=1
+export TPM_POWER=1
+testing=1
+###################################################### Parameters to not modify
 governor=ondemand
+frequency=min
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 export OPENBLAS_NUM_THREADS=1
@@ -24,8 +25,18 @@ then
     echo "*** TPM bash log: Trace OK"
 	targets=("1" "2" "3" "4" "5" "6" "7" "8" "9" "10" "11" "12" "13" "14" "15" "16")
 	iteration=("1" "2" "3")
-else
+fi
+if [[ ${TPM_PAPI} -eq 1 ]]
+then
 	threads=1
+	targets=("1")
+	iteration=("1")
+fi
+###################################################### Testing parameters
+if [[ $testing -eq 1 ]]
+then
+	msize=(16384)
+	bsize=(512)
 	targets=("1")
 	iteration=("1")
 fi
@@ -64,6 +75,7 @@ do
                         then
                             targets=("1" "2" "3" "4" "5" "6" "7" "8")
                         fi
+    					ulimit -s unlimited
 						if [[ "$algorithm" == "qr" ]];
 						then
     						ulimit -s unlimited
@@ -73,11 +85,12 @@ do
 					    if [[ ${TPM_POWER} -eq 1 ]]
 					    then
 							sudo -E power/tpm_server $thread $governor $frequency $target ${algo} &
-	                        sleep 1
+	                        sleep 0.5
                             echo "*** TPM bash log: Power socket launched"
 						fi
 
 					    # Launch runs
+						# If using all core, membind to both NUMA domains
 					    if [[ $thread -gt $numa ]]
 					    then
 					    	if [[ ${TPM_TRACE} -eq 1 ]]
@@ -86,6 +99,7 @@ do
                             else
 					    		LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 					    	fi
+						# Otherwise, bind to NUMA domain 0
 					    else
 					    	if [[ ${TPM_TRACE} -eq 1 ]]
 					    	then
