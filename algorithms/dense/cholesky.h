@@ -321,17 +321,17 @@ void cholesky(tpm_desc A)
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
-    CounterData final_potrf, final_trsm, final_syrk, final_gemm;
+    CounterData total_potrf, total_trsm, total_syrk, total_gemm;
 
-    accumulate_counters(&final_potrf, potrf, available_threads);
-    accumulate_counters(&final_trsm, trsm, available_threads);
-    accumulate_counters(&final_syrk, syrk, available_threads);
-    accumulate_counters(&final_gemm, gemm, available_threads);
+    accumulate_counters(&total_potrf, potrf, available_threads);
+    accumulate_counters(&total_trsm, trsm, available_threads);
+    accumulate_counters(&total_syrk, syrk, available_threads);
+    accumulate_counters(&total_gemm, gemm, available_threads);
 
-    compute_derived_metrics(&final_potrf);
-    compute_derived_metrics(&final_trsm);
-    compute_derived_metrics(&final_syrk);
-    compute_derived_metrics(&final_gemm);
+    compute_derived_metrics(&total_potrf);
+    compute_derived_metrics(&total_trsm);
+    compute_derived_metrics(&total_syrk);
+    compute_derived_metrics(&total_gemm);
 
     // PAPI opens too much file descriptors without closing them
     int file_desc;
@@ -356,13 +356,13 @@ void cholesky(tpm_desc A)
       }
 
       fprintf(file, "cholesky,potrf,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              final_potrf.mem_boundness, final_potrf.arithm_intensity, final_potrf.bmr, final_potrf.ilp, (double)final_potrf.values[0] / (double)l3_cache_size, final_potrf.weight);
+              total_potrf.mem_boundness, total_potrf.arithm_intensity, total_potrf.bmr, total_potrf.ilp, (double)total_potrf.values[0] / (double)l3_cache_size, total_potrf.weight);
       fprintf(file, "cholesky,trsm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              final_trsm.mem_boundness, final_trsm.arithm_intensity, final_trsm.bmr, final_trsm.ilp, (double)final_trsm.values[0] / (double)l3_cache_size, final_trsm.weight);
+              total_trsm.mem_boundness, total_trsm.arithm_intensity, total_trsm.bmr, total_trsm.ilp, (double)total_trsm.values[0] / (double)l3_cache_size, total_trsm.weight);
       fprintf(file, "cholesky,syrk,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              final_syrk.mem_boundness, final_syrk.arithm_intensity, final_syrk.bmr, final_syrk.ilp, (double)final_syrk.values[0] / (double)l3_cache_size, final_syrk.weight);
+              total_syrk.mem_boundness, total_syrk.arithm_intensity, total_syrk.bmr, total_syrk.ilp, (double)total_syrk.values[0] / (double)l3_cache_size, total_syrk.weight);
       fprintf(file, "cholesky,gemm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
-              final_gemm.mem_boundness, final_gemm.arithm_intensity, final_gemm.bmr, final_gemm.ilp, (double)final_gemm.values[0] / (double)l3_cache_size, final_gemm.weight);
+              total_gemm.mem_boundness, total_gemm.arithm_intensity, total_gemm.bmr, total_gemm.ilp, (double)total_gemm.values[0] / (double)l3_cache_size, total_gemm.weight);
 
       fclose(file);
     }
