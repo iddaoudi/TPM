@@ -29,14 +29,14 @@ fi
 if [[ ${TPM_PAPI} -eq 1 ]]; then
 	threads=1
 	targets=("1")
-	iteration=("1")
+	iteration=({1..3})
 fi
 ###################################################### Testing parameters
 if [[ $testing -eq 1 ]]; then
-	msize=(8192)
-	bsize=(512)
+	msize=(2048 4096)
+	bsize=(256 512)
 	targets=("1")
-	iteration=("1")
+	iteration=({1..1})
 fi
 ###################################################### Power
 if [[ ${TPM_POWER} -eq 1 ]]; then
@@ -57,7 +57,6 @@ for algorithm in ${algo[*]}; do
 			for tile in ${bsize[*]}; do
 				for iter in ${iteration[*]}; do
 					for target in ${targets[*]}; do
-						echo "*** TPM bash log: n" $iter "Launching" $algorithm $matrix $tile $thread "for case" $target
 
 						export TPM_ITER=$iter
 						export OMP_NUM_THREADS=$thread
@@ -79,6 +78,7 @@ for algorithm in ${algo[*]}; do
 
 						# PAPI runs: according to the frequency
 						if [[ $TPM_PAPI -eq 1 ]]; then
+							echo "*** TPM bash log: PAPI counters -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter
 							for papi_frequency in ${papi_frequencies[*]}; do
 								if [[ $papi_frequency = "min" ]]; then
 									lowest_freq=$(cpufreq-info -l | awk '{print $1}')
@@ -96,22 +96,26 @@ for algorithm in ${algo[*]}; do
 									sudo cpufreq-set -c 0 -u $highest_freq
 								fi
 							done
+							echo "*** TPM bash log: PAPI counters -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter "done"
 						# TRACE runs: according to the NUMA nodes
 						elif [[ ${TPM_TRACE} -eq 1 ]]; then
+							echo "*** TPM bash log: Power -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter
 							if [[ $thread -gt $numa ]]; then
 								LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 							else
 								LD_PRELOAD=$omp_so:$trace_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 							fi
+							echo "*** TPM bash log: Power -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter "done"
 						# STANDARD runs: according to the NUMA nodes
 						else
+							echo "*** TPM bash log: Default -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter
 							if [[ $thread -gt $numa ]]; then
 								LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0,1 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 							else
 								LD_PRELOAD=$omp_so numactl --physcpubind=0-$(expr $thread - 1) --membind=0 algorithms/tpm_benchmark -a $algorithm -m $matrix -b $tile
 							fi
+							echo "*** TPM bash log: Default -" $algorithm $matrix $tile $thread "for case" $target "iteration" $iter "done"
 						fi
-						echo "*** TPM bash log: n" $iter "Launching" $algorithm $matrix $tile $thread "for case" $target "done"
 					done
 				done
 			done
