@@ -364,7 +364,7 @@ void cholesky(tpm_desc A)
       fprintf(file, "cholesky,gemm,%d,%d,%f,%f,%f,%f,%f,%d\n", A.matrix_size, A.tile_size,
               final_gemm.mem_boundness, final_gemm.arithm_intensity, final_gemm.bmr, final_gemm.ilp, (double)final_gemm.values[0] / (double)l3_cache_size, final_gemm.weight);
 
-      fclose(file2);
+      fclose(file);
     }
   }
 }
