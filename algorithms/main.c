@@ -19,19 +19,6 @@
 #include "common.h"
 #include "utils.h"
 
-void print_matrix(double *A, int size)
-{
-  for (int i = 0; i < size; i++)
-  {
-    for (int j = 0; j < size; j++)
-    {
-      printf("%lf\t", A[i * size + j]);
-    }
-    printf("\n");
-  }
-  printf("\n");
-}
-
 typedef enum
 {
   ALGO_CHOLESKY,
