@@ -64,7 +64,7 @@ for algorithm in ${algo[*]}; do
 						if [[ "$algorithm" == "lu" ]]; then
 							targets=("1" "2" "3" "4" "5" "6" "7" "8")
 						fi
-						ulimit -s unlimited
+
 						if [[ "$algorithm" == "qr" ]]; then
 							ulimit -s unlimited
 						fi
