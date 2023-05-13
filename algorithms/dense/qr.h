@@ -36,6 +36,7 @@ void qr(tpm_desc A, tpm_desc S)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
     int ret = PAPI_create_eventset(&eventset);
+    PAPI_add_events(eventset, events, NEVENTS);
 
     for (int i = 0; i < available_threads; i++)
     {
