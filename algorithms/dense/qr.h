@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  26/03/2023
+ *       Revision:  13/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -26,20 +26,24 @@ void qr(tpm_desc A, tpm_desc S)
   long long values[NEVENTS];
   const int available_threads = omp_get_max_threads();
 
-  long long(*values_by_thread_geqrt)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_ormqr)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_tsqrt)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_tsmqr)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  // NEVENTS + 1 for the task weights
+  CounterData *geqrt = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *ormqr = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *tsqrt = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *tsmqr = (CounterData *)malloc(available_threads * sizeof(CounterData));
 
   if (TPM_PAPI)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
     int ret = PAPI_create_eventset(&eventset);
-    PAPI_add_events(eventset, events, NEVENTS);
-    memset(values_by_thread_geqrt, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_ormqr, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_tsqrt, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_tsmqr, 0, available_threads * sizeof(long long[NEVENTS]));
+
+    for (int i = 0; i < available_threads; i++)
+    {
+      memset(geqrt[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(ormqr[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(tsqrt[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(tsmqr[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+    }
   }
 
   // TPM library: initialization
@@ -60,9 +64,8 @@ void qr(tpm_desc A, tpm_desc S)
       tpm_upstream_set_task_name(name_with_id_char);
     }
 
-#pragma omp task firstprivate(name_with_id_char) depend(inout                                             \
-                                                        : tileA [0:S.tile_size * S.tile_size]) depend(out \
-                                                                                                      : tileS [0:A.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) \
+    depend(inout : tileA[0 : S.tile_size * S.tile_size]) depend(out : tileS[0 : A.tile_size * S.tile_size])
     {
       double tho[S.tile_size];
       double work[S.tile_size * S.tile_size];
@@ -103,8 +106,9 @@ void qr(tpm_desc A, tpm_desc S)
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
         {
-          values_by_thread_geqrt[omp_get_thread_num()][i] += values[i];
+          geqrt[omp_get_thread_num()].values[i] += values[i];
         }
+        geqrt[omp_get_thread_num()].values[NEVENTS]++;
       }
       else if (TPM_TRACE)
       {
@@ -126,9 +130,7 @@ void qr(tpm_desc A, tpm_desc S)
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task firstprivate(name_with_id_char) depend(in                                                                                       \
-                                                        : tileA [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size]) depend(inout \
-                                                                                                                                           : tileB [0:S.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(in : tileA[0 : S.tile_size * S.tile_size], tileS[0 : A.tile_size * S.tile_size]) depend(inout : tileB[0 : S.tile_size * S.tile_size])
         {
           double work[S.tile_size * S.tile_size];
 
@@ -169,8 +171,9 @@ void qr(tpm_desc A, tpm_desc S)
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-              values_by_thread_ormqr[omp_get_thread_num()][i] += values[i];
+              ormqr[omp_get_thread_num()].values[i] += values[i];
             }
+            ormqr[omp_get_thread_num()].values[NEVENTS]++;
           }
           else if (TPM_TRACE)
           {
@@ -194,9 +197,7 @@ void qr(tpm_desc A, tpm_desc S)
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task firstprivate(name_with_id_char) depend(inout                                                                                  \
-                                                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(out \
-                                                                                                                                           : tileS [0:S.tile_size * A.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(inout : tileA[0 : S.tile_size * S.tile_size], tileB[0 : S.tile_size * S.tile_size]) depend(out : tileS[0 : S.tile_size * A.tile_size])
         {
           double work[S.tile_size * S.tile_size];
           double tho[S.tile_size];
@@ -237,8 +238,9 @@ void qr(tpm_desc A, tpm_desc S)
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-              values_by_thread_tsqrt[omp_get_thread_num()][i] += values[i];
+              tsqrt[omp_get_thread_num()].values[i] += values[i];
             }
+            tsqrt[omp_get_thread_num()].values[NEVENTS]++;
           }
           else if (TPM_TRACE)
           {
@@ -262,9 +264,7 @@ void qr(tpm_desc A, tpm_desc S)
             tpm_upstream_set_task_name(name_with_id_char);
           }
 
-#pragma omp task firstprivate(name_with_id_char) depend(inout                                                                                 \
-                                                        : tileA [0:S.tile_size * S.tile_size], tileB [0:S.tile_size * S.tile_size]) depend(in \
-                                                                                                                                           : tileC [0:S.tile_size * S.tile_size], tileS [0:A.tile_size * S.tile_size])
+#pragma omp task firstprivate(name_with_id_char) depend(inout : tileA[0 : S.tile_size * S.tile_size], tileB[0 : S.tile_size * S.tile_size]) depend(in : tileC[0 : S.tile_size * S.tile_size], tileS[0 : A.tile_size * S.tile_size])
           {
             double work[S.tile_size * S.tile_size];
 
@@ -306,8 +306,9 @@ void qr(tpm_desc A, tpm_desc S)
               // Accumulate events values
               for (int i = 0; i < NEVENTS; i++)
               {
-                values_by_thread_tsmqr[omp_get_thread_num()][i] += values[i];
+                tsmqr[omp_get_thread_num()].values[i] += values[i];
               }
+              tsmqr[omp_get_thread_num()].values[NEVENTS]++;
             }
             else if (TPM_TRACE)
             {
@@ -327,55 +328,8 @@ void qr(tpm_desc A, tpm_desc S)
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
-    CounterData geqrt, ormqr, tsqrt, tsmqr;
-
-    accumulate_counters(geqrt.values, values_by_thread_geqrt, available_threads);
-    accumulate_counters(ormqr.values, values_by_thread_ormqr, available_threads);
-    accumulate_counters(tsqrt.values, values_by_thread_tsqrt, available_threads);
-    accumulate_counters(tsmqr.values, values_by_thread_tsmqr, available_threads);
-
-    compute_derived_metrics(&geqrt);
-    compute_derived_metrics(&ormqr);
-    compute_derived_metrics(&tsqrt);
-    compute_derived_metrics(&tsmqr);
-
-    // PAPI opens too much file descriptors without closing them
-    int file_desc;
-    for (file_desc = 3; file_desc < 1024; ++file_desc)
-    {
-      close(file_desc);
-    }
-
-    FILE *file;
-    if ((file = fopen("counters_qr.csv", "a+")) == NULL)
-    {
-      perror("fopen failed");
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      fseek(file, 0, SEEK_SET);
-      int first_char = fgetc(file);
-      if (first_char == EOF)
-      {
-        fprintf(file, "algorithm, task, matrix_size, tile_size, mem_boundness, arithm_intensity, bmr, ilp, l3_cache_ratio\n");
-      }
-
-      fprintf(file, "qr, geqrt, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              geqrt.mem_boundness, geqrt.arithm_intensity, geqrt.bmr, geqrt.ilp, (double)geqrt.values[0] / (double)l3_cache_size);
-      fprintf(file, "qr, ormqr, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              ormqr.mem_boundness, ormqr.arithm_intensity, ormqr.bmr, ormqr.ilp, (double)ormqr.values[0] / (double)l3_cache_size);
-      fprintf(file, "qr, tsqrt, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              tsqrt.mem_boundness, tsqrt.arithm_intensity, tsqrt.bmr, tsqrt.ilp, (double)tsqrt.values[0] / (double)l3_cache_size);
-      fprintf(file, "qr, tsmqr, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              tsmqr.mem_boundness, tsmqr.arithm_intensity, tsmqr.bmr, tsmqr.ilp, (double)tsmqr.values[0] / (double)l3_cache_size);
-
-      fclose(file);
-    }
+    const char *task_names[] = {"geqrt", "ormqr", "tsqrt", "tsmqr"};
+    CounterData *counters[] = {geqrt, ormqr, tsqrt, tsmqr};
+    int num_tasks = sizeof(task_names) / sizeof(task_names[0]); // This gives the length of the tasks array
+    dump_counters("qr", task_names, counters, num_tasks, A.matrix_size, A.tile_size, l3_cache_size, available_threads);
   }
-
-  free(values_by_thread_geqrt);
-  free(values_by_thread_ormqr);
-  free(values_by_thread_tsqrt);
-  free(values_by_thread_tsmqr);
-}

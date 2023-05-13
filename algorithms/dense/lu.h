@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  26/03/2023
+ *       Revision:  13/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -26,20 +26,25 @@ void lu(tpm_desc A)
   long long values[NEVENTS];
   const int available_threads = omp_get_max_threads();
 
-  long long(*values_by_thread_getrf)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_trsm1)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_trsm2)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
-  long long(*values_by_thread_gemm)[NEVENTS] = malloc(available_threads * sizeof(long long[NEVENTS]));
+  // NEVENTS + 1 for the task weights
+  CounterData *getrf = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *trsm1 = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *trsm2 = (CounterData *)malloc(available_threads * sizeof(CounterData));
+  CounterData *gemm = (CounterData *)malloc(available_threads * sizeof(CounterData));
 
   if (TPM_PAPI)
   {
     int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
     int ret = PAPI_create_eventset(&eventset);
     PAPI_add_events(eventset, events, NEVENTS);
-    memset(values_by_thread_getrf, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_trsm1, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_trsm2, 0, available_threads * sizeof(long long[NEVENTS]));
-    memset(values_by_thread_gemm, 0, available_threads * sizeof(long long[NEVENTS]));
+
+    for (int i = 0; i < available_threads; i++)
+    {
+      memset(getrf[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(trsm1[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(trsm2[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+      memset(gemm[i].values, 0, (NEVENTS + 1) * sizeof(long long));
+    }
   }
 
   // TPM library: initialization
@@ -59,8 +64,7 @@ void lu(tpm_desc A)
       tpm_upstream_set_task_name(name_with_id_char);
     }
 
-#pragma omp task depend(inout \
-                        : tileA[0])
+#pragma omp task depend(inout : tileA[0])
     {
       if (TPM_PAPI)
       {
@@ -97,8 +101,9 @@ void lu(tpm_desc A)
         // Accumulate events values
         for (int i = 0; i < NEVENTS; i++)
         {
-          values_by_thread_getrf[omp_get_thread_num()][i] += values[i];
+          getrf[omp_get_thread_num()].values[i] += values[i];
         }
+        getrf[omp_get_thread_num()].values[NEVENTS]++;
       }
       else if (TPM_TRACE)
       {
@@ -120,10 +125,8 @@ void lu(tpm_desc A)
         tpm_upstream_set_task_name(name_with_id_char);
       }
 
-#pragma omp task depend(in                                     \
-                        : tileA [0:A.tile_size * A.tile_size]) \
-    depend(inout                                               \
-           : tileB[A.tile_size * A.tile_size])
+#pragma omp task depend(in : tileA[0 : A.tile_size * A.tile_size]) \
+    depend(inout : tileB[A.tile_size * A.tile_size])
       {
         if (TPM_PAPI)
         {
@@ -162,8 +165,9 @@ void lu(tpm_desc A)
           // Accumulate events values
           for (int i = 0; i < NEVENTS; i++)
           {
-            values_by_thread_trsm1[omp_get_thread_num()][i] += values[i];
+            trsm1[omp_get_thread_num()].values[i] += values[i];
           }
+          trsm1[omp_get_thread_num()].values[NEVENTS]++;
         }
         else if (TPM_TRACE)
         {
@@ -186,10 +190,8 @@ void lu(tpm_desc A)
         tpm_upstream_set_task_name(name_with_id_char);
       }
 
-#pragma omp task depend(in                                     \
-                        : tileA [0:A.tile_size * A.tile_size]) \
-    depend(inout                                               \
-           : tileB[A.tile_size * A.tile_size])
+#pragma omp task depend(in : tileA[0 : A.tile_size * A.tile_size]) \
+    depend(inout : tileB[A.tile_size * A.tile_size])
       {
         if (TPM_PAPI)
         {
@@ -228,8 +230,9 @@ void lu(tpm_desc A)
           // Accumulate events values
           for (int i = 0; i < NEVENTS; i++)
           {
-            values_by_thread_trsm2[omp_get_thread_num()][i] += values[i];
+            trsm2[omp_get_thread_num()].values[i] += values[i];
           }
+          trsm2[omp_get_thread_num()].values[NEVENTS]++;
         }
         else if (TPM_TRACE)
         {
@@ -252,11 +255,9 @@ void lu(tpm_desc A)
           tpm_upstream_set_task_name(name_with_id_char);
         }
 
-#pragma omp task depend(in                                     \
-                        : tileA [0:A.tile_size * A.tile_size], \
-                          tileB [0:A.tile_size * A.tile_size]) \
-    depend(inout                                               \
-           : tileC [0:A.tile_size * A.tile_size])
+#pragma omp task depend(in : tileA[0 : A.tile_size * A.tile_size], \
+                            tileB[0 : A.tile_size * A.tile_size])  \
+    depend(inout : tileC[0 : A.tile_size * A.tile_size])
         {
           if (TPM_PAPI)
           {
@@ -295,8 +296,9 @@ void lu(tpm_desc A)
             // Accumulate events values
             for (int i = 0; i < NEVENTS; i++)
             {
-              values_by_thread_gemm[omp_get_thread_num()][i] += values[i];
+              gemm[omp_get_thread_num()].values[i] += values[i];
             }
+            gemm[omp_get_thread_num()].values[NEVENTS]++;
           }
           else if (TPM_TRACE)
           {
@@ -315,55 +317,8 @@ void lu(tpm_desc A)
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
-    CounterData getrf, trsm1, trsm2, gemm;
-
-    accumulate_counters(getrf.values, values_by_thread_getrf, available_threads);
-    accumulate_counters(trsm1.values, values_by_thread_trsm1, available_threads);
-    accumulate_counters(trsm2.values, values_by_thread_trsm2, available_threads);
-    accumulate_counters(gemm.values, values_by_thread_gemm, available_threads);
-
-    compute_derived_metrics(&getrf);
-    compute_derived_metrics(&trsm1);
-    compute_derived_metrics(&trsm2);
-    compute_derived_metrics(&gemm);
-
-    // PAPI opens too much file descriptors without closing them
-    int file_desc;
-    for (file_desc = 3; file_desc < 1024; ++file_desc)
-    {
-      close(file_desc);
-    }
-
-    FILE *file;
-    if ((file = fopen("counters_lu.csv", "a+")) == NULL)
-    {
-      perror("fopen failed");
-      exit(EXIT_FAILURE);
-    }
-    else
-    {
-      fseek(file, 0, SEEK_SET);
-      int first_char = fgetc(file);
-      if (first_char == EOF)
-      {
-        fprintf(file, "algorithm, task, matrix_size, tile_size, mem_boundness, arithm_intensity, bmr, ilp, l3_cache_ratio\n");
-      }
-
-      fprintf(file, "lu, getrf, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              getrf.mem_boundness, getrf.arithm_intensity, getrf.bmr, getrf.ilp, (double)getrf.values[0] / (double)l3_cache_size);
-      fprintf(file, "lu, trsm1, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              trsm1.mem_boundness, trsm1.arithm_intensity, trsm1.bmr, trsm1.ilp, (double)trsm1.values[0] / (double)l3_cache_size);
-      fprintf(file, "lu, trsm2, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              trsm2.mem_boundness, trsm2.arithm_intensity, trsm2.bmr, trsm2.ilp, (double)trsm2.values[0] / (double)l3_cache_size);
-      fprintf(file, "lu, gemm, %d, %d, %f, %f, %f, %f, %f\n", A.matrix_size, A.tile_size,
-              gemm.mem_boundness, gemm.arithm_intensity, gemm.bmr, gemm.ilp, (double)gemm.values[0] / (double)l3_cache_size);
-
-      fclose(file);
-    }
+    const char *task_names[] = {"getrf", "trsm1", "trsm2", "gemm"};
+    CounterData *counters[] = {getrf, trsm1, trsm2, gemm};
+    int num_tasks = sizeof(task_names) / sizeof(task_names[0]); // This gives the length of the tasks array
+    dump_counters("lu", task_names, counters, num_tasks, A.matrix_size, A.tile_size, l3_cache_size, available_threads);
   }
-
-  free(values_by_thread_getrf);
-  free(values_by_thread_trsm1);
-  free(values_by_thread_trsm2);
-  free(values_by_thread_gemm);
-}
