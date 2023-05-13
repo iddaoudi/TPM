@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  11/01/2023
- *       Revision:  none
+ *       Revision:  14/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -17,89 +17,112 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 
-// Right hand side vector initialization
-void rhs(int matrix_size, double *f_, int tile_size)
+void poisson(int matrix_size, int tile_size, double *time_start, double *time_finish)
 {
-	double(*f)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])f_;
-	double x, y;
+	// Check the convergence
+	int check = 0;
+	// 4 iterations by default
+	int niter = 4;
 
-	int i, j, k, l;
-#pragma omp parallel
-#pragma omp master
-	for (j = 0; j < matrix_size; j += tile_size)
-	{
-		for (i = 0; i < matrix_size; i += tile_size)
-		{
-#pragma omp task firstprivate(tile_size, i, j, matrix_size) private(l, k, x, y) shared(f)
-			for (k = j; k < j + tile_size; k++)
-			{
-				y = (double)(k) / (double)(matrix_size - 1);
-				for (l = i; l < i + tile_size; l++)
-				{
-					x = (double)(l) / (double)(matrix_size - 1);
-					if (l == 0 || l == nx - 1 || k == 0 || k == ny - 1)
-						(*f)[l][k] = u_solution(x, y);
-					else
-						(*f)[l][k] = -u_solution_derivative(x, y);
-				}
-			}
-		}
-	}
-}
+	double dx;
+	int k, i, l, j;
 
-double u_solution(double x, double y)
-{
-	double pi = 3.141592653589793;
-	return sin(pi * x * y);
-}
+	double *falloc = malloc(matrix_size * matrix_size * sizeof(double));
+	double(*f)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])falloc;
 
-double u_solution_derivative(double x, double y)
-{
-	double pi = 3.141592653589793;
-	return -pi * pi * (x * x + y * y) * sin(pi * x * y);
-}
-
-void poisson(int matrix_size, int tile_size)
-{
-	double dx, dy; // FIXME dx = dy
-
-	double *f_ = malloc(matrix_size * matrix_size * sizeof(double));
-	double(*f)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])f_;
-
-	double *u = malloc(matrix_size * matrix_size * sizeof(double));
-	double *u_new_ = malloc(matrix_size * matrix_size * sizeof(double));
-	double(*u_new)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size] u_new_);
+	double *ualloc = malloc(matrix_size * matrix_size * sizeof(double));
+	double *unewalloc = malloc(matrix_size * matrix_size * sizeof(double));
+	double(*unew)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])unewalloc;
 
 	dx = 1.0 / (double)(matrix_size - 1);
 
-	rhs(matrix_size, f_tmp, tile_size);
+	rhs(matrix_size, falloc, tile_size);
 
-	int i, j, k, l;
 #pragma omp parallel
 #pragma omp master
 	for (j = 0; j < matrix_size; j += tile_size)
-	{
 		for (i = 0; i < matrix_size; i += tile_size)
 		{
 #pragma omp task firstprivate(i, j) private(k, l)
 			{
-				for (k = j; k < j + tile_size; k++)
-				{
-					for (l = i; l < i + tile_size; l++)
+				for (l = j; l < j + tile_size; ++l)
+					for (k = i; k < i + tile_size; ++k)
 					{
-						if (l == 0 || l == nx - 1 || k == 0 || k == ny - 1)
+						if (k == 0 || k == matrix_size - 1 || l == 0 || l == matrix_size - 1)
 						{
-							(*u_new)[l][k] = (*f)[l][k];
+							(*unew)[k][l] = (*f)[k][l];
 						}
 						else
 						{
-							(*u_new)[l][k] = 0.0;
+							(*unew)[k][l] = 0.0;
 						}
 					}
+			}
+		}
+
+	*time_start = omp_get_wtime();
+	jacobi(matrix_size, dx, falloc, niter, ualloc, unewalloc, tile_size);
+	*time_finish = omp_get_wtime();
+
+	if (check)
+	{
+		double x;
+		double y;
+
+		double *udiffalloc = malloc(matrix_size * matrix_size * sizeof(double));
+		double(*udiff)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])udiffalloc;
+
+		for (j = 0; j < matrix_size; j++)
+		{
+			y = (double)(j) / (double)(matrix_size - 1);
+			for (i = 0; i < matrix_size; i++)
+			{
+				x = (double)(i) / (double)(matrix_size - 1);
+				(*udiff)[i][j] = (*unew)[i][j] - ux(x, y);
+			}
+		}
+		double error1 = r8mat_rms(matrix_size, udiffalloc);
+
+		rhs(matrix_size, falloc, tile_size);
+
+		for (j = 0; j < matrix_size; j++)
+		{
+			for (i = 0; i < matrix_size; i++)
+			{
+				if (i == 0 || i == matrix_size - 1 || j == 0 || j == matrix_size - 1)
+				{
+					(*unew)[i][j] = (*f)[i][j];
+				}
+				else
+				{
+					(*unew)[i][j] = 0.0;
 				}
 			}
 		}
+
+		jacobi(matrix_size, dx, falloc, niter, ualloc, unewalloc, tile_size);
+
+		// Check convergence
+		for (j = 0; j < matrix_size; j++)
+		{
+			y = (double)(j) / (double)(matrix_size - 1);
+			for (i = 0; i < matrix_size; i++)
+			{
+				x = (double)(i) / (double)(matrix_size - 1);
+				(*udiff)[i][j] = (*unew)[i][j] - ux(x, y);
+			}
+		}
+		double error2 = r8mat_rms(matrix_size, udiffalloc);
+
+		bool convergence = fabs(error1 - error2) < 1.0E-6;
+		// In case of convergence, print True, otherwise print False
+		printf("Convergence: %s\n", formatBool(convergence));
+
+		free(udiffalloc);
 	}
-	sweep();
+	free(falloc);
+	free(ualloc);
+	free(unewalloc);
 }

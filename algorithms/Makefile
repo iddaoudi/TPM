@@ -20,7 +20,7 @@ LAPACKE_LIB=${ROOT}/OpenBLAS/build
 LAPACKE_LIBRARY=-lopenblas -I${LAPACKE_LIB}/include -L${LAPACKE_LIB}/lib
 
 # PAPI
-PAPI_LIBRARY=-lpapi -lpthread -mcmodel=large 
+PAPI_LIBRARY=-lpapi -lpthread -lm -mcmodel=large 
 
 all: tpm_benchmark
 

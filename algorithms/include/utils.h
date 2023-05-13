@@ -70,3 +70,6 @@ long l3_cache_size;
 #include "srcslu/lu0.h"
 #include "srcslu/fwd.h"
 #include "sparselu.h"
+
+#include "srcpoisson/jacobi.h"
+#include "poisson.h"

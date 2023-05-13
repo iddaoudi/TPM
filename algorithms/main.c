@@ -19,12 +19,26 @@
 #include "common.h"
 #include "utils.h"
 
+void print_matrix(double *A, int size)
+{
+  for (int i = 0; i < size; i++)
+  {
+    for (int j = 0; j < size; j++)
+    {
+      printf("%lf\t", A[i * size + j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+}
+
 typedef enum
 {
   ALGO_CHOLESKY,
   ALGO_QR,
   ALGO_LU,
   ALGO_SPARSELU,
+  ALGO_POISSON,
   ALGO_UNKNOWN
 } AlgorithmType;
 
@@ -45,6 +59,10 @@ AlgorithmType parse_algorithm(const char *algorithm)
   else if (strcmp(algorithm, "sparselu") == 0)
   {
     return ALGO_SPARSELU;
+  }
+  else if (strcmp(algorithm, "poisson") == 0)
+  {
+    return ALGO_POISSON;
   }
   else
   {
@@ -125,12 +143,14 @@ int main(int argc, char *argv[])
     }
   }
 
+  // Check matrix size divisibility by tile size
   if (MSIZE % BSIZE != 0)
   {
     printf("Tile size does not divide the matrix size. Aborting.\n");
     exit(EXIT_FAILURE);
   }
 
+  // PAPI library initialization
   int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
   if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
   {
@@ -142,7 +162,7 @@ int main(int argc, char *argv[])
     printf("PAPI library init error: %s\n", PAPI_strerror(papi_version));
     exit(EXIT_FAILURE);
   }
-
+  // Threaded PAPI initialization
   if (TPM_PAPI)
   {
     int ret;
@@ -172,27 +192,28 @@ int main(int argc, char *argv[])
   // Launch algorithms
   switch (algo_type)
   {
+  // Dense algorithms
   case ALGO_CHOLESKY:
   case ALGO_QR:
   case ALGO_LU:
   {
     tpm_desc *A = NULL;
     double *ptr = NULL;
-    int error = posix_memalign((void **)&ptr, getpagesize(),
-                               MSIZE * MSIZE * sizeof(double));
+    tpm_desc *S = NULL;
+
+    int error = posix_memalign((void **)&ptr, getpagesize(), MSIZE * MSIZE * sizeof(double));
     if (error)
     {
       printf("Problem allocating contiguous memory.\n");
       exit(EXIT_FAILURE);
     }
     tpm_matrix_desc_create(&A, ptr, BSIZE, MSIZE * MSIZE, BSIZE * BSIZE, MSIZE);
+    tpm_hermitian_positive_generator(*A);
 
     switch (algo_type)
     {
-
     // Cholesky algorithm
     case ALGO_CHOLESKY:
-      tpm_hermitian_positive_generator(*A);
       time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
@@ -204,9 +225,7 @@ int main(int argc, char *argv[])
 
     // QR algorithm
     case ALGO_QR:
-      tpm_hermitian_positive_generator(*A);
       // Workspace allocation for QR
-      tpm_desc *S = NULL;
       int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
       time_start = omp_get_wtime();
@@ -222,7 +241,6 @@ int main(int argc, char *argv[])
 
     // LU algorithm
     case ALGO_LU:
-      tpm_hermitian_positive_generator(*A);
       time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
@@ -234,6 +252,16 @@ int main(int argc, char *argv[])
     }
     free(A->matrix);
     tpm_matrix_desc_destroy(&A);
+    break;
+  }
+
+  // Sparse algorithms
+  // Poisson algorithm
+  case ALGO_POISSON:
+  {
+    {
+      poisson(MSIZE, BSIZE, &time_start, &time_finish);
+    }
     break;
   }
 
@@ -259,12 +287,14 @@ int main(int argc, char *argv[])
     }
     break;
   }
+
   default:
     printf("Invalid algorithm. Aborting.\n");
     exit(EXIT_FAILURE);
   }
 
-  if (TPM_TRACE) {
+  if (TPM_TRACE)
+  {
     double exec_time = time_finish - time_start;
     tpm_upstream_finalize(exec_time);
   }

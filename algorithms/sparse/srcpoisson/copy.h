@@ -1,13 +1,13 @@
 /*
  * =====================================================================================
  *
- *       Filename:  sweep.h
+ *       Filename:  copy_block.h
  *
- *    Description:
+ *    Description:  Save the estimate
  *
  *        Version:  1.0
  *        Created:  18/01/2023
- *       Revision:  none
+ *       Revision:  13/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -18,12 +18,12 @@
 
 #include <assert.h>
 
-static inline void copy_block(int matrix_size, int block_x, int block_y, double *u_, double *u_new_, int tile_size)
+static inline void copy_block(int matrix_size, int block_x, int block_y, double *ualloc, double *unewalloc, int tile_size)
 {
 	int i, j;
 
-	double(*u)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])u_;
-	double(*unew)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])u_new_;
+	double(*u)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])ualloc;
+	double(*unew)[matrix_size][matrix_size] = (double(*)[matrix_size][matrix_size])unewalloc;
 
 	int start_i = block_x * tile_size;
 	int start_j = block_y * tile_size;
