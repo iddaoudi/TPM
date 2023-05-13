@@ -322,3 +322,4 @@ void lu(tpm_desc A)
     int num_tasks = sizeof(task_names) / sizeof(task_names[0]); // This gives the length of the tasks array
     dump_counters("lu", task_names, counters, num_tasks, A.matrix_size, A.tile_size, l3_cache_size, available_threads);
   }
+}
