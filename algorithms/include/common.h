@@ -28,7 +28,7 @@
 #include <pthread.h>
 #include <papi.h>
 
-#define TPM_STRING_SIZE 64
+#define TPM_STRING_SIZE 128
 
 // External functions for tracing
 void __attribute__((weak))
@@ -73,10 +73,10 @@ char *tpm_unique_task_identifier(char *name, int a, int b, int c)
   memset(tmp_name, '\0', TPM_STRING_SIZE);
   strcpy(tmp_name, name);
 
-  size_t sizeof_integer = sizeof(int);
-  char string_a[sizeof_integer];
-  char string_b[sizeof_integer];
-  char string_c[sizeof_integer];
+  // Room for up to 10 digits, a sign, and a null terminator
+  char string_a[12];
+  char string_b[12];
+  char string_c[12];
 
   sprintf(string_a, "%d", a);
   sprintf(string_b, "%d", b);
