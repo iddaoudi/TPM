@@ -26,6 +26,8 @@ typedef enum
   ALGO_LU,
   ALGO_SPARSELU,
   ALGO_POISSON,
+  ALGO_SYLSVD,
+  ALGO_INVERT,
   ALGO_UNKNOWN
 } AlgorithmType;
 
@@ -50,6 +52,14 @@ AlgorithmType parse_algorithm(const char *algorithm)
   else if (strcmp(algorithm, "poisson") == 0)
   {
     return ALGO_POISSON;
+  }
+  else if (strcmp(algorithm, "sylsvd") == 0)
+  {
+    return ALGO_SYLSVD;
+  }
+  else if (strcmp(algorithm, "invert") == 0)
+  {
+    return ALGO_INVERT;
   }
   else
   {
@@ -175,6 +185,7 @@ int main(int argc, char *argv[])
 
   // Timers
   double time_start, time_finish;
+  int error;
 
   // Launch algorithms
   switch (algo_type)
@@ -182,13 +193,12 @@ int main(int argc, char *argv[])
   // Dense algorithms
   case ALGO_CHOLESKY:
   case ALGO_QR:
-  case ALGO_LU:
   {
     tpm_desc *A = NULL;
     double *ptr = NULL;
     tpm_desc *S = NULL;
 
-    int error = posix_memalign((void **)&ptr, getpagesize(), MSIZE * MSIZE * sizeof(double));
+    error = posix_memalign((void **)&ptr, getpagesize(), MSIZE * MSIZE * sizeof(double));
     if (error)
     {
       printf("Problem allocating contiguous memory.\n");
@@ -201,6 +211,7 @@ int main(int argc, char *argv[])
     {
     // Cholesky algorithm
     case ALGO_CHOLESKY:
+
       time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
@@ -208,6 +219,7 @@ int main(int argc, char *argv[])
         cholesky(*A);
       }
       time_finish = omp_get_wtime();
+
       break;
 
     // QR algorithm
@@ -215,6 +227,7 @@ int main(int argc, char *argv[])
       // Workspace allocation for QR
       int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
+
       time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
@@ -222,23 +235,101 @@ int main(int argc, char *argv[])
         qr(*A, *S);
       }
       time_finish = omp_get_wtime();
+
       free(S->matrix);
       tpm_matrix_desc_destroy(&S);
-      break;
-
-    // LU algorithm
-    case ALGO_LU:
-      time_start = omp_get_wtime();
-#pragma omp parallel
-#pragma omp master
-      {
-        lu(*A);
-      }
-      time_finish = omp_get_wtime();
-      break;
     }
+
     free(A->matrix);
     tpm_matrix_desc_destroy(&A);
+    break;
+  }
+  // LU algorithm
+  case ALGO_LU:
+  {
+    double *A = malloc(MSIZE * MSIZE * sizeof(double));
+    double *hA = malloc(MSIZE * MSIZE * sizeof(double));
+    int *ipiv = malloc(MSIZE * sizeof(int));
+
+    tpm_dense_generator(A, MSIZE);
+    for (int i = 0; i < MSIZE; i++)
+    {
+      ipiv[i] = i;
+    }
+
+    time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+    {
+      lu(MSIZE, BSIZE, A, ipiv, hA);
+    }
+    time_finish = omp_get_wtime();
+
+    break;
+  }
+  // Sylvester-SVD algorithm
+  case ALGO_SYLSVD:
+  {
+    // Number of iterations is constant, we only vary the size of the whole matrix
+    // which is the input tile size
+    int iter = 100;
+    // Array of matrices
+    double *As[iter];
+    double *Bs[iter];
+    double *Xs[iter];
+    double *Us[iter];
+    double *Ss[iter];
+    double *VTs[iter];
+    for (int i = 0; i < iter; i++)
+    {
+      As[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+      Bs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+      Xs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+      Us[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+      Ss[i] = (double *)malloc(BSIZE * sizeof(double));
+      VTs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+
+      tpm_dense_generator(As[i], BSIZE);
+      tpm_dense_generator(Bs[i], BSIZE);
+      tpm_dense_generator(Xs[i], BSIZE);
+    }
+
+    time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+    {
+      sylsvd(As, Bs, Xs, Us, Ss, VTs, BSIZE, iter);
+    }
+    time_finish = omp_get_wtime();
+
+    for (int i = 0; i < iter; i++)
+    {
+      free(As[i]);
+      free(Bs[i]);
+      free(Xs[i]);
+      free(Us[i]);
+      free(Ss[i]);
+      free(VTs[i]);
+    }
+    break;
+  }
+  case ALGO_INVERT:
+  {
+    double *A = malloc(MSIZE * MSIZE * sizeof(double));
+    // Partial pivoting index array
+    int *ipiv = malloc(MSIZE * sizeof(int));
+    tpm_dense_generator(A, MSIZE);
+
+    time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+    {
+      invert(A, ipiv, MSIZE, BSIZE);
+    }
+    time_finish = omp_get_wtime();
+
+    free(A);
+    free(ipiv);
     break;
   }
 
@@ -267,9 +358,11 @@ int main(int argc, char *argv[])
 #pragma omp parallel
 #pragma omp master
       tpm_sparse_allocate(&M, MSIZE, BSIZE);
+
       time_start = omp_get_wtime();
       sparselu(M, MSIZE, BSIZE);
       time_finish = omp_get_wtime();
+
       free(M);
     }
     break;
