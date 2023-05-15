@@ -3,7 +3,7 @@
  *
  *       Filename:  poisson.h
  *
- *    Description:  Task-based 2 dimensions poisson algorithm
+ *    Description:  Task-based 2 dimensions Poisson algorithm
  *
  *        Version:  1.0
  *        Created:  11/01/2023
@@ -16,15 +16,14 @@
  * =====================================================================================
  */
 
-#include <math.h>
 #include <stdbool.h>
 
 void poisson(int matrix_size, int tile_size, double *time_start, double *time_finish)
 {
 	// Check the convergence
 	int check = 0;
-	// 4 iterations by default
-	int niter = 4;
+	// Number of iterations
+	int niter = 100;
 
 	double dx;
 	int k, i, l, j;
