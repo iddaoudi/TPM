@@ -16,8 +16,6 @@
  * =====================================================================================
  */
 
-#include <sys/time.h>
-
 void sparselu(double **M, int matrix_size, int tile_size)
 {
   // TPM library: initialization
@@ -28,9 +26,9 @@ void sparselu(double **M, int matrix_size, int tile_size)
   struct timeval start = (struct timeval){0};
   struct timeval end = (struct timeval){0};
   unsigned int cpu, node;
-  
+
 #pragma omp parallel private(i, j, k) shared(M)
-#pragma omp single
+#pragma omp master
   {
     for (k = 0; k < matrix_size; k++)
     {
@@ -40,8 +38,7 @@ void sparselu(double **M, int matrix_size, int tile_size)
         tpm_upstream_set_task_name(name_with_id_char);
 
 #pragma omp task firstprivate(k) shared(M) \
-    depend(inout                           \
-           : M [k * matrix_size + k:tile_size * tile_size])
+    depend(inout : M[k * matrix_size + k : tile_size * tile_size])
       {
         // TPM library: send CPU and name
         cpu = 0;
@@ -74,11 +71,9 @@ void sparselu(double **M, int matrix_size, int tile_size)
           if (TPM_TRACE)
             tpm_upstream_set_task_name(name_with_id_char);
 
-#pragma omp task firstprivate(j, k) shared(M)               \
-    depend(in                                               \
-           : M [k * matrix_size + k:tile_size * tile_size]) \
-        depend(inout                                        \
-               : M [k * matrix_size + j:tile_size * tile_size])
+#pragma omp task firstprivate(j, k) shared(M)                   \
+    depend(in : M[k * matrix_size + k : tile_size * tile_size]) \
+    depend(inout : M[k * matrix_size + j : tile_size * tile_size])
           {
             // TPM library: send CPU and name
             cpu = 0;
@@ -111,11 +106,9 @@ void sparselu(double **M, int matrix_size, int tile_size)
           if (TPM_TRACE)
             tpm_upstream_set_task_name(name_with_id_char);
 
-#pragma omp task firstprivate(i, k) shared(M)               \
-    depend(in                                               \
-           : M [k * matrix_size + k:tile_size * tile_size]) \
-        depend(inout                                        \
-               : M [i * matrix_size + k:tile_size * tile_size])
+#pragma omp task firstprivate(i, k) shared(M)                   \
+    depend(in : M[k * matrix_size + k : tile_size * tile_size]) \
+    depend(inout : M[i * matrix_size + k : tile_size * tile_size])
           {
             // TPM library: send CPU and name
             cpu = 0;
@@ -153,12 +146,10 @@ void sparselu(double **M, int matrix_size, int tile_size)
               if (TPM_TRACE)
                 tpm_upstream_set_task_name(name_with_id_char);
 
-#pragma omp task firstprivate(k, j, i) shared(M)            \
-    depend(in                                               \
-           : M [i * matrix_size + k:tile_size * tile_size], \
-             M [k * matrix_size + j:tile_size * tile_size]) \
-        depend(inout                                        \
-               : M [i * matrix_size + j:tile_size * tile_size])
+#pragma omp task firstprivate(k, j, i) shared(M)                \
+    depend(in : M[i * matrix_size + k : tile_size * tile_size], \
+               M[k * matrix_size + j : tile_size * tile_size])  \
+    depend(inout : M[i * matrix_size + j : tile_size * tile_size])
               {
                 // TPM library: send CPU and name
                 cpu = 0;
