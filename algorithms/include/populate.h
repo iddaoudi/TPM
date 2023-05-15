@@ -146,3 +146,14 @@ static void tpm_sparse_allocate(double ***M, int matrix_size, int tile_size)
   *M = (double **)malloc(matrix_size * matrix_size * sizeof(double *));
   tpm_sparse_generator(*M, matrix_size, tile_size);
 }
+
+void tpm_dense_generator(double *mat, int elements)
+{
+  for (int i = 0; i < elements; i++)
+  {
+    for (int j = 0; j < elements; j++)
+    {
+      mat[i * elements + j] = ((double)rand() / (RAND_MAX)) * 10.;
+    }
+  }
+}
