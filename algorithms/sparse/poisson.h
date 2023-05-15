@@ -16,8 +16,6 @@
  * =====================================================================================
  */
 
-#include <stdbool.h>
-
 void poisson(int matrix_size, int tile_size, double *time_start, double *time_finish)
 {
 	// Check the convergence
