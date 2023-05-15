@@ -71,3 +71,27 @@ void tpm_simple_print_matrix(tpm_desc A)
     }
   }
 }
+
+void tpm_default_print_matrix(const char *name, const double *mat, int m)
+{
+  printf("%s:\n", name);
+  if (strcmp(name, "S") == 0)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      printf("%f ", mat[j]);
+    }
+    printf("\n");
+  }
+  else
+  {
+    for (int i = 0; i < m; i++)
+    {
+      for (int j = 0; j < m; j++)
+      {
+        printf("%f ", mat[i * m + j]);
+      }
+      printf("\n");
+    }
+  }
+}
