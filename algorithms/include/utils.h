@@ -6,8 +6,8 @@
  *    Description:  Headers imports and useful definitions used across dense algorithms
  *
  *        Version:  1.0
- *        Created:  25/12/2022 19:30:35
- *       Revision:  none
+ *        Created:  25/12/2022
+ *       Revision:  14/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -16,6 +16,7 @@
  * =====================================================================================
  */
 
+#include <math.h>
 #include "assert.h"
 #include "cblas.h"
 #include "lapacke.h"
@@ -61,7 +62,9 @@ long l3_cache_size;
 #include "srcqr/dtsqrt.h"
 #include "qr.h"
 
-#include "srclu/dgetrf.h"
+#include "srclu/lacpy.h"
+#include "srclu/tile_lapacke_conversion.h"
+#include "srclu/geswp.h"
 #include "lu.h"
 
 #include "srcslu/empty_block.h"
@@ -73,3 +76,9 @@ long l3_cache_size;
 
 #include "srcpoisson/jacobi.h"
 #include "poisson.h"
+
+#include "srcsylsvd/svd.h"
+#include "srcsylsvd/sylverster.h"
+#include "sylsvd.h"
+
+#include "invert.h"
