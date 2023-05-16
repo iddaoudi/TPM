@@ -8,12 +8,15 @@ def logic(df_energy, df_counters, task_dict):
     unique_tiles = df_energy["tile_size"].unique()
     unique_cases = df_energy["case"].unique()
 
-    # FIXME Only one algorithm here
-    assert len(unique_algorithms) == 1
-
-    # FIXME only Cholesky here
-    if unique_algorithms == "cholesky":
-        cases_dict = dict.cholesky_dict
+    # FIXME Cholesky and QR only
+    for algorithm in unique_algorithms:
+        if algorithm == "cholesky":
+            cases_dict = dict.cholesky_dict
+        elif algorithm == "qr":
+            cases_dict = dict.qr_dict
+        else:
+            print("Missing dictionnary!")
+            exit(1)
 
     # Create the metrics columns with the abstract names
     for task in cases_dict[len(cases_dict)]:
@@ -54,7 +57,9 @@ def logic(df_energy, df_counters, task_dict):
                                 & (df_energy["tile_size"] == tile)
                                 & (df_energy["case"] == case),
                                 task_dict[task],
-                            ] = frequency
+                            ] = (
+                                frequency * 1e-6
+                            )
 
                             # Set the name of the column with the task name abstration and the metric name
                             column_name = task_dict[task] + "_" + dict.metrics[i]
@@ -102,7 +107,9 @@ def logic(df_energy, df_counters, task_dict):
                                 & (df_energy["tile_size"] == tile)
                                 & (df_energy["case"] == case),
                                 task_dict[task],
-                            ] = frequency
+                            ] = (
+                                frequency * 1e-6
+                            )
 
                             # Set the name of the column with the task name abstration and the metric name
                             column_name = task_dict[task] + "_" + dict.metrics[i]

@@ -1,4 +1,3 @@
-import sys
 import pandas as pd
 import glob
 
@@ -18,10 +17,8 @@ def calculate_task_ratio(df_counters):
     return df_counters
 
 
-def mean_of_files():
-    folder = sys.argv[1]
-    # FIXME Only Cholesky here
-    energy_files_format = "energy_data_cholesky_*.csv"
+def mean_of_files(folder):
+    energy_files_format = "energy_data_*.csv"
     counter_files_format = "counters_*.csv"
 
     energy_files_paths = glob.glob(folder + energy_files_format)

@@ -2,20 +2,33 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_score, GridSearchCV
 from sklearn.metrics import roc_auc_score
 from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 
 
-def single_target_model(df):
+def single_target_model(
+    df, train_algorithms, train_matrix_sizes, test_algorithms, test_matrix_sizes
+):
+    print("Training on:")
+    print(train_algorithms, train_matrix_sizes)
+    print("Testing on:")
+    print(test_algorithms, test_matrix_sizes)
+
     # Split data FIXME according to matrix_size
-    unique_matrix_sizes = df["matrix_size"].unique()
-    train_matrix_size = unique_matrix_sizes[0]
-    test_matrix_size = unique_matrix_sizes[1]
-
-    train = df[df["matrix_size"] == train_matrix_size].copy()
-    test = df[df["matrix_size"] == test_matrix_size].copy()
+    train = df[
+        (df["matrix_size"].isin(train_matrix_sizes))
+        & (df["algorithm"].isin(train_algorithms))
+    ].copy()
+    test = df[
+        (df["matrix_size"].isin(test_matrix_sizes))
+        & (df["algorithm"].isin(test_algorithms))
+    ].copy()
 
     # Preprocess data
     train["total_energy"] = train[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
@@ -58,7 +71,8 @@ def single_target_model(df):
     # Features
     # feature_cols = ['tile_size'] + [f'task{i}_{metric}' for i in range(1, 5) for metric in ['mem_boundness', 'arithm_intensity', 'ilp', 'l3_cache_ratio']]
     feature_cols = (
-        ["tile_size"]
+        ["matrix_size"]
+        + ["tile_size"]
         + [f"task{i}" for i in range(1, 5)]
         + [
             f"task{i}_{metric}"
@@ -88,7 +102,35 @@ def single_target_model(df):
                 "estimator__max_depth": [3, 5, 7],
             },
         ),
+        "random_forest": (
+            RandomForestClassifier(),
+            {
+                "estimator__n_estimators": [50, 100, 150],
+                "estimator__max_depth": [3, 5, 7],
+                "estimator__min_samples_split": [2, 5, 10],
+            },
+        ),
+        "knn": (
+            KNeighborsClassifier(),
+            {
+                "estimator__n_neighbors": [3, 5, 7, 9],
+                "estimator__weights": ["uniform", "distance"],
+                "estimator__algorithm": ["auto", "ball_tree", "kd_tree", "brute"],
+            },
+        ),
+        "mlp": (
+            MLPClassifier(),
+            {
+                "estimator__hidden_layer_sizes": [(50,), (100,)],
+                "estimator__activation": ["tanh", "relu"],
+                "estimator__solver": ["sgd", "adam"],
+                "estimator__alpha": [0.0001, 0.05],
+                "estimator__learning_rate": ["constant", "adaptive"],
+            },
+        ),
     }
+
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
     # Scale features
     scaler = StandardScaler()
@@ -98,19 +140,21 @@ def single_target_model(df):
         cv = StratifiedKFold(n_splits=5)
         grid_search = GridSearchCV(pipeline, params, cv=cv, scoring="roc_auc")
         grid_search.fit(train[feature_cols], train["target"])
-        print(f"Best parameters for {name}: ", grid_search.best_params_)
+        # print(f"Best parameters for {name}: ", grid_search.best_params_)
         print(f"Best score for {name}     : ", grid_search.best_score_)
 
         # Evaluate
         test_pred = grid_search.predict_proba(test[feature_cols])[:, 1]
-        print(f"Test AUC-ROC for {name}   : ", roc_auc_score(test["target"], test_pred))
 
         # Predict
         test["predicted_probability"] = test_pred
         best_cases = test.loc[
-            test.groupby(["matrix_size", "tile_size"])["predicted_probability"].idxmax()
+            test.groupby(["algorithm", "matrix_size", "tile_size"])[
+                "predicted_probability"
+            ].idxmax()
         ]
         columns_to_keep = [
+            "algorithm",
             "matrix_size",
             "tile_size",
             "case",
@@ -126,13 +170,20 @@ def single_target_model(df):
         print(best_cases)
 
         # Print feature importance if the model has 'feature_importances_' attribute
-        # if hasattr(grid_search.best_estimator_.named_steps['estimator'], 'feature_importances_'):
-        #     importances = grid_search.best_estimator_.named_steps['estimator'].feature_importances_
-        #     features = feature_cols
+        feature_importance = 0
+        if feature_importance:
+            if hasattr(
+                grid_search.best_estimator_.named_steps["estimator"],
+                "feature_importances_",
+            ):
+                importances = grid_search.best_estimator_.named_steps[
+                    "estimator"
+                ].feature_importances_
+                features = feature_cols
 
-        #     print(f'Feature importance for {name}:')
-        #     for feature, importance in zip(features, importances):
-        #         print(f'Feature   : {feature}')
-        #         print(f'Importance: {importance}')
+                print(f"Feature importance for {name}:")
+                for feature, importance in zip(features, importances):
+                    print(f"Feature   : {feature}")
+                    print(f"Importance: {importance}")
 
         print("********************************************************")

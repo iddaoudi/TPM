@@ -18,3 +18,22 @@ cholesky_dict = {
     15: ["gemm", "trsm", "syrk"],
     16: ["potrf", "trsm", "syrk", "gemm"],
 }
+
+qr_dict = {
+    1: [],
+    2: ["ormqr"],
+    3: ["tsqrt"],
+    4: ["ormqr", "tsqrt"],
+    5: ["tsmqr"],
+    6: ["ormqr", "tsmqr"],
+    7: ["tsqrt", "tsmqr"],
+    8: ["ormqr", "tsqrt", "tsmqr"],
+    9: ["geqrt"],
+    10: ["ormqr", "geqrt"],
+    11: ["tsqrt", "geqrt"],
+    12: ["ormqr", "tsqrt", "geqrt"],
+    13: ["tsmqr", "geqrt"],
+    14: ["ormqr", "tsmqr", "geqrt"],
+    15: ["tsqrt", "tsmqr", "geqrt"],
+    16: ["ormqr", "tsmqr", "geqrt", "tsqrt"],
+}
