@@ -16,16 +16,9 @@
  * =====================================================================================
  */
 
-// #define LOG 1
-
 void lu(int matrix_size, int tile_size, double *pA, int *ipiv, double *A)
 {
     double alpha = 1., neg = -1.;
-    tpm_matrix_to_tile(A, pA, matrix_size, matrix_size, tile_size, matrix_size);
-
-#ifdef LOG
-    tpm_default_print_matrix("A", pA, matrix_size);
-#endif
 
     for (int k = 0; k < matrix_size / tile_size; k++)
     {
@@ -68,7 +61,11 @@ void lu(int matrix_size, int tile_size, double *pA, int *ipiv, double *A)
 
                 cblas_dtrsm(CblasColMajor, CblasLeft, CblasLower, CblasNoTrans, CblasUnit, tile_size,
                             tile_size, alpha, akk, tile_size, akj, tile_size);
-
+            }
+#pragma omp task depend(in : akk[0 : m * tile_size])                                \
+    depend(inout : akj[0 : tile_size * tile_size], ipiv[k * tile_size : tile_size]) \
+    firstprivate(akk, akj, m)
+            {
                 for (int i = k + 1; i < matrix_size / tile_size; i++)
                 {
                     cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, tile_size, tile_size,
@@ -89,9 +86,4 @@ void lu(int matrix_size, int tile_size, double *pA, int *ipiv, double *A)
             tpm_geswp(A + (t - 1) * tile_size * matrix_size, tile_size, t * tile_size, matrix_size, ipiv);
         }
     }
-    tpm_tile_to_matrix(A, pA, matrix_size, matrix_size, tile_size, matrix_size);
-
-#ifdef LOG
-    tpm_default_print_matrix("A", pA, matrix_size);
-#endif
 }

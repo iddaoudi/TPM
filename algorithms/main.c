@@ -19,6 +19,8 @@
 #include "common.h"
 #include "utils.h"
 
+// #define LOG 1
+
 typedef enum
 {
   ALGO_CHOLESKY,
@@ -252,6 +254,10 @@ int main(int argc, char *argv[])
     int *ipiv = malloc(MSIZE * sizeof(int));
 
     tpm_dense_generator(A, MSIZE);
+    tpm_matrix_to_tile(hA, A, MSIZE, MSIZE, BSIZE, MSIZE);
+#ifdef LOG
+    tpm_default_print_matrix("A", A, MSIZE);
+#endif
     for (int i = 0; i < MSIZE; i++)
     {
       ipiv[i] = i;
@@ -264,7 +270,14 @@ int main(int argc, char *argv[])
       lu(MSIZE, BSIZE, A, ipiv, hA);
     }
     time_finish = omp_get_wtime();
+    tpm_matrix_to_tile(hA, A, MSIZE, MSIZE, BSIZE, MSIZE);
+#ifdef LOG
+    tpm_default_print_matrix("A", A, MSIZE);
+#endif
 
+    free(A);
+    free(hA);
+    free(ipiv);
     break;
   }
   // Sylvester-SVD algorithm
