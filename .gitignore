@@ -11,4 +11,6 @@ trace/CMakeFiles/
 trace/Makefile
 trace/cmake_install.cmake
 trace/libtpm_trace.so
-
+model/data_treatment/__pycache__/
+model/learning/__pycache__/
+model/plot/__pycache__/
