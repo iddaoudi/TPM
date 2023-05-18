@@ -58,5 +58,10 @@ sudo apt install hwloc -y
 sudo apt install acpi-support acpid acpi -y
 cd TPM/
 
+echo off | sudo tee /sys/devices/system/cpu/smt/control
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Disable hyperthreading OK"
+
+echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> PAPI permissions OK"
+
 echo "*** Done, now need to move from intel_pstate to ACPI!"
-echo "*** Then, perform a << echo 0 | sudo tee /proc/sys/kernel/perf_event_paranoid >> to enable PAPI counters!"
