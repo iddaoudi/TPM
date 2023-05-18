@@ -6,9 +6,9 @@ ROOT=/home/cc
 algo=(cholesky)
 msize=(16384 24576 32768)
 bsize=(512 1024 2048)
-threads=(11)
-numa=11
-export TPM_PAPI=1
+threads=(12)
+numa=12
+export TPM_PAPI=0
 export TPM_TRACE=0
 export TPM_POWER=0
 testing=1
@@ -62,7 +62,9 @@ for algorithm in ${algo[*]}; do
 						export OMP_NUM_THREADS=$thread
 
 						if [[ "$algorithm" == "lu" ]]; then
-							targets=("1" "2" "3" "4" "5" "6" "7" "8")
+							if [[ $testing -eq 0 ]]; then
+								targets=({1..8})
+							fi
 						fi
 
 						if [[ "$algorithm" == "qr" ]]; then
