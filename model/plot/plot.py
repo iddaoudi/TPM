@@ -27,13 +27,13 @@ def plot_function(df, architecture):
     colors = np.linspace(0, 1, num=16)
 
     for name, group in groups:
-        case1 = group.loc[group["case"] == 1]
-        x_val = case1["time"].iloc[0] * 1.15
-        y_val = case1[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1).iloc[0]
-
         fig, axes = plt.subplots(1, len(tile_sizes), figsize=(12, 4))
 
         for i, tile_size in enumerate(tile_sizes):
+            case1 = group.loc[(group["case"] == 1) & (group["tile_size"] == tile_size)]
+            x_val = case1["time"].iloc[0] * 1.05
+            y_val = case1[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1).iloc[0]
+
             ax = axes[i]
             tile_group = group.loc[group["tile_size"] == tile_size]
 
@@ -174,6 +174,7 @@ def plot_multi(data, architecture):
                     linewidth=0.5,
                 )
                 ax1.set_ylabel("Time * Energy")
+                ax1.set_title(f"Tile Size {tile_size}")
 
                 if len(metric) != 0:
                     ax2 = ax1.twinx()

@@ -75,7 +75,7 @@ void tpm_simple_print_matrix(tpm_desc A)
 void tpm_default_print_matrix(const char *name, const double *mat, int m)
 {
   printf("%s:\n", name);
-  if (strcmp(name, "S") == 0)
+  if ((strcmp(name, "S") == 0) || (strcmp(name, "EV") == 0))
   {
     for (int j = 0; j < m; j++)
     {
