@@ -321,6 +321,6 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
         const char *task_names[] = {"trsyl", "gesvd", "geev", "gemm"};
         CounterData *counters[] = {trsyl, gesvd, geev, gemm};
         int num_tasks = sizeof(task_names) / sizeof(task_names[0]); // This gives the length of the tasks array
-        dump_counters("sylsvd", task_names, counters, num_tasks, A.matrix_size, A.tile_size, l3_cache_size, available_threads);
+        dump_counters("sylsvd", task_names, counters, num_tasks, matrix_size * iter, matrix_size, l3_cache_size, available_threads);
     }
 }
