@@ -33,7 +33,7 @@ if [[ ${TPM_PAPI} -eq 1 ]]; then
 fi
 ###################################################### Testing parameters
 if [[ $testing -eq 1 ]]; then
-	msize=(2048 4096)
+	msize=(1024 2048)
 	bsize=(256 512)
 	targets=("1")
 	iteration=({1..1})
@@ -73,7 +73,7 @@ for algorithm in ${algo[*]}; do
 
 						# Start server
 						if [[ ${TPM_POWER} -eq 1 ]]; then
-							sudo -E power/tpm_server $thread $governor $power_frequency $target ${algo} &
+							sudo -E power/tpm_server $thread $governor $power_frequency $target $algorithm &
 							sleep 0.5
 							echo "*** TPM bash log: Power socket launched"
 						fi
