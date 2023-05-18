@@ -54,14 +54,14 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
 
     // TPM library: initialization
     if (TPM_TRACE)
-        tpm_downstream_start("sylsvd", A.matrix_size, A.tile_size, NTH);
+        tpm_downstream_start("sylsvd", matrix_size * iter, matrix_size, NTH);
 
     for (int i = 0; i < iter; i++)
     {
         if (TPM_TRACE)
         {
             // TPM library: create a unique task name
-            name_with_id_char = tpm_unique_task_identifier("trsyl", k, m, n);
+            name_with_id_char = tpm_unique_task_identifier("trsyl", i, 0, 0);
             tpm_upstream_set_task_name(name_with_id_char);
         }
 
@@ -118,7 +118,7 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
         if (TPM_TRACE)
         {
             // TPM library: create a unique task name
-            name_with_id_char = tpm_unique_task_identifier("gesvd", k, m, n);
+            name_with_id_char = tpm_unique_task_identifier("gesvd", i, 0, 0);
             tpm_upstream_set_task_name(name_with_id_char);
         }
 #pragma omp task firstprivate(name_with_id_char) depend(in : Xs[i]) depend(out : Us[i], Ss[i], VTs[i])
@@ -178,7 +178,7 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
         if (TPM_TRACE)
         {
             // TPM library: create a unique task name
-            name_with_id_char = tpm_unique_task_identifier("geev", k, m, n);
+            name_with_id_char = tpm_unique_task_identifier("geev", i, 0, 0);
             tpm_upstream_set_task_name(name_with_id_char);
         }
 #pragma omp task firstprivate(name_with_id_char) depend(in : Xs[i]) depend(out : EVs[i])
@@ -235,7 +235,7 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
         if (TPM_TRACE)
         {
             // TPM library: create a unique task name
-            name_with_id_char = tpm_unique_task_identifier("gemm", k, m, n);
+            name_with_id_char = tpm_unique_task_identifier("gemm", i, 0, 0);
             tpm_upstream_set_task_name(name_with_id_char);
         }
 #pragma omp task firstprivate(name_with_id_char) depend(in : Us[i], VTs[i]) depend(out : Ms[i])

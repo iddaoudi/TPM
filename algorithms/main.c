@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
   // Timers
   double time_start, time_finish;
-  int error;
+  int error, ret;
 
   // Launch algorithms
   switch (algo_type)
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
     // QR algorithm
     case ALGO_QR:
       // Workspace allocation for QR
-      int ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
+      ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
 
       time_start = omp_get_wtime();
