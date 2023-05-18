@@ -19,7 +19,7 @@
 // #define LOG 1
 
 void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[], double *VTs[],
-            int matrix_size, int iter)
+            double *EVs[], double *Ms[], int matrix_size, int iter)
 {
     // LAPACKE error code
     int info;
@@ -28,7 +28,8 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
     {
 #pragma omp task depend(in : Xs[i]) depend(out : Xs[i])
         {
-            info = tpm_sylvester(As[i], Bs[i], Xs[i], matrix_size, matrix_size);
+            double scale;
+            info = LAPACKE_dtrsyl(LAPACK_ROW_MAJOR, 'N', 'N', 1, matrix_size, matrix_size, As[i], matrix_size, Bs[i], matrix_size, Xs[i], matrix_size, &scale);
         }
 
 #pragma omp task depend(in : Xs[i]) depend(out : Us[i], Ss[i], VTs[i])
@@ -36,7 +37,24 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
 #ifdef LOG
             tpm_default_print_matrix("X", Xs[i], matrix_size);
 #endif
-            info = tpm_svd(Xs[i], Us[i], Ss[i], VTs[i], matrix_size, matrix_size);
+            double *superb = (double *)malloc((matrix_size - 1) * sizeof(double));
+            info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', matrix_size, matrix_size, Xs[i], matrix_size, Ss[i], Us[i], matrix_size, VTs[i], matrix_size, superb);
+            free(superb);
+        }
+
+#pragma omp task depend(in : Xs[i]) depend(out : EVs[i])
+        {
+            double *EVI = (double *)malloc(matrix_size * sizeof(double)); // Imaginary part of the eigenvalues
+            int info = LAPACKE_dgeev(LAPACK_ROW_MAJOR, 'N', 'V', matrix_size, Xs[i], matrix_size, EVs[i], EVI, NULL, matrix_size, Xs[i], matrix_size);
+            free(EVI);
+        }
+
+#pragma omp task depend(in : Us[i], VTs[i]) depend(out : Ms[i])
+        {
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                        matrix_size, matrix_size, matrix_size,
+                        1.0, Us[i], matrix_size, VTs[i], matrix_size,
+                        0.0, Ms[i], matrix_size);
         }
     }
 
@@ -55,6 +73,8 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
             tpm_default_print_matrix("U", Us[i], matrix_size);
             tpm_default_print_matrix("S", Ss[i], matrix_size);
             tpm_default_print_matrix("VT", VTs[i], matrix_size);
+            tpm_default_print_matrix("EV", EVs[i], matrix_size);
+            tpm_default_print_matrix("M", Ms[i], matrix_size);
         }
     }
 #endif

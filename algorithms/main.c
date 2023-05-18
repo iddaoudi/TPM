@@ -293,14 +293,18 @@ int main(int argc, char *argv[])
     double *Us[iter];
     double *Ss[iter];
     double *VTs[iter];
+    double *EVs[iter];
+    double *Ms[iter];
     for (int i = 0; i < iter; i++)
     {
-      As[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
-      Bs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
-      Xs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
-      Us[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
-      Ss[i] = (double *)malloc(BSIZE * sizeof(double));
-      VTs[i] = (double *)malloc(BSIZE * BSIZE * sizeof(double));
+      As[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
+      Bs[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
+      Xs[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
+      Us[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
+      Ss[i] = (double *)calloc(BSIZE, sizeof(double));
+      VTs[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
+      EVs[i] = (double *)calloc(BSIZE, sizeof(double));
+      Ms[i] = (double *)calloc(BSIZE * BSIZE, sizeof(double));
 
       tpm_dense_generator(As[i], BSIZE);
       tpm_dense_generator(Bs[i], BSIZE);
@@ -311,7 +315,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel
 #pragma omp master
     {
-      sylsvd(As, Bs, Xs, Us, Ss, VTs, BSIZE, iter);
+      sylsvd(As, Bs, Xs, Us, Ss, VTs, EVs, Ms, BSIZE, iter);
     }
     time_finish = omp_get_wtime();
 
@@ -323,6 +327,8 @@ int main(int argc, char *argv[])
       free(Us[i]);
       free(Ss[i]);
       free(VTs[i]);
+      free(EVs[i]);
+      free(Ms[i]);
     }
     break;
   }

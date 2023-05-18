@@ -77,8 +77,6 @@ long l3_cache_size;
 #include "srcpoisson/jacobi.h"
 #include "poisson.h"
 
-#include "srcsylsvd/svd.h"
-#include "srcsylsvd/sylverster.h"
 #include "sylsvd.h"
 
 #include "invert.h"
