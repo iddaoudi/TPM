@@ -8,7 +8,7 @@
  *
  *        Version:  1.0
  *        Created:  14/05/2023
- *       Revision:  none
+ *       Revision:  21/05/2023
  *       Compiler:  clang
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -35,7 +35,6 @@ void invert(double *A, int *ipiv, int matrix_size, int tile_size)
 
     if (TPM_PAPI)
     {
-        int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP, PAPI_BR_INS};
         int ret = PAPI_create_eventset(&eventset);
         PAPI_add_events(eventset, events, NEVENTS);
 
