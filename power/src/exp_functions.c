@@ -26,6 +26,8 @@
 #include "cholesky.h"
 #include "qr.h"
 #include "lu.h"
+#include "invert.h"
+#include "sylsvd.h"
 #include "sparselu.h"
 
 int start_experiment()
@@ -59,7 +61,7 @@ int start_experiment()
   // Store original frequency
   // By default, the original frequency of every CPU is set to its maximum
   unsigned long original_frequency = frequencies_vector[0];
-  
+
   // Change the governor
   change_governor();
   // Select the wanted frequency depending on user input
@@ -81,7 +83,6 @@ int start_experiment()
   uint64_t dram_energy_start[active_packages];
   uint64_t dram_energy_finish[active_packages];
 
-  
   while (1)
   {
     char task_and_cpu[TPM_STRING_SIZE];
@@ -104,6 +105,12 @@ int start_experiment()
       else if (!strcmp(algorithm, "lu"))
         lu_control(selected_case, task, (int)cpu, selected_frequency,
                    original_frequency);
+      else if (!strcmp(algorithm, "invert"))
+        sparselu_control(selected_case, task, (int)cpu, selected_frequency,
+                         original_frequency);
+      else if (!strcmp(algorithm, "sylsvd"))
+        sparselu_control(selected_case, task, (int)cpu, selected_frequency,
+                         original_frequency);
       else if (!strcmp(algorithm, "sparselu"))
         sparselu_control(selected_case, task, (int)cpu, selected_frequency,
                          original_frequency);

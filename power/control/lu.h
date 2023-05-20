@@ -7,7 +7,7 @@
  *
  *        Version:  1.0
  *        Created:  25/12/2022
- *       Revision:  26/03/2023
+ *       Revision:  20/05/2023
  *       Compiler:  gcc
  *
  *         Author:  Idriss Daoudi <idaoudi@anl.gov>
@@ -20,7 +20,7 @@ void lu_control(int selected_case, const char *task, int cpu,
                 unsigned long selected_frequency,
                 unsigned long original_frequency)
 {
-  static const char *task_names[] = {"getrf", "gemm", "trsm"};
+  static const char *task_names[] = {"getrfpiv", "gemm", "trsmswp", "geswp"};
 
   if (selected_case >= 1 && selected_case <= 7)
   {
@@ -42,7 +42,7 @@ void lu_control(int selected_case, const char *task, int cpu,
       tpm_set_max_frequency(cpu, original_frequency);
     }
   }
-  else if (selected_case == 8)
+  else if (selected_case == 16)
   {
     tpm_set_max_frequency(cpu, selected_frequency);
   }
