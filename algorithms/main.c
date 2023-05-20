@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
   {
     // Number of iterations is constant, we only vary the size of the whole matrix
     // which is the input tile size
-    int iter = 100;
+    int iter = 40;
     // Array of matrices
     double *As[iter];
     double *Bs[iter];
