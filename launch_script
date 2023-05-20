@@ -3,14 +3,14 @@
 ROOT=/home/cc
 
 ###################################################### Parameters to modify
-algo=(cholesky)
-msize=(16384 24576 32768)
+algo=(cholesky qr lu invert sylsvd)
+msize=(8192 12288 16384 20480 24576 28672)
 bsize=(512 1024 2048)
-threads=(12)
+threads=(24)
 numa=12
 export TPM_PAPI=0
-export TPM_TRACE=0
-export TPM_POWER=0
+export TPM_TRACE=1
+export TPM_POWER=1
 testing=1
 ###################################################### Parameters to not modify
 governor=ondemand
@@ -60,12 +60,6 @@ for algorithm in ${algo[*]}; do
 
 						export TPM_ITER=$iter
 						export OMP_NUM_THREADS=$thread
-
-						if [[ "$algorithm" == "lu" ]]; then
-							if [[ $testing -eq 0 ]]; then
-								targets=({1..8})
-							fi
-						fi
 
 						if [[ "$algorithm" == "qr" ]]; then
 							ulimit -s unlimited
