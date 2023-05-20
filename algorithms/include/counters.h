@@ -55,7 +55,7 @@ void accumulate_counters(CounterData *dst, CounterData *src, int available_threa
     }
 }
 
-void dump_counters(const char *algorithm, const char *task_names[], CounterData *counters[], int num_tasks, int matrix_size, int tile_size, double l3_cache_size, int available_threads)
+void dump_counters(const char *algorithm, const char *task_names[], CounterData *counters[], int num_tasks, int matrix_size, int tile_size, long l3_cache_size, int available_threads)
 {
     CounterData *total_counters = malloc(num_tasks * sizeof(CounterData));
     for (int i = 0; i < num_tasks; i++)
