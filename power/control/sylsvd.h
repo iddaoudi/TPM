@@ -22,7 +22,7 @@ void sylsvd_control(int selected_case, const char *task, int cpu,
 {
     static const char *task_names[] = {"trsyl", "gesvd", "geev", "gemm"};
 
-    if (selected_case >= 1 && selected_case <= 7)
+    if (selected_case >= 1 && selected_case <= 15)
     {
         int task_mask = selected_case - 1;
         int task_found = 0;
