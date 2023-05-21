@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -10,6 +9,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 import warnings
 from sklearn.exceptions import ConvergenceWarning
+
+import data_treatment.dictionaries as dict
 
 
 def single_target_model(
@@ -69,16 +70,16 @@ def single_target_model(
     test["target"] = test["target"].astype(bool)
 
     # Features
-    # feature_cols = ['tile_size'] + [f'task{i}_{metric}' for i in range(1, 5) for metric in ['mem_boundness', 'arithm_intensity', 'ilp', 'l3_cache_ratio']]
     feature_cols = (
+        # App metrics
         ["matrix_size"]
         + ["tile_size"]
+        + [f"task{i}_weight" for i in range(1, 5)]
+        + ["case"]
+        # System metrics
         + [f"task{i}" for i in range(1, 5)]
-        + [
-            f"task{i}_{metric}"
-            for i in range(1, 5)
-            for metric in ["mem_boundness", "arithm_intensity", "ilp", "l3_cache_ratio"]
-        ]
+        # Hardware metrics
+        + [f"task{i}_{metric}" for i in range(1, 5) for metric in dict.metrics]
     )
 
     # Models
