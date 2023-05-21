@@ -17,6 +17,17 @@ def calculate_task_ratio(df_counters):
     return df_counters
 
 
+def calculate_new_columns(df_counters):
+    df_counters["ilp"] = df_counters["papi_tot_ins"] / df_counters["papi_tot_cyc"]
+    df_counters["mb"] = df_counters["papi_res_stl"] / df_counters["papi_tot_cyc"]
+    df_counters["cmr"] = df_counters["papi_l3_tcm"] / df_counters["papi_tot_ins"]
+    df_counters["ctr"] = df_counters["papi_l3_tcm"] / df_counters["l3_cache_size"]
+    df_counters["cti"] = (
+        df_counters["papi_l3_tcm"] * df_counters["l3_cache_size"]
+    ) / df_counters["papi_tot_cyc"]
+    return df_counters
+
+
 def mean_of_files(folder):
     energy_files_format = "energy_data_*.csv"
     counter_files_format = "counters_*.csv"
