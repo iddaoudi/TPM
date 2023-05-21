@@ -69,27 +69,37 @@ def logic(df_energy, df_counters, task_dict):
                                 (df_counters["matrix_size"] == matrix)
                                 & (df_counters["tile_size"] == tile)
                                 & (df_counters["task"] == task),
-                                "weight_ratio",
+                                "weight",
                             ].values[0]
 
                             # Find the metric according to the frequency and multiply it by the task weight
-                            df_energy.loc[
+                            common_energy_filter = (
                                 (df_energy["algorithm"] == algorithm)
                                 & (df_energy["matrix_size"] == matrix)
                                 & (df_energy["tile_size"] == tile)
-                                & (df_energy["case"] == case),
-                                column_name,
-                            ] = (
-                                df_counters.loc[
-                                    (df_counters["algorithm"] == algorithm)
-                                    & (df_counters["matrix_size"] == matrix)
-                                    & (df_counters["tile_size"] == tile)
-                                    & (df_counters["task"] == task)
-                                    & (df_counters["frequency"] == frequency),
-                                    dict.metrics[i],
-                                ].values[0]
-                                * task_weight
+                                & (df_energy["case"] == case)
                             )
+
+                            common_counters_filter = (
+                                (df_counters["algorithm"] == algorithm)
+                                & (df_counters["matrix_size"] == matrix)
+                                & (df_counters["tile_size"] == tile)
+                                & (df_counters["task"] == task)
+                                & (df_counters["frequency"] == frequency)
+                            )
+
+                            metric_value = df_counters.loc[
+                                common_counters_filter, dict.metrics[i]
+                            ].values[0]
+
+                            if column_name != task_dict[task] + "_weight":
+                                df_energy.loc[common_energy_filter, column_name] = (
+                                    metric_value * task_weight
+                                )
+                            else:
+                                df_energy.loc[
+                                    common_energy_filter, column_name
+                                ] = metric_value
 
                         for task in original_frequency_tasks:
                             # Get the frequency
@@ -119,25 +129,36 @@ def logic(df_energy, df_counters, task_dict):
                                 (df_counters["matrix_size"] == matrix)
                                 & (df_counters["tile_size"] == tile)
                                 & (df_counters["task"] == task),
-                                "weight_ratio",
+                                "weight",
                             ].values[0]
 
                             # Find the metric according to the frequency and multiply it by the task weight
-                            df_energy.loc[
+                            common_energy_filter = (
                                 (df_energy["algorithm"] == algorithm)
                                 & (df_energy["matrix_size"] == matrix)
                                 & (df_energy["tile_size"] == tile)
-                                & (df_energy["case"] == case),
-                                column_name,
-                            ] = (
-                                df_counters.loc[
-                                    (df_counters["algorithm"] == algorithm)
-                                    & (df_counters["matrix_size"] == matrix)
-                                    & (df_counters["tile_size"] == tile)
-                                    & (df_counters["task"] == task)
-                                    & (df_counters["frequency"] == frequency),
-                                    dict.metrics[i],
-                                ].values[0]
-                                * task_weight
+                                & (df_energy["case"] == case)
                             )
+
+                            common_counters_filter = (
+                                (df_counters["algorithm"] == algorithm)
+                                & (df_counters["matrix_size"] == matrix)
+                                & (df_counters["tile_size"] == tile)
+                                & (df_counters["task"] == task)
+                                & (df_counters["frequency"] == frequency)
+                            )
+
+                            metric_value = df_counters.loc[
+                                common_counters_filter, dict.metrics[i]
+                            ].values[0]
+
+                            if column_name != task_dict[task] + "_weight":
+                                df_energy.loc[common_energy_filter, column_name] = (
+                                    metric_value * task_weight
+                                )
+                            else:
+                                df_energy.loc[
+                                    common_energy_filter, column_name
+                                ] = metric_value
+
     return df_energy

@@ -13,7 +13,7 @@ def calculate_task_ratio(df_counters):
         ["algorithm", "matrix_size", "tile_size", "frequency"]
     )
     weight_sum = grouped["weight"].transform("sum")
-    df_counters["weight_ratio"] = df_counters["weight"] / weight_sum
+    df_counters["weight"] = df_counters["weight"] / weight_sum
     return df_counters
 
 

@@ -1,14 +1,4 @@
-# metrics = ["mem_boundness", "arithm_intensity", "ilp", "l3_cache_ratio"]
-metrics_to_parse = [
-    "papi_l3_tcm",
-    "papi_tot_ins",
-    "papi_res_stl",
-    "papi_tot_cyc",
-    "papi_br_msp",
-    "weight",
-    "l3_cache_size",
-]
-metrics_to_create = [
+metrics = [
     "papi_l3_tcm",
     "papi_tot_ins",
     "papi_res_stl",
