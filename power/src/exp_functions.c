@@ -106,11 +106,11 @@ int start_experiment()
         lu_control(selected_case, task, (int)cpu, selected_frequency,
                    original_frequency);
       else if (!strcmp(algorithm, "invert"))
-        sparselu_control(selected_case, task, (int)cpu, selected_frequency,
-                         original_frequency);
+        invert_control(selected_case, task, (int)cpu, selected_frequency,
+                       original_frequency);
       else if (!strcmp(algorithm, "sylsvd"))
-        sparselu_control(selected_case, task, (int)cpu, selected_frequency,
-                         original_frequency);
+        sylsvd_control(selected_case, task, (int)cpu, selected_frequency,
+                       original_frequency);
       else if (!strcmp(algorithm, "sparselu"))
         sparselu_control(selected_case, task, (int)cpu, selected_frequency,
                          original_frequency);
