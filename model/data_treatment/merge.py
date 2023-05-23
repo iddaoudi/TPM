@@ -14,6 +14,12 @@ def logic(df_energy, df_counters, task_dict):
             cases_dict = dict.cholesky_dict
         elif algorithm == "qr":
             cases_dict = dict.qr_dict
+        elif algorithm == "lu":
+            cases_dict = dict.lu_dict
+        elif algorithm == "invert":
+            cases_dict = dict.invert_dict
+        elif algorithm == "sylsvd":
+            cases_dict = dict.sylsvd_dict
         else:
             print("Missing dictionnary!")
             exit(1)

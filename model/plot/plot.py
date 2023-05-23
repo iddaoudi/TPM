@@ -161,18 +161,23 @@ def plot_multi(data, architecture):
                 colors = filtered_data.apply(color_map, axis=1)
 
                 ax1 = axes[index]
-                ax1.scatter(
+                ax1.bar(
                     filtered_data["case"],
                     filtered_data["time_energy_product"],
-                    c=colors,
-                    marker="o",
+                    color=colors,
                 )
-                ax1.plot(
-                    filtered_data["case"],
-                    filtered_data["time_energy_product"],
-                    c="gray",
-                    linewidth=0.5,
-                )
+                # ax1.scatter(
+                #     filtered_data["case"],
+                #     filtered_data["time_energy_product"],
+                #     c=colors,
+                #     marker="o",
+                # )
+                # ax1.plot(
+                #     filtered_data["case"],
+                #     filtered_data["time_energy_product"],
+                #     c="gray",
+                #     linewidth=0.5,
+                # )
                 ax1.set_ylabel("Time * Energy")
                 ax1.set_title(f"Tile Size {tile_size}")
 
@@ -198,10 +203,10 @@ def plot_multi(data, architecture):
             fig.tight_layout()
             if len(metric) != 0:
                 plt.savefig(
-                    f"./model/plot/figures/{architecture}_{algorithm}_{matrix_size}_{metric}.png"
+                    f"./model/plot/figures/bars/{architecture}_{algorithm}_{matrix_size}_{metric}.png"
                 )
             else:
                 plt.savefig(
-                    f"./model/plot/figures/{architecture}_{algorithm}_{matrix_size}.png"
+                    f"./model/plot/figures/bars/{architecture}_{algorithm}_{matrix_size}.png"
                 )
             # plt.show()
