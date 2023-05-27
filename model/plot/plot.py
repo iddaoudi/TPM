@@ -98,33 +98,6 @@ def plot_multi(data, architecture):
             fig.suptitle(f"Algorithm: {algorithm} - Matrix Size: {matrix_size}")
 
             for index, tile_size in enumerate(tile_sizes):
-                if len(metric) != 0:
-                    data["ai"] = (
-                        data["task1_arithm_intensity"]
-                        + data["task2_arithm_intensity"]
-                        + data["task3_arithm_intensity"]
-                        + data["task4_arithm_intensity"]
-                    )
-                    data["mb"] = (
-                        data["task1_mem_boundness"]
-                        + data["task2_mem_boundness"]
-                        + data["task3_mem_boundness"]
-                        + data["task4_mem_boundness"]
-                    )
-                    data["ilp"] = (
-                        data["task1_ilp"]
-                        + data["task2_ilp"]
-                        + data["task3_ilp"]
-                        + data["task4_ilp"]
-                    )
-                    data["cmr"] = (
-                        data["task1_l3_cache_ratio"]
-                        + data["task2_l3_cache_ratio"]
-                        + data["task3_l3_cache_ratio"]
-                        + data["task4_l3_cache_ratio"]
-                    )
-                    data["sum"] = data["ai"] + data["mb"] + data["ilp"] + data["cmr"]
-
                 filtered_data = data[
                     (data["matrix_size"] == matrix_size)
                     & (data["tile_size"] == tile_size)
@@ -138,7 +111,7 @@ def plot_multi(data, architecture):
                 ].values[0]
 
                 condition = (filtered_data["energy"] < case_1_energy) & (
-                    filtered_data["time"] <= case_1_time * 1.15
+                    filtered_data["time"] <= case_1_time * 1.05
                 )
                 # If no case is fulfilling the 2 constraints
                 if not condition.any():
@@ -152,7 +125,7 @@ def plot_multi(data, architecture):
                         return "green"
                     elif (
                         row["energy"] < case_1_energy
-                        and row["time"] <= case_1_time * 1.15
+                        and row["time"] <= case_1_time * 1.05
                     ):
                         return "red"
                     else:
