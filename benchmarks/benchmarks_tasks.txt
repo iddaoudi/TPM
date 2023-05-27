@@ -1,0 +1,23 @@
+dgram 4 laset syssq gessq gram
+dcesca 5 laset gesum gessq geadd cesca
+dgetrs_nopiv 2 trsm gemm
+dgetrf_nopiv 3 getrfnpiv trsm gemm
+dgesvd 10 geqrt lacpy unmqr tpqrt tpmqrt gelqt unmlq tplqt tpmlqt laset
+dgesv_nopiv 3 getrfnpiv trsm gemm
+dgenm2 6 laset zasum gessq lacpy lascal gemv
+dlauum 4 lauum syrk trmm gemm
+dtrtri 3 trsm trtri gemm
+dtradd 2 tradd geadd
+dpoinv 7 potrf trsm syrk gemm trtri lauum trmm
+dpotri 6 trsm trtri gemm lauum syrk trmm
+dposv 4 potrf trsm syrk gemm
+dpotrs 2 trsm gemm
+dpotrf 4 potrf trsm syrk gemm
+dtrsm 2 trsm gemm
+dtrmm 2 trmm gemm
+dsyr2k 2 syr2k gemm
+dsyrk 2 syrk gemm
+dsymm 2 symm gemm
+dlantr 4 set lantr lange langemax
+dlansy 4 laset lansy lange langemax
+dlange 3 laset lange langemax

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ROOT=/home/xps/Work/Software
+
+TPM=${ROOT}/TPM2
+CHAMELEON=${ROOT}/chameleon-tpm/build/bin
+
+MATRIX=(4096)
+TILE=(512)
+THREADS=4
+
+while IFS= read -r algorithm
+do
+    for matrix in ${MATRIX[*]}
+    do
+        for tile in ${TILE[*]}
+        do
+            echo "**************************"
+            echo "BASH LAUNCHING" $algorithm
+            echo "**************************"
+            LD_PRELOAD=${TPM}/libTPMLibrary.so ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t ${THREADS} -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+        done
+    done
+done < benchmarks/benchmarks.txt
