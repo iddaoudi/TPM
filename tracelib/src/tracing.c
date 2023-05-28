@@ -17,19 +17,19 @@ extern void TPM_trace_start()
     }
 
     /* PAPI initialization */
-    int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
-    if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
-    {
-        fprintf(stderr, "PAPI library version mismatch: %s\n", PAPI_strerror(papi_version));
-        exit(EXIT_FAILURE);
-    }
-    else if (papi_version < 0)
-    {
-        fprintf(stderr, "PAPI library init error: %s\n", PAPI_strerror(papi_version));
-        exit(EXIT_FAILURE);
-    }
     if (TPM_PAPI)
     {
+        int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
+        if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
+        {
+            fprintf(stderr, "PAPI library version mismatch: %s\n", PAPI_strerror(papi_version));
+            exit(EXIT_FAILURE);
+        }
+        else if (papi_version < 0)
+        {
+            fprintf(stderr, "PAPI library init error: %s\n", PAPI_strerror(papi_version));
+            exit(EXIT_FAILURE);
+        }
         /* Threaded PAPI initialization */
         int ret;
         if ((ret = PAPI_thread_init(pthread_self)) != PAPI_OK)
