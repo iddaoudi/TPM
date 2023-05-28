@@ -1,1 +1,11 @@
 .vscode/
+tracelib/CMakeCache.txt
+tracelib/CMakeFiles/
+tracelib/Makefile
+tracelib/cmake_install.cmake
+tracelib/libTPMLibrary.so
+power/power
+power/CMakeCache.txt
+power/CMakeFiles/          
+power/Makefile             
+power/cmake_install.cmake  
