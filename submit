@@ -2,12 +2,21 @@
 
 ROOT=/home/xps/Work/Software
 
-TPM=${ROOT}/TPM2
+TPM=${ROOT}/TPM
 CHAMELEON=${ROOT}/chameleon-tpm/build/bin
 
+cd $TPM/tracelib
+make clean && make
+cd -
+
+cd $TPM/power
+make clean && make
+cd -
+
 MATRIX=(4096)
-TILE=(512)
-THREADS=4
+TILE=(1024)
+THREADS=16
+CASE=({1..1})
 
 while IFS= read -r algorithm
 do
@@ -15,10 +24,16 @@ do
     do
         for tile in ${TILE[*]}
         do
-            echo "**************************"
-            echo "BASH LAUNCHING" $algorithm
-            echo "**************************"
-            LD_PRELOAD=${TPM}/libTPMLibrary.so ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t ${THREADS} -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+            for case in ${CASE[*]}
+            do
+                lowest_freq=$(cpufreq-info -l | awk '{print $1}')
+                default_freq=$(cpufreq-info -l | awk '{print $2}')
+                sudo -E ${TPM}/power/power $algorithm $THREADS $case $lowest_freq $default_freq &
+                echo "TPM BASH power server launched"
+                echo "TPM BASH tracelib launching" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
+                LD_PRELOAD=${TPM}/tracelib/libTPMLibrary.so numactl --physcpubind=0-$(expr $THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                echo "TPM BASH tracelib done" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
+            done
         done
     done
-done < benchmarks/benchmarks.txt
+done < benchmarks/benchmarks2.txt
