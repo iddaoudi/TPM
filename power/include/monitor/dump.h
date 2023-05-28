@@ -5,10 +5,10 @@ void dump(int active_packages,
           uint64_t *dram_energy_finish,
           double exec_time)
 {
+
     char filename[64];
-    // int TPM_ITER = atoi(getenv("TPM_ITER"));
-    // sprintf(filename, "energy_data_%s_%d_%d.csv", algorithm, matrix_size, TPM_ITER);
-    sprintf(filename, "energy_data.csv");
+    int TPM_ITER = atoi(getenv("TPM_ITER"));
+    sprintf(filename, "energy_data_%s_%d_%d.csv", algorithm, matrix_size, TPM_ITER);
 
     FILE *file;
     struct stat buffer;
@@ -23,8 +23,7 @@ void dump(int active_packages,
 
     if (!file_already_exists)
     {
-        // fprintf(file, "algorithm,matrix_size,tile_size,case,PKG1,PKG2,DRAM1,DRAM2,time\n");
-        fprintf(file, "PKG1,PKG2,DRAM1,DRAM2,time\n");
+        fprintf(file, "algorithm,matrix_size,tile_size,case,PKG1,PKG2,DRAM1,DRAM2,time\n");
     }
 
     uint64_t *pkg_energy = (uint64_t *)calloc(active_packages, sizeof(uint64_t));
@@ -41,12 +40,11 @@ void dump(int active_packages,
         fprintf(stderr, "More packages that what dump can handle\n");
         exit(EXIT_FAILURE);
     }
-    // fprintf(file, "%s,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
-    //         algorithm, matrix_size, tile_size, selected_case, pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1], exec_time);
-    fprintf(file, "%" PRIu64 ",%" PRIu64 ",%f\n",
-            pkg_energy[0],
-            dram_energy[0],
+    fprintf(file, "%s,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
+            algorithm, matrix_size, tile_size, combination_of_tasks,
+            pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1],
             exec_time);
+
     fclose(file);
 
     free(pkg_energy);

@@ -2,8 +2,9 @@
 
 MATRIX=(4096)
 TILE=(1024)
-THREADS=16
+TPM_THREADS=16
 CASE=({1..1})
+ITER=({1..1})
 
 export TPM_PAPI_SET=0
 export TPM_POWER_SET=1
@@ -28,8 +29,10 @@ TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
 
 if [ $TPM_PAPI_SET -eq 1 ];
 then
-    THREADS=1
+    TPM_THREADS=1
 fi
+
+export TPM_THREADS=$TPM_THREADS
 
 while IFS= read -r algorithm
 do
@@ -37,21 +40,28 @@ do
     do
         for tile in ${TILE[*]}
         do
-            for case in ${CASE[*]}
+            for iteration in ${ITER[*]}
             do
-                export TPM_ALGORITHM=$algorithm
-        
-                lowest_freq=$(cpufreq-info -l | awk '{print $1}')
-                default_freq=$(cpufreq-info -l | awk '{print $2}')
-                sudo -E ${TPM}/power/TPMpower $algorithm $THREADS $case $lowest_freq $default_freq &
-                echo "TPM BASH power server launched"
-                
-                echo "TPM BASH tracelib launching" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
-                LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
-                echo "TPM BASH tracelib done" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
+                for case in ${CASE[*]}
+                do
+                    export TPM_ALGORITHM=$algorithm
+                    export TPM_MATRIX=$matrix
+                    export TPM_TILE=$tile
+                    export TPM_ITER=$iteration
+            
+                    lowest_freq=$(cpufreq-info -l | awk '{print $1}')
+                    default_freq=$(cpufreq-info -l | awk '{print $2}')
+                    sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
+                    echo "*** TPM: Power server launched"
+                    
+                    echo "*** TPM: Tracelib launching" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
+                    LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                    echo "*** TPM: Tracelib done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
+                done
             done
         done
     done
 done < benchmarks/benchmarks2.txt
 
 ps -ef | grep TPMpower | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9
+echo "*** TPM: Submission finished"

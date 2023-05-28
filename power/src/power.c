@@ -2,17 +2,20 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 6)
+    if (argc != 4)
     {
         fprintf(stderr, "Incorrect number of arguments\n");
         exit(EXIT_FAILURE);
     }
 
-    algorithm = argv[1];
-    number_of_threads = atoi(argv[2]);
-    combination_of_tasks = atoi(argv[3]);
-    frequency_to_set = atoi(argv[4]);
-    default_frequency = atoi(argv[5]);
+    combination_of_tasks = atoi(argv[1]);
+    frequency_to_set = atoi(argv[2]);
+    default_frequency = atoi(argv[3]);
+
+    algorithm = getenv("TPM_ALGORITHM");
+    number_of_threads = atoi(getenv("TPM_THREADS"));
+    matrix_size = atoi(getenv("TPM_MATRIX"));
+    tile_size = atoi(getenv("TPM_TILE"));
 
     /* Check that the current governor is ondemand */
     TPM_power_check_current_governor();
