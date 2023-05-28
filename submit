@@ -30,9 +30,12 @@ TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
 if [ $TPM_PAPI_SET -eq 1 ];
 then
     TPM_THREADS=1
+    CASE=(1)
 fi
 
 export TPM_THREADS=$TPM_THREADS
+lowest_freq=$(cpufreq-info -l | awk '{print $1}')
+default_freq=$(cpufreq-info -l | awk '{print $2}')
 
 while IFS= read -r algorithm
 do
@@ -48,15 +51,36 @@ do
                     export TPM_MATRIX=$matrix
                     export TPM_TILE=$tile
                     export TPM_ITER=$iteration
-            
-                    lowest_freq=$(cpufreq-info -l | awk '{print $1}')
-                    default_freq=$(cpufreq-info -l | awk '{print $2}')
-                    sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
-                    echo "*** TPM: Power server launched"
                     
-                    echo "*** TPM: Tracelib launching" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
-                    LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
-                    echo "*** TPM: Tracelib done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
+                    if [ $TPM_PAPI_SET -eq 1 ];
+                    then
+                        echo "*** TPM: Measuring PAPI counters"
+                        FREQUENCIES=(MIN DEFAULT)
+                        for frequency in ${FREQUENCIES[*]};
+                        do
+                            if [ $frequency = "MIN" ];
+                            then
+                                export TPM_FREQUENCY=$lowest_freq
+                                sudo cpufreq-set -c 0 -u $lowest_freq
+                            else
+                                export TPM_FREQUENCY=$default_freq
+                                sudo cpufreq-set -c 0 -u $default_freq
+                            fi
+                            LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                        done
+                        echo "*** TPM: Measuring PAPI done" $algorithm "with parameters" $matrix $tile
+                    fi
+                    
+                    if [ $TPM_POWER_SET -eq 1 ];
+                    then
+                        echo "*** TPM: Measuring energy/case"
+
+                        sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
+                        echo "*** TPM: Power server launched"
+                    
+                        LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                        echo "*** TPM: Measuring energy/case done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
+                    fi
                 done
             done
         done
