@@ -1,22 +1,35 @@
 #!/bin/bash
 
-ROOT=/home/xps/Work/Software
-
-TPM=${ROOT}/TPM
-CHAMELEON=${ROOT}/chameleon-tpm/build/bin
-
-cd $TPM/tracelib
-make clean && make
-cd -
-
-cd $TPM/power
-make clean && make
-cd -
-
 MATRIX=(4096)
 TILE=(1024)
 THREADS=16
 CASE=({1..1})
+
+export TPM_PAPI_SET=1
+
+ROOT=/home/xps/Work/Software
+TPM=${ROOT}/TPM
+CHAMELEON=${ROOT}/chameleon-tpm/build/bin
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/${ROOT}/OpenBLAS/build/lib
+
+cd $TPM/tracelib
+rm CMakeCache.txt
+cmake .
+make clean && make
+cd -
+cd $TPM/power
+rm CMakeCache.txt
+cmake .
+make clean && make
+cd -
+
+TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
+
+if [ $TPM_PAPI_SET -eq 1 ];
+then
+    THREADS=1
+fi
 
 while IFS= read -r algorithm
 do
@@ -26,14 +39,19 @@ do
         do
             for case in ${CASE[*]}
             do
+                export TPM_ALGORITHM=$algorithm
+        
                 lowest_freq=$(cpufreq-info -l | awk '{print $1}')
                 default_freq=$(cpufreq-info -l | awk '{print $2}')
-                sudo -E ${TPM}/power/power $algorithm $THREADS $case $lowest_freq $default_freq &
+                sudo -E ${TPM}/power/TPMpower $algorithm $THREADS $case $lowest_freq $default_freq &
                 echo "TPM BASH power server launched"
+                
                 echo "TPM BASH tracelib launching" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
-                LD_PRELOAD=${TPM}/tracelib/libTPMLibrary.so numactl --physcpubind=0-$(expr $THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -o $algorithm -t $THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
                 echo "TPM BASH tracelib done" $algorithm "case" $case "with parameters" $THREADS $matrix $tile
             done
         done
     done
 done < benchmarks/benchmarks2.txt
+
+ps -ef | grep TPMpower | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9

@@ -6,12 +6,12 @@
 
 #include "zmq.h"
 #include "pthread.h"
+#include "papi.h"
 
 #include "cvector.h"
 #include "utils.h"
 #include "common.h"
-// #include "internal/task.h"
-// FIXME Useless for now ---> add task map and collect individual task data
+#include "internal/task.h"
 
 #include "zutils.h"
 #include "client.h"

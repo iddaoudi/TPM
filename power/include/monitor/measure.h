@@ -5,12 +5,12 @@ void TPM_power_start_measuring_uj(int active_packages,
     for (int i = 0; i < active_packages; i++)
     {
         pkg_energy_start[i] = TPM_rapl_get_uj(i, "pkg");
-        printf("energy %" PRIu64 "\n", pkg_energy_start[i]);
         dram_energy_start[i] = TPM_rapl_get_uj(i, "dram");
         if (pkg_energy_start[i] >= TPM_rapl_get_maxuj(i, "pkg") ||
             dram_energy_start[i] >= TPM_rapl_get_maxuj(i, "dram"))
         {
             fprintf(stderr, "Energy measured larger than max?\n");
+            exit(EXIT_FAILURE);
         }
     }
 }

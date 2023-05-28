@@ -5,6 +5,7 @@ int main(int argc, char *argv[])
     if (argc != 6)
     {
         fprintf(stderr, "Incorrect number of arguments\n");
+        exit(EXIT_FAILURE);
     }
 
     algorithm = argv[1];

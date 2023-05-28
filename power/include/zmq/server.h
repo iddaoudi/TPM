@@ -12,6 +12,7 @@ void TPM_power_start_zmq_server()
     if (ret != 0)
     {
         fprintf(stderr, "Failed to launch ZMQ server\n");
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -21,5 +22,6 @@ void TPM_power_close_zmq_server()
     if (ret != 0)
     {
         fprintf(stderr, "Failed to shut down ZMQ server\n");
+        exit(EXIT_FAILURE);
     }
 }

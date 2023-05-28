@@ -15,7 +15,7 @@ set(ZMQ_LIBRARY -lzmq)
 set(CPUFREQ_LIBRARY -lcpufreq)
 
 # Create executable
-add_executable(power src/power.c)
+add_executable(TPMpower src/power.c)
 
 # Link libraries to your executable
-target_link_libraries(power ${ZMQ_LIBRARY} ${CPUFREQ_LIBRARY})
+target_link_libraries(TPMpower ${ZMQ_LIBRARY} ${CPUFREQ_LIBRARY})

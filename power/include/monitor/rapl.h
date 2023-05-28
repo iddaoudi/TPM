@@ -33,7 +33,7 @@ int TPM_rapl_init()
     if (rc != 0)
     {
         fprintf(stderr, "regcomp() failed\n");
-        return -1;
+        exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < MAX_PKGS; i++)

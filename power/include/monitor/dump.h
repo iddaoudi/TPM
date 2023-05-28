@@ -38,7 +38,8 @@ void dump(int active_packages,
 
     if (active_packages > 2)
     {
-        fprintf(stderr, "More packages that what dump can hamdle\n");
+        fprintf(stderr, "More packages that what dump can handle\n");
+        exit(EXIT_FAILURE);
     }
     // fprintf(file, "%s,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
     //         algorithm, matrix_size, tile_size, selected_case, pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1], exec_time);

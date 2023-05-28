@@ -50,6 +50,7 @@ void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
     if (task_names == NULL)
     {
         fprintf(stderr, "Algorithm for power control not found\n");
+        exit(EXIT_FAILURE);
     }
 
     if (selected_case >= 1 && selected_case <= ((1 << num_tasks) - 1))

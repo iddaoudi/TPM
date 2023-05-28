@@ -3,12 +3,8 @@
 
 int activate_zmq = 1;
 
-char *recorded_algorithm;
-const char *recorded_task_name;
-
-int recorded_matrix_size;
-int recorded_tile_size;
-int recorded_number_of_threads;
+int TPM_PAPI = 0;
+char *TPM_ALGORITHM;
 
 pthread_mutex_t mutex;
 

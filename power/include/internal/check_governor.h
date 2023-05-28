@@ -8,5 +8,6 @@ void TPM_power_check_current_governor()
     if (ret != 0)
     {
         fprintf(stderr, "Current governor is not ondemand\n");
+        exit(EXIT_FAILURE);
     }
 }
