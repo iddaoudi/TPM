@@ -160,9 +160,12 @@ extern void TPM_trace_finalize(double total_execution_time)
     }
     if (TPM_PAPI)
     {
-        // #pragma omp taskwait
+#pragma omp taskwait
         PAPI_destroy_eventset(&eventset);
         PAPI_shutdown();
+
+        dump();
+
         for (int i = 0; i < algorithm->num_tasks; i++)
         {
             free(algorithm->counters[i]);

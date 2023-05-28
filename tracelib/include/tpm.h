@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <sched.h>
 
@@ -15,3 +16,5 @@
 
 #include "zutils.h"
 #include "client.h"
+
+#include "dump.h"

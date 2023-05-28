@@ -1,5 +1,6 @@
 #define TPM_MESSAGE_SIZE 26
 #define TPM_STRING_SIZE 10
+#define TPM_FILENAME_SIZE 64
 
 int TPM_PAPI = 0;
 int TPM_POWER = 0;

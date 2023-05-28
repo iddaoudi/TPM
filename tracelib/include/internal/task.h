@@ -1,6 +1,8 @@
 #define NEVENTS 5
 
-int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP}; //, PAPI_BR_INS};
+int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_RES_STL, PAPI_TOT_CYC, PAPI_BR_MSP};                     //, PAPI_BR_INS};
+char *events_strings[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_RES_STL", "PAPI_TOT_CYC", "PAPI_BR_MSP"}; //, "PAPI_BR_INS"};
+
 int eventset;
 long long values[NEVENTS];
 
