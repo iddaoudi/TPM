@@ -6,7 +6,7 @@ void dump(int active_packages,
           double exec_time)
 {
 
-    char filename[64];
+    char filename[TPM_FILENAME_SIZE];
     int TPM_ITER = atoi(getenv("TPM_ITER"));
     sprintf(filename, "energy_data_%s_%d_%d.csv", algorithm, matrix_size, TPM_ITER);
 
