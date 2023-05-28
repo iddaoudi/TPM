@@ -37,7 +37,7 @@ void dump(long l3_cache_size)
         {
             fprintf(file, "%s,%s,%d,%d,%ld,%d,%lld,", TPM_ALGORITHM,
                     algorithm->task_index[i].task_name,
-                    TPM_MATRIX, TPM_TILE, TPM_FREQUENCY,
+                    TPM_MATRIX, TPM_TILE, l3_cache_size, TPM_FREQUENCY,
                     algorithm->counters[i]->values[NEVENTS]);
             for (int j = 0; j < NEVENTS; j++)
             {
