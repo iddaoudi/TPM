@@ -1,7 +1,7 @@
 #define TPM_MESSAGE_SIZE 26
 #define TPM_STRING_SIZE 10
 
-int activate_zmq = 0;
+int activate_zmq = 1;
 
 char *recorded_algorithm;
 const char *recorded_task_name;
