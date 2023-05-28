@@ -5,23 +5,23 @@ TILE=(1024)
 THREADS=16
 CASE=({1..1})
 
-export TPM_PAPI_SET=1
+export TPM_PAPI_SET=0
+export TPM_POWER_SET=1
 
 ROOT=/home/xps/Work/Software
 TPM=${ROOT}/TPM
 CHAMELEON=${ROOT}/chameleon-tpm/build/bin
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/${ROOT}/OpenBLAS/build/lib
+export OPENBLAS_NUM_THREADS=1
 
-cd $TPM/tracelib
-rm CMakeCache.txt
+cd $TPM/tracelib && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile libTPMLibrary.so
 cmake .
-make clean && make
+make -s clean && make -s
 cd -
-cd $TPM/power
-rm CMakeCache.txt
+cd $TPM/power && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile TPMpower
 cmake .
-make clean && make
+make -s clean && make -s
 cd -
 
 TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
