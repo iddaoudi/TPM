@@ -2,16 +2,20 @@
 
 extern void TPM_trace_start()
 {
-    /* ZMQ part */
-    zmq_context = zmq_ctx_new();
-    zmq_request = zmq_socket(zmq_context, ZMQ_PUSH);
-
-    TPM_zmq_connect_client(zmq_request);
-    TPM_zmq_send_signal(zmq_request, "energy 0");
-
-    /* PAPI part */
     TPM_ALGORITHM = getenv("TPM_ALGORITHM");
     TPM_PAPI = atoi(getenv("TPM_PAPI_SET"));
+    TPM_POWER = atoi(getenv("TPM_POWER_SET"));
+
+    /* ZMQ initialization */
+    if (TPM_POWER)
+    {
+        zmq_context = zmq_ctx_new();
+        zmq_request = zmq_socket(zmq_context, ZMQ_PUSH);
+
+        TPM_zmq_connect_client(zmq_request);
+        TPM_zmq_send_signal(zmq_request, "energy 0");
+    }
+
     /* PAPI initialization */
     int papi_version = PAPI_library_init(PAPI_VER_CURRENT);
     if (papi_version != PAPI_VER_CURRENT && papi_version > 0)
@@ -24,7 +28,7 @@ extern void TPM_trace_start()
         fprintf(stderr, "PAPI library init error: %s\n", PAPI_strerror(papi_version));
         exit(EXIT_FAILURE);
     }
-    if (TPM_PAPI == 1)
+    if (TPM_PAPI)
     {
         /* Threaded PAPI initialization */
         int ret;
@@ -79,13 +83,15 @@ extern void TPM_trace_task_start(const char *task_name)
 {
     pthread_mutex_lock(&mutex);
 
-    unsigned int cpu, node;
-    getcpu(&cpu, &node);
-    char *signal_control_task_on_cpu = TPM_str_and_int_to_str(task_name, cpu);
-    TPM_zmq_send_signal(zmq_request, signal_control_task_on_cpu);
-    free(signal_control_task_on_cpu);
-
-    if (TPM_PAPI == 1)
+    if (TPM_POWER)
+    {
+        unsigned int cpu, node;
+        getcpu(&cpu, &node);
+        char *signal_control_task_on_cpu = TPM_str_and_int_to_str(task_name, cpu);
+        TPM_zmq_send_signal(zmq_request, signal_control_task_on_cpu);
+        free(signal_control_task_on_cpu);
+    }
+    if (TPM_PAPI)
     {
         /* Start PAPI counters */
         memset(values, 0, sizeof(values));
@@ -142,15 +148,17 @@ extern void TPM_trace_task_finish(const char *task_name)
 
 extern void TPM_trace_finalize(double total_execution_time)
 {
-    TPM_zmq_send_signal(zmq_request, "energy 1");
+    if (TPM_POWER)
+    {
+        TPM_zmq_send_signal(zmq_request, "energy 1");
 
-    char *signal_execution_time = TPM_str_and_double_to_str("time", total_execution_time);
-    TPM_zmq_send_signal(zmq_request, signal_execution_time);
-    free(signal_execution_time);
+        char *signal_execution_time = TPM_str_and_double_to_str("time", total_execution_time);
+        TPM_zmq_send_signal(zmq_request, signal_execution_time);
+        free(signal_execution_time);
 
-    TPM_zmq_close(zmq_request, zmq_context);
-
-    if (TPM_PAPI == 1)
+        TPM_zmq_close(zmq_request, zmq_context);
+    }
+    if (TPM_PAPI)
     {
         // #pragma omp taskwait
         PAPI_destroy_eventset(&eventset);
