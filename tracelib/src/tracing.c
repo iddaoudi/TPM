@@ -101,7 +101,6 @@ extern void TPM_trace_task_start(const char *task_name)
             fprintf(stderr, "PAPI_start %s error: %s\n", task_name, PAPI_strerror(ret));
             exit(EXIT_FAILURE);
         }
-        printf("Started PAPI counting for %s\n", task_name);
     }
     pthread_mutex_unlock(&mutex);
 }
@@ -140,7 +139,6 @@ extern void TPM_trace_task_finish(const char *task_name)
             algorithm->counters[task_index]->values[i] += values[i];
         }
         algorithm->counters[task_index]->values[NEVENTS]++;
-        printf("Finished PAPI counting for %s\n", task_name);
     }
 
     pthread_mutex_unlock(&mutex);

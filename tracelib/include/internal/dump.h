@@ -32,7 +32,7 @@ void dump()
             {
                 fprintf(file, "%s,", events_strings[i]);
             }
-            printf("\n");
+            fprintf(file, "\n");
         }
         for (int i = 0; i < algorithm->num_tasks; i++)
         {
