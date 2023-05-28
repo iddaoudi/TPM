@@ -1,4 +1,4 @@
-void dump()
+void dump(long l3_cache_size)
 {
     int TPM_ITER = atoi(getenv("TPM_ITER"));
     int TPM_FREQUENCY = atoi(getenv("TPM_FREQUENCY"));
@@ -26,8 +26,7 @@ void dump()
         int first_char = fgetc(file);
         if (first_char == EOF)
         {
-            // FIXME L3 cache size
-            fprintf(file, "algorithm,task,matrix_size,tile_size,frequency,weight,");
+            fprintf(file, "algorithm,task,matrix_size,tile_size,l3_cache_size,frequency,weight,");
             for (int i = 0; i < NEVENTS; i++)
             {
                 fprintf(file, "%s,", events_strings[i]);
@@ -36,7 +35,7 @@ void dump()
         }
         for (int i = 0; i < algorithm->num_tasks; i++)
         {
-            fprintf(file, "%s,%s,%d,%d,%d,%lld,", TPM_ALGORITHM,
+            fprintf(file, "%s,%s,%d,%d,%ld,%d,%lld,", TPM_ALGORITHM,
                     algorithm->task_index[i].task_name,
                     TPM_MATRIX, TPM_TILE, TPM_FREQUENCY,
                     algorithm->counters[i]->values[NEVENTS]);

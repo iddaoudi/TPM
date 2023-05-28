@@ -162,7 +162,21 @@ extern void TPM_trace_finalize(double total_execution_time)
         PAPI_destroy_eventset(&eventset);
         PAPI_shutdown();
 
-        dump();
+        /* Get L3 cache size */
+        long l3_cache_size;
+#ifdef _SC_LEVEL3_CACHE_SIZE
+        l3_cache_size = sysconf(_SC_LEVEL3_CACHE_SIZE);
+#else
+        fprintf(stderr, "_SC_LEVEL3_CACHE_SIZE is not available\n");
+        exit(EXIT_FAILURE);
+#endif
+        if (l3_cache_size == -1)
+        {
+            fprintf(stderr, "L3 cache size sysconf failed\n");
+            exit(EXIT_FAILURE);
+        }
+
+        dump(l3_cache_size);
 
         for (int i = 0; i < algorithm->num_tasks; i++)
         {
