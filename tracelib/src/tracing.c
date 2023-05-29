@@ -52,30 +52,28 @@ extern void TPM_trace_start()
             fprintf(stderr, "PAPI_add_events error: %s\n", PAPI_strerror(ret));
             exit(EXIT_FAILURE);
         }
-
-        /* Find the algorithm corresponding tasks */
-        for (int i = 0; i < sizeof(algorithms) / sizeof(Algorithm); i++)
+    }
+    /* Find the algorithm corresponding tasks */
+    for (int i = 0; i < sizeof(algorithms) / sizeof(Algorithm); i++)
+    {
+        if (strcmp(algorithms[i].algorithm_name, TPM_ALGORITHM) == 0)
         {
-            if (strcmp(algorithms[i].algorithm_name, TPM_ALGORITHM) == 0)
-            {
-                algorithm = &algorithms[i];
-                printf("Found algorithm: %s\n", algorithm->algorithm_name);
-                break;
-            }
+            algorithm = &algorithms[i];
+            break;
         }
-        if (!algorithm)
-        {
-            fprintf(stderr, "Algorithm not found\n");
-            exit(EXIT_FAILURE);
-        }
-        algorithm->counters = (CounterData **)malloc(algorithm->num_tasks * sizeof(CounterData *));
-        algorithm->task_index = (TaskIndex *)malloc(algorithm->num_tasks * sizeof(TaskIndex));
-        for (int i = 0; i < algorithm->num_tasks; i++)
-        {
-            algorithm->counters[i] = (CounterData *)calloc(1, sizeof(CounterData));
-            algorithm->task_index[i].task_name = algorithm->task_names[i];
-            algorithm->task_index[i].index = i;
-        }
+    }
+    if (!algorithm)
+    {
+        fprintf(stderr, "Algorithm not found\n");
+        exit(EXIT_FAILURE);
+    }
+    algorithm->counters = (CounterData **)malloc(algorithm->num_tasks * sizeof(CounterData *));
+    algorithm->task_index = (TaskIndex *)malloc(algorithm->num_tasks * sizeof(TaskIndex));
+    for (int i = 0; i < algorithm->num_tasks; i++)
+    {
+        algorithm->counters[i] = (CounterData *)calloc(1, sizeof(CounterData));
+        algorithm->task_index[i].task_name = algorithm->task_names[i];
+        algorithm->task_index[i].index = i;
     }
 }
 

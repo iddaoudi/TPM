@@ -62,7 +62,6 @@ void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
             if (!strcmp(task, task_names[i]) && (task_mask & (1 << i)))
             {
                 TPM_power_set_frequency(cpu, frequency_to_set);
-                printf("POWER: lowering %s frequency on cpu %d\n", task, cpu);
                 task_found = 1;
                 break;
             }
@@ -74,7 +73,6 @@ void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
     }
     else if (selected_case == (1 << num_tasks))
     {
-        printf("POWER: (all) lowering %s frequency\n", task);
         TPM_power_set_frequency(cpu, frequency_to_set);
     }
 }
