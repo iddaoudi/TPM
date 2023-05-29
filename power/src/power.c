@@ -12,10 +12,10 @@ int main(int argc, char *argv[])
     frequency_to_set = atoi(argv[2]);
     default_frequency = atoi(argv[3]);
 
-    algorithm = getenv("TPM_ALGORITHM");
-    number_of_threads = atoi(getenv("TPM_THREADS"));
-    matrix_size = atoi(getenv("TPM_MATRIX"));
-    tile_size = atoi(getenv("TPM_TILE"));
+    ALGORITHM = getenv("TPM_ALGORITHM");
+    NTHREADS = atoi(getenv("TPM_THREADS"));
+    MATRIX = atoi(getenv("TPM_MATRIX"));
+    TILE = atoi(getenv("TPM_TILE"));
 
     /* Check that the current governor is ondemand */
     TPM_power_check_current_governor();

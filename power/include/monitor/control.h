@@ -39,7 +39,7 @@ void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
     int num_tasks = 0;
     for (int i = 0; i < sizeof(algorithms) / sizeof(algorithms[0]); ++i)
     {
-        if (!strcmp(algorithm, algorithms[i].algorithm))
+        if (!strcmp(ALGORITHM, algorithms[i].algorithm))
         {
             task_names = algorithms[i].task_names;
             num_tasks = algorithms[i].num_tasks;

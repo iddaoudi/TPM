@@ -1,7 +1,7 @@
-char *algorithm;
-int number_of_threads;
-int matrix_size;
-int tile_size;
+char *ALGORITHM;
+int NTHREADS;
+int MATRIX;
+int TILE;
 
 int frequency_to_set;
 int default_frequency;

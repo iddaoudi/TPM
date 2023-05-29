@@ -8,7 +8,7 @@ void dump(int active_packages,
 
     char filename[TPM_FILENAME_SIZE];
     int TPM_ITER = atoi(getenv("TPM_ITER"));
-    sprintf(filename, "energy_data_%s_%d_%d.csv", algorithm, matrix_size, TPM_ITER);
+    sprintf(filename, "energy_data_%s_%d_%d.csv", ALGORITHM, MATRIX, TPM_ITER);
 
     FILE *file;
     struct stat buffer;
@@ -41,7 +41,7 @@ void dump(int active_packages,
         exit(EXIT_FAILURE);
     }
     fprintf(file, "%s,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
-            algorithm, matrix_size, tile_size, combination_of_tasks,
+            ALGORITHM, MATRIX, TILE, combination_of_tasks,
             pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1],
             exec_time);
 
