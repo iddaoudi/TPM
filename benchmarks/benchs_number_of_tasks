@@ -1,0 +1,26 @@
+#!/bin/bash
+
+declare -A combinations
+combinations["dgram"]=64
+combinations["dcesca"]=128
+combinations["dgetrs_nopiv"]=4
+combinations["dgetrf_nopiv"]=8
+combinations["dgesvd"]=2048
+combinations["dgesv_nopiv"]=8
+combinations["dgenm2"]=128
+combinations["dlauum"]=16
+combinations["dtrtri"]=8
+combinations["dtradd"]=4
+combinations["dpoinv"]=128
+combinations["dpotri"]=64
+combinations["dposv"]=16
+combinations["dpotrs"]=4
+combinations["dpotrf"]=16
+combinations["dtrsm"]=4
+combinations["dtrmm"]=4
+combinations["dsyr2k"]=4
+combinations["dsyrk"]=4
+combinations["dsymm"]=4
+combinations["dlantr"]=16
+combinations["dlansy"]=16
+combinations["dlange"]=8
