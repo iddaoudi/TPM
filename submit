@@ -1,10 +1,18 @@
 #!/bin/bash
 
-MATRIX=(4096)
-TILE=(1024)
+MATRIX=(8192 12288 16384 20480 24576 28672)
+TILE=(512 1024 2048)
 TPM_THREADS=16
-CASE=({1..1})
 ITER=({1..1})
+TEST=1
+
+source benchmarks/benchs_number_of_tasks
+
+if [ $TEST -eq 1 ];
+then
+    MATRIX=(4096)
+    TILE=(1024)
+fi
 
 export TPM_PAPI_SET=0
 export TPM_POWER_SET=1
@@ -45,7 +53,7 @@ do
         do
             for iteration in ${ITER[*]}
             do
-                for case in ${CASE[*]}
+                for ((case=1; case<=${combinations[$algorithm]}; case++))
                 do
                     export TPM_ALGORITHM=$algorithm
                     export TPM_MATRIX=$matrix
@@ -85,7 +93,7 @@ do
             done
         done
     done
-done < benchmarks/benchmarks2.txt
+done < benchmarks/selected_benchmarks.txt
 
 ps -ef | grep TPMpower | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9
 echo "*** TPM: Submission finished"
