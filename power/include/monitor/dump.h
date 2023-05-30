@@ -3,7 +3,7 @@ void dump(int active_packages,
           uint64_t *pkg_energy_finish,
           uint64_t *dram_energy_start,
           uint64_t *dram_energy_finish,
-          double exec_time)
+          double exec_time, const char **list_of_tasks)
 {
 
     char filename[TPM_FILENAME_SIZE];
@@ -23,7 +23,7 @@ void dump(int active_packages,
 
     if (!file_already_exists)
     {
-        fprintf(file, "algorithm,matrix_size,tile_size,threads,case,PKG1,PKG2,DRAM1,DRAM2,time\n");
+        fprintf(file, "algorithm,matrix_size,tile_size,threads,case,task,PKG1,PKG2,DRAM1,DRAM2,time\n");
     }
 
     uint64_t *pkg_energy = (uint64_t *)calloc(active_packages, sizeof(uint64_t));
@@ -40,10 +40,13 @@ void dump(int active_packages,
         fprintf(stderr, "More packages that what dump can handle\n");
         exit(EXIT_FAILURE);
     }
-    fprintf(file, "%s,%d,%d,%d,%d,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
-            ALGORITHM, MATRIX, TILE, NTHREADS, combination_of_tasks,
-            pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1],
-            exec_time);
+    for (int i = 0; list_of_tasks[i] != NULL; i++)
+    {
+        fprintf(file, "%s,%d,%d,%d,%d,%s,%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%f\n",
+                ALGORITHM, MATRIX, TILE, NTHREADS, combination_of_tasks, list_of_tasks[i],
+                pkg_energy[0], pkg_energy[1], dram_energy[0], dram_energy[1],
+                exec_time);
+    }
 
     fclose(file);
 

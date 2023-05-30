@@ -5,9 +5,9 @@ typedef struct
     int num_tasks;
 } AlgorithmTasks;
 
-void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
-                       unsigned long frequency_to_set,
-                       unsigned long original_frequency)
+const char **TPM_power_control(int selected_case, const char *task, unsigned int cpu,
+                               unsigned long frequency_to_set,
+                               unsigned long original_frequency)
 {
     static AlgorithmTasks algorithms[] = {
         {"dgram", dgram_tasks, sizeof(dgram_tasks) / sizeof(dgram_tasks[0])},
@@ -75,4 +75,5 @@ void TPM_power_control(int selected_case, const char *task, unsigned int cpu,
     {
         TPM_power_set_frequency(cpu, frequency_to_set);
     }
+    return task_names;
 }
