@@ -54,6 +54,10 @@ do
         do
             for iteration in ${ITER[*]}
             do
+                export TPM_ALGORITHM=$algorithm
+                export TPM_MATRIX=$matrix
+                export TPM_TILE=$tile
+                export TPM_ITER=$iteration
                 if [ $TPM_PAPI_SET -eq 1 ];
                 then
                     echo "*** TPM: Measuring PAPI counters"
@@ -76,12 +80,7 @@ do
                 if [ $TPM_POWER_SET -eq 1 ];
                 then
                     for ((case=1; case<=${combinations[$algorithm]}; case++))
-                    do
-                        export TPM_ALGORITHM=$algorithm
-                        export TPM_MATRIX=$matrix
-                        export TPM_TILE=$tile
-                        export TPM_ITER=$iteration
-                        
+                    do  
                         echo "*** TPM: Measuring energy/case"
 
                         sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
