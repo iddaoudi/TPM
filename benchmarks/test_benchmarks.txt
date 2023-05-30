@@ -1,0 +1,6 @@
+dgetrs_nopiv
+dgetrf_nopiv
+dlauum
+dtrtri
+dpotrs
+dpotrf
