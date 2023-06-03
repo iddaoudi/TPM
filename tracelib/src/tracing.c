@@ -221,6 +221,8 @@ extern void TPM_trace_finalize(double total_execution_time)
         clock_gettime(CLOCK_MONOTONIC, &total_end);
         volatile double elapsed = (total_end.tv_sec - total_start.tv_sec);
         elapsed += (total_end.tv_nsec - total_start.tv_nsec) / 1000000000.0;
-        printf("total,%f,%s,%f\n", elapsed, TPM_TASK_TIME_TASK, total_task_time);
+        int TPM_MATRIX = atoi(getenv("TPM_MATRIX"));
+        int TPM_TILE = atoi(getenv("TPM_TILE"));
+        printf("%d,%d,%f,%s,%f\n", TPM_MATRIX, TPM_TILE, elapsed, TPM_TASK_TIME_TASK, total_task_time);
     }
 }
