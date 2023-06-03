@@ -13,4 +13,6 @@ volatile double total_task_time;
 struct timespec start, end;
 struct timespec total_start, total_end;
 
+int task_counter = 0;
+
 pthread_mutex_t mutex;

@@ -95,6 +95,7 @@ extern void TPM_trace_task_start(const char *task_name)
         if (strcmp(task_name, TPM_TASK_TIME_TASK) == 0)
         {
             clock_gettime(CLOCK_MONOTONIC, &start);
+            task_counter++;
         }
     }
 
@@ -223,6 +224,6 @@ extern void TPM_trace_finalize(double total_execution_time)
         elapsed += (total_end.tv_nsec - total_start.tv_nsec) / 1000000000.0;
         int TPM_MATRIX = atoi(getenv("TPM_MATRIX"));
         int TPM_TILE = atoi(getenv("TPM_TILE"));
-        printf("%d,%d,%f,%s,%f\n", TPM_MATRIX, TPM_TILE, elapsed, TPM_TASK_TIME_TASK, total_task_time);
+        printf("%d,%d,%f,%s,%f,%d\n", TPM_MATRIX, TPM_TILE, elapsed, TPM_TASK_TIME_TASK, total_task_time, task_counter);
     }
 }
