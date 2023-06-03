@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sched.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "zmq.h"
 #include "pthread.h"
