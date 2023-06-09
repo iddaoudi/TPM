@@ -4,9 +4,15 @@
 
 int TPM_PAPI = 0;
 int TPM_POWER = 0;
+int TPM_TASK_TIME = 0;
 
-char *TPM_ALGORITHM;
+char *TPM_ALGORITHM = NULL;
+char *TPM_TASK_TIME_TASK = NULL;
+
+volatile double total_task_time;
+struct timespec start, end;
+struct timespec total_start, total_end;
+
+int task_counter = 0;
 
 pthread_mutex_t mutex;
-
-cvector_vector_type(char *) recorded_tasks_vector;

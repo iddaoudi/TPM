@@ -5,6 +5,15 @@ extern void TPM_trace_start()
     TPM_ALGORITHM = getenv("TPM_ALGORITHM");
     TPM_PAPI = atoi(getenv("TPM_PAPI_SET"));
     TPM_POWER = atoi(getenv("TPM_POWER_SET"));
+    TPM_TASK_TIME = atoi(getenv("TPM_TASK_TIME"));
+    TPM_TASK_TIME_TASK = getenv("TPM_TASK_TIME_TASK");
+
+    /* Measure task times */
+    if (TPM_TASK_TIME)
+    {
+        total_task_time = 0.0;
+        clock_gettime(CLOCK_MONOTONIC, &total_start);
+    }
 
     /* ZMQ initialization */
     if (TPM_POWER)
@@ -81,6 +90,15 @@ extern void TPM_trace_task_start(const char *task_name)
 {
     pthread_mutex_lock(&mutex);
 
+    if (TPM_TASK_TIME)
+    {
+        if (strcmp(task_name, TPM_TASK_TIME_TASK) == 0)
+        {
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            task_counter++;
+        }
+    }
+
     if (TPM_POWER)
     {
         unsigned int cpu, node;
@@ -89,6 +107,7 @@ extern void TPM_trace_task_start(const char *task_name)
         TPM_zmq_send_signal(zmq_request, signal_control_task_on_cpu);
         free(signal_control_task_on_cpu);
     }
+
     if (TPM_PAPI)
     {
         /* Start PAPI counters */
@@ -100,6 +119,7 @@ extern void TPM_trace_task_start(const char *task_name)
             exit(EXIT_FAILURE);
         }
     }
+
     pthread_mutex_unlock(&mutex);
 }
 
@@ -107,7 +127,19 @@ extern void TPM_trace_task_finish(const char *task_name)
 {
     pthread_mutex_lock(&mutex);
 
-    if (TPM_PAPI == 1)
+    if (TPM_TASK_TIME)
+    {
+        if (strcmp(task_name, TPM_TASK_TIME_TASK) == 0)
+        {
+            clock_gettime(CLOCK_MONOTONIC, &end);
+
+            volatile double elapsed = (end.tv_sec - start.tv_sec);
+            elapsed += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+            total_task_time += elapsed;
+        }
+    }
+
+    if (TPM_PAPI)
     {
         /* Stop PAPI counters */
         int ret = PAPI_stop(eventset, values);
@@ -154,6 +186,7 @@ extern void TPM_trace_finalize(double total_execution_time)
 
         TPM_zmq_close(zmq_request, zmq_context);
     }
+
     if (TPM_PAPI)
     {
 #pragma omp taskwait
@@ -182,5 +215,15 @@ extern void TPM_trace_finalize(double total_execution_time)
         }
         free(algorithm->counters);
         free(algorithm->task_index);
+    }
+
+    if (TPM_TASK_TIME)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &total_end);
+        volatile double elapsed = (total_end.tv_sec - total_start.tv_sec);
+        elapsed += (total_end.tv_nsec - total_start.tv_nsec) / 1000000000.0;
+        int TPM_MATRIX = atoi(getenv("TPM_MATRIX"));
+        int TPM_TILE = atoi(getenv("TPM_TILE"));
+        printf("%d,%d,%f,%s,%f,%d\n", TPM_MATRIX, TPM_TILE, elapsed, TPM_TASK_TIME_TASK, total_task_time, task_counter);
     }
 }

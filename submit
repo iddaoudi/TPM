@@ -2,19 +2,21 @@
 
 MATRIX=(8192 12288 16384 20480 24576 28672)
 TILE=(512 1024 2048)
-TPM_THREADS=16
+TPM_THREADS=1
 ITER=({1..1})
 TEST=1
 export TPM_PAPI_SET=0
-export TPM_POWER_SET=1
+export TPM_POWER_SET=0
+export TPM_TASK_TIME=1
+export TPM_TASK_TIME_TASK="gemm"
 
 source benchmarks/benchs_number_of_tasks
 BENCH_FILE="benchmarks/selected_benchmarks.txt"
 
 if [ $TEST -eq 1 ];
 then
-    MATRIX=(8192 12288)
-    TILE=(320 640 960 1280)
+    MATRIX=(10000)
+    TILE=(1000)
     BENCH_FILE="benchmarks/test_benchmarks.txt"
 fi
 
@@ -75,9 +77,7 @@ do
                         LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
                     done
                     echo "*** TPM: Measuring PAPI done" $algorithm "with parameters" $matrix $tile
-                fi
-
-                if [ $TPM_POWER_SET -eq 1 ];
+                elif [ $TPM_POWER_SET -eq 1 ];
                 then
                     for ((case=1; case<=${combinations[$algorithm]}; case++))
                     do  
@@ -87,9 +87,11 @@ do
                         sleep 0.1
                         echo "*** TPM: Power server launched"
                     
-                        LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile #2>&1 >> chameleon_output.txt
+                        LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0,1 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile #2>&1 >> chameleon_output.txt
                         echo "*** TPM: Measuring energy/case done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
                     done
+                else
+                    LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
                 fi
 
             done
