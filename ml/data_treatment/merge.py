@@ -55,16 +55,20 @@ def logic(df_energy, df_counters):
     # Define the columns that represent your metrics
     metric_columns = [
         "frequency",
-        "PAPI_L3_TCM",
-        "PAPI_TOT_INS",
-        "PAPI_RES_STL",
+        "PAPI_VEC_DP",
+        "PAPI_L2_TCR",
+        "PAPI_L3_TCR",
         "PAPI_TOT_CYC",
-        "PAPI_BR_MSP",
+        "PAPI_RES_STL",
+        "PAPI_L2_TCW",
+        "PAPI_L3_TCW",
+        "PAPI_TOT_INS",
+        "PAPI_L3_TCM",
         "ilp",
-        "mb",
-        "cmi",
-        "ctr",
-        "cti",
+        "cpi",
+        "cmr",
+        "vr",
+        "scr",
     ]
 
     # Multiply each metric by its weight

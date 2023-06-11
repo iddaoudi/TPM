@@ -26,14 +26,18 @@ def algorithm_cases_dict(algorithm):
 
 
 metrics = [
-    "PAPI_L3_TCM",
-    "PAPI_TOT_INS",
-    "PAPI_RES_STL",
+    "PAPI_VEC_DP",
+    "PAPI_L2_TCR",
+    "PAPI_L3_TCR",
     "PAPI_TOT_CYC",
-    "PAPI_BR_MSP",
+    "PAPI_RES_STL",
+    "PAPI_L2_TCW",
+    "PAPI_L3_TCW",
+    "PAPI_TOT_INS",
+    "PAPI_L3_TCM",
     "ilp",
-    "mb",
-    "cmi",
-    "ctr",
-    "cti",
+    "cpi",
+    "cmr",
+    "vr",
+    "scr",
 ]

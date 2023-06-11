@@ -103,8 +103,8 @@ def single_target_model_regression(
     all_predictions = pd.DataFrame()
 
     # Scale features
-    # scaler = MinMaxScaler()
-    scaler = RobustScaler()
+    scaler = MinMaxScaler()
+    # scaler = RobustScaler()
     # scaler = StandardScaler()
     for name, (model, params) in models.items():
         best_cases = pd.DataFrame()
@@ -160,7 +160,7 @@ def single_target_model_regression(
         best_cases["model"] = name
         all_predictions = pd.concat([all_predictions, best_cases])
 
-        # print(f"Predicted best cases for {name}:")
-        # print(best_cases)
+        print(f"Predicted best cases for {name}:")
+        print(best_cases)
 
-    plot.plot_predictions(all_predictions, df, architecture)
+    # plot.plot_predictions(all_predictions, df, architecture)

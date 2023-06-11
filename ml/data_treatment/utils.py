@@ -16,12 +16,19 @@ def calculate_task_ratio(df_counters):
 
 def calculate_new_columns(df_counters):
     df_counters["ilp"] = df_counters["PAPI_TOT_INS"] / df_counters["PAPI_TOT_CYC"]
-    df_counters["mb"] = df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_CYC"]
-    df_counters["cmi"] = df_counters["PAPI_L3_TCM"] / df_counters["PAPI_TOT_INS"]
-    df_counters["ctr"] = df_counters["PAPI_L3_TCM"] / df_counters["l3_cache_size"]
-    df_counters["cti"] = (
-        df_counters["PAPI_L3_TCM"] * df_counters["l3_cache_size"]
-    ) / df_counters["PAPI_TOT_CYC"]
+    df_counters["cpi"] = df_counters["PAPI_TOT_CYC"] / df_counters["PAPI_TOT_INS"]
+    df_counters["cmr"] = df_counters["PAPI_L3_TCM"] / df_counters["PAPI_L3_TCR"]
+    df_counters["vr"] = df_counters["PAPI_VEC_DP"] / df_counters["PAPI_TOT_INS"]
+    df_counters["scr"] = df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_CYC"]
+    
+    df_counters["PAPI_VEC_DP"] = df_counters["PAPI_VEC_DP"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_L2_TCR"] = df_counters["PAPI_L2_TCR"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_L3_TCR"] = df_counters["PAPI_L3_TCR"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_RES_STL"] = df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_L2_TCW"] = df_counters["PAPI_L2_TCW"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_L3_TCW"] = df_counters["PAPI_L3_TCW"] / df_counters["PAPI_TOT_INS"]
+    df_counters["PAPI_L3_TCM"] = df_counters["PAPI_L3_TCM"] / df_counters["PAPI_TOT_INS"]
+    
     return df_counters
 
 
