@@ -16,7 +16,7 @@ if __name__ == "__main__":
     architecture = ""
 
     for i in range(3, len(sys.argv)):
-        folder = sys.argv[3]
+        folder = sys.argv[i]
         tmp = folder.split("/")
         architecture = tmp[1]
 
@@ -43,6 +43,7 @@ if __name__ == "__main__":
     if len(array_of_df) > 1:
         print("Merged dataframes!")
         combined_df = pd.concat(array_of_df, ignore_index=True)
+
     # Single algorithm
     elif len(array_of_df) == 1:
         print("Single dataframe!")
@@ -57,9 +58,9 @@ if __name__ == "__main__":
     # Try models
     if command == 1:
         train_algorithms = [algo]
-        train_matrix_sizes = [10000, 12000, 14000]
+        train_matrix_sizes = [12288]
         test_algorithms = [algo]
-        test_matrix_sizes = [16000, 18000, 20000]
+        test_matrix_sizes = [16384]
 
         stm_var = 0
         edp_var = 1
