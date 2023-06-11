@@ -55,6 +55,15 @@ extern void TPM_trace_start()
             fprintf(stderr, "PAPI_create_eventset error: %s\n", PAPI_strerror(ret));
             exit(EXIT_FAILURE);
         }
+
+        int TPM_PAPI_EVENTS = atoi(getenv("TPM_PAPI_EVENTS"));
+        if (TPM_PAPI_EVENTS == 1)
+        {
+            NEVENTS = 4;
+            int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};                    
+            char *events_strings[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"};
+        }
+
         ret = PAPI_add_events(eventset, events, NEVENTS);
         if (ret != PAPI_OK)
         {
