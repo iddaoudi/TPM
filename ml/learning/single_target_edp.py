@@ -31,11 +31,11 @@ def single_target_model_regression(
     # Split data
     train = df[
         (df["matrix_size"].isin(train_matrix_sizes))
-        & (df["algorithm"].isin(train_algorithms))
+        # & (df["algorithm"].isin(train_algorithms))
     ].copy()
     test = df[
         (df["matrix_size"].isin(test_matrix_sizes))
-        & (df["algorithm"].isin(test_algorithms))
+        # & (df["algorithm"].isin(test_algorithms))
     ].copy()
 
     # Preprocess data
@@ -110,7 +110,7 @@ def single_target_model_regression(
         best_cases = pd.DataFrame()
         # Train
         pipeline = Pipeline([("scaler", scaler), ("estimator", model)])
-        cv = KFold(n_splits=5)
+        cv = KFold(n_splits=10)
         grid_search = GridSearchCV(
             pipeline, params, cv=cv, scoring="neg_mean_squared_error"
         )
@@ -118,6 +118,13 @@ def single_target_model_regression(
 
         print(f"Best parameters for {name}: ", grid_search.best_params_)
         # print(f"Best score for {name}     : ", -grid_search.best_score_)
+        
+        best_model = grid_search.best_estimator_
+        if hasattr(best_model[-1], "feature_importances_"):
+            importance = best_model[-1].feature_importances_
+            print(f"Feature importance for {name}:")
+            for i, j in enumerate(importance):
+                print(f"{feature_cols[i]}: {j}")
 
         # Evaluate
         test_pred = grid_search.predict(test[feature_cols])
