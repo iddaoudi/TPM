@@ -1,0 +1,103 @@
+#!/bin/bash
+
+MATRIX=(8192 12288 16384 20480 24576 28672)
+TILE=(512 1024 2048)
+TPM_THREADS=1
+ITER=({1..1})
+TEST=1
+export TPM_PAPI_SET=0
+export TPM_POWER_SET=1
+export TPM_TASK_TIME=0
+export TPM_TASK_TIME_TASK="gemm"
+
+source benchmarks_chameleon/benchs_number_of_tasks
+BENCH_FILE="benchmarks_chameleon/selected_benchmarks.txt"
+
+if [ $TEST -eq 1 ];
+then
+    MATRIX=(4000)
+    TILE=(1000)
+    BENCH_FILE="benchmarks_chameleon/test_benchmarks.txt"
+fi
+
+ROOT=/home/cc
+TPM=${ROOT}/TPM
+CHAMELEON=${ROOT}/chameleon-tpm/build/bin
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/${ROOT}/OpenBLAS/build/lib
+export OPENBLAS_NUM_THREADS=1
+
+cd $TPM/tracelib && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile libTPMLibrary.so
+cmake .
+make -s clean && make -s
+cd -
+cd $TPM/power && rm -rf CMakeFiles/ cmake_install.cmake CMakeCache.txt Makefile TPMpower
+cmake .
+make -s clean && make -s
+cd -
+
+TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
+
+if [ $TPM_PAPI_SET -eq 1 ];
+then
+    TPM_THREADS=1
+    CASE=(1)
+fi
+
+export TPM_THREADS=$TPM_THREADS
+lowest_freq=$(cpufreq-info -l | awk '{print $1}')
+default_freq=$(cpufreq-info -l | awk '{print $2}')
+
+while IFS= read -r algorithm
+do
+    for matrix in ${MATRIX[*]}
+    do
+        for tile in ${TILE[*]}
+        do
+            for iteration in ${ITER[*]}
+            do
+                export TPM_ALGORITHM=$algorithm
+                export TPM_MATRIX=$matrix
+                export TPM_TILE=$tile
+                export TPM_ITER=$iteration
+                if [ $TPM_PAPI_SET -eq 1 ];
+                then
+                    echo "*** TPM: Measuring PAPI counters"
+                    FREQUENCIES=(MIN DEFAULT)
+                    for frequency in ${FREQUENCIES[*]};
+                    do
+                        if [ $frequency = "MIN" ];
+                        then
+                            export TPM_FREQUENCY=$lowest_freq
+                            sudo cpufreq-set -c 0 -u $lowest_freq
+                        else
+                            export TPM_FREQUENCY=$default_freq
+                            sudo cpufreq-set -c 0 -u $default_freq
+                        fi
+                        LD_PRELOAD=$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                    done
+                    echo "*** TPM: Measuring PAPI done" $algorithm "with parameters" $matrix $tile
+                elif [ $TPM_POWER_SET -eq 1 ];
+                then
+                    for ((case=1; case<=${combinations[$algorithm]}; case++))
+                    do  
+                        echo "*** TPM: Measuring energy/case"
+
+                        sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
+                        sleep 0.1
+                        echo "*** TPM: Power server launched"
+                    
+                        LD_PRELOAD=$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile #2>&1 >> chameleon_output.txt
+                        echo "*** TPM: Measuring energy/case done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
+                    done
+                else
+                    LD_PRELOAD=$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${CHAMELEON}/chameleon_dtesting -w -s -o $algorithm -t $TPM_THREADS -m $matrix -n $matrix -k $matrix -b $tile -i $tile
+                fi
+
+            done
+        done
+    done
+done < "$BENCH_FILE"
+
+ps -ef | grep TPMpower | grep -v grep | awk '{print $2}' | sudo xargs -r kill -9
+echo "*** TPM: Submission finished"

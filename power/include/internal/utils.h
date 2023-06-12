@@ -7,11 +7,15 @@ int frequency_to_set;
 int default_frequency;
 int combination_of_tasks;
 
+static const char *cholesky_tasks[] = {"potrf", "gemm", "trsm", "syrk"};
+static const char *qr_tasks[] = {"geqrt", "ormqr", "tsmqr", "tsqrt"};
+static const char *lu_tasks[] = {"getrfpiv", "gemm", "trsmswp", "geswp"};
+static const char *sylsvd_tasks[] = {"trsyl", "gesvd", "geev", "gemm"};
+static const char *invert_tasks[] = {"getrf", "gemm", "trsm", "getri"};
 static const char *dgram_tasks[] = {"laset", "syssq", "gessq", "gram", "plssq", "plssq2"};
 static const char *dcesca_tasks[] = {"laset", "gesum", "gessq", "geadd", "cesca", "plssq", "plssq2"};
 static const char *dgetrs_nopiv_tasks[] = {"trsm", "gemm"};
 static const char *dgetrf_nopiv_tasks[] = {"getrfnpiv", "trsm", "gemm"};
-static const char *dgesvd_tasks[] = {"geqrt", "lacpy", "lacpyx", "unmqr", "tpqrt", "tpmqrt", "gelqt", "unmlq", "tplqt", "tpmlqt", "laset"};
 static const char *dgesv_nopiv_tasks[] = {"getrfnpiv", "trsm", "gemm"};
 static const char *dgenm2_tasks[] = {"laset", "zasum", "gessq", "lacpy", "lascal", "gemv", "plssq2"};
 static const char *dlauum_tasks[] = {"lauum", "syrk", "trmm", "gemm"};

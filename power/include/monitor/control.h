@@ -10,11 +10,15 @@ const char **TPM_power_control(int selected_case, const char *task, unsigned int
                                unsigned long original_frequency)
 {
     static AlgorithmTasks algorithms[] = {
+        {"cholesky", cholesky_tasks, sizeof(cholesky_tasks) / sizeof(cholesky_tasks[0])},
+        {"qr", qr_tasks, sizeof(qr_tasks) / sizeof(qr_tasks[0])},
+        {"lu", lu_tasks, sizeof(lu_tasks) / sizeof(lu_tasks[0])},
+        {"invert", invert_tasks, sizeof(invert_tasks) / sizeof(invert_tasks[0])},
+        {"sylsvd", sylsvd_tasks, sizeof(sylsvd_tasks) / sizeof(sylsvd_tasks[0])},
         {"dgram", dgram_tasks, sizeof(dgram_tasks) / sizeof(dgram_tasks[0])},
         {"dcesca", dcesca_tasks, sizeof(dcesca_tasks) / sizeof(dcesca_tasks[0])},
         {"dgetrs_nopiv", dgetrs_nopiv_tasks, sizeof(dgetrs_nopiv_tasks) / sizeof(dgetrs_nopiv_tasks[0])},
         {"dgetrf_nopiv", dgetrf_nopiv_tasks, sizeof(dgetrf_nopiv_tasks) / sizeof(dgetrf_nopiv_tasks[0])},
-        {"dgesvd", dgesvd_tasks, sizeof(dgesvd_tasks) / sizeof(dgesvd_tasks[0])},
         {"dgesv_nopiv", dgesv_nopiv_tasks, sizeof(dgesv_nopiv_tasks) / sizeof(dgesv_nopiv_tasks[0])},
         {"dgenm2", dgenm2_tasks, sizeof(dgenm2_tasks) / sizeof(dgenm2_tasks[0])},
         {"dlauum", dlauum_tasks, sizeof(dlauum_tasks) / sizeof(dlauum_tasks[0])},
@@ -41,8 +45,17 @@ const char **TPM_power_control(int selected_case, const char *task, unsigned int
     {
         if (!strcmp(ALGORITHM, algorithms[i].algorithm))
         {
-            task_names = algorithms[i].task_names;
             num_tasks = algorithms[i].num_tasks;
+            task_names = malloc(sizeof(char *) * num_tasks);
+            if (!task_names)
+            {
+                fprintf(stderr, "Failed to allocate memory for task_names\n");
+                exit(EXIT_FAILURE);
+            }
+            for (int j = 0; j < num_tasks; j++)
+            {
+                task_names[j] = algorithms[i].task_names[j];
+            }
             break;
         }
     }
@@ -59,6 +72,7 @@ const char **TPM_power_control(int selected_case, const char *task, unsigned int
         int task_found = 0;
         for (int i = 0; i < num_tasks; ++i)
         {
+
             if (!strcmp(task, task_names[i]) && (task_mask & (1 << i)))
             {
                 TPM_power_set_frequency(cpu, frequency_to_set);
@@ -75,5 +89,6 @@ const char **TPM_power_control(int selected_case, const char *task, unsigned int
     {
         TPM_power_set_frequency(cpu, frequency_to_set);
     }
+
     return task_names;
 }

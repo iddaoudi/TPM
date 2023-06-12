@@ -1,16 +1,16 @@
 #define NEVENTS 4
 
-int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};                    
-char *events_strings[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"}; 
+int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};
+char *events_strings[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"};
 
-// int events[NEVENTS] = {PAPI_L2_TCR, PAPI_L2_TCW};                    
-// char *events_strings[NEVENTS] = {"PAPI_L2_TCR", "PAPI_L2_TCW"}; 
+// int events[NEVENTS] = {PAPI_L2_TCR, PAPI_L2_TCW};
+// char *events_strings[NEVENTS] = {"PAPI_L2_TCR", "PAPI_L2_TCW"};
 
-// int events[NEVENTS] = {PAPI_L3_TCR, PAPI_L3_TCW};                    
-// char *events_strings[NEVENTS] = {"PAPI_L3_TCR", "PAPI_L3_TCW"}; 
+// int events[NEVENTS] = {PAPI_L3_TCR, PAPI_L3_TCW};
+// char *events_strings[NEVENTS] = {"PAPI_L3_TCR", "PAPI_L3_TCW"};
 
-// int events[NEVENTS] = {PAPI_VEC_FP};                    
-// char *events_strings[NEVENTS] = {"PAPI_VEC_FP"}; 
+// int events[NEVENTS] = {PAPI_VEC_FP};
+// char *events_strings[NEVENTS] = {"PAPI_VEC_FP"};
 
 int eventset;
 long long values[NEVENTS];
@@ -58,6 +58,11 @@ static const char *dsymm_tasks[] = {"symm", "gemm"};
 static const char *dlantr_tasks[] = {"laset", "lantr", "lange", "langemax"};
 static const char *dlansy_tasks[] = {"laset", "lansy", "lange", "langemax"};
 static const char *dlange_tasks[] = {"laset", "lange", "langemax"};
+static const char *cholesky_tasks[] = {"potrf", "trsm", "syrk", "gemm"};
+static const char *qr_tasks[] = {"geqrt", "ormqr", "tsmqr", "tsqrt"};
+static const char *lu_tasks[] = {"getrfpiv", "gemm", "trsmswp", "geswp"};
+static const char *sylsvd_tasks[] = {"trsyl", "gesvd", "geev", "gemm"};
+static const char *invert_tasks[] = {"getrf", "gemm", "trsm", "getri"};
 
 Algorithm algorithms[] = {
     {"dgram", dgram_tasks, sizeof(dgram_tasks) / sizeof(dgram_tasks[0]), NULL, NULL},
@@ -83,6 +88,11 @@ Algorithm algorithms[] = {
     {"dlantr", dlantr_tasks, sizeof(dlantr_tasks) / sizeof(dlantr_tasks[0]), NULL, NULL},
     {"dlansy", dlansy_tasks, sizeof(dlansy_tasks) / sizeof(dlansy_tasks[0]), NULL, NULL},
     {"dlange", dlange_tasks, sizeof(dlange_tasks) / sizeof(dlange_tasks[0]), NULL, NULL},
+    {"cholesky", cholesky_tasks, sizeof(cholesky_tasks) / sizeof(cholesky_tasks[0]), NULL, NULL},
+    {"qr", qr_tasks, sizeof(qr_tasks) / sizeof(qr_tasks[0]), NULL, NULL},
+    {"lu", lu_tasks, sizeof(lu_tasks) / sizeof(lu_tasks[0]), NULL, NULL},
+    {"invert", invert_tasks, sizeof(invert_tasks) / sizeof(invert_tasks[0]), NULL, NULL},
+    {"sylsvd", sylsvd_tasks, sizeof(sylsvd_tasks) / sizeof(sylsvd_tasks[0]), NULL, NULL},
 };
 
 Algorithm *algorithm = NULL;
