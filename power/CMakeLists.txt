@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(TPMPowerControl VERSION 1.0.0)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
 # Add all include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
