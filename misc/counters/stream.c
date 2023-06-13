@@ -3,7 +3,7 @@
 #include <string.h>
 #include <papi.h>
 
-#define NEVENTS 4
+#define NEVENTS 2
 
 static double *vecA1, *vecB1, *vecC1;
 static double *vecA2, *vecB2, *vecC2;
@@ -37,12 +37,14 @@ int main(int argc, char *argv[])
 
     long long values[NEVENTS];
 
-    int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};
-    char *events_str[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"};
-    // int events[NEVENTS] = {PAPI_L2_TCR, PAPI_L2_TCW, PAPI_VEC_DP};
-    // char *events_str[NEVENTS] = {"PAPI_L2_TCR", "PAPI_L2_TCW", "PAPI_L3_TCR"};
-
-    ret = PAPI_add_events(eventset, events, NEVENTS);
+    //int events[NEVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};
+    //char *events_str[NEVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"};
+    int events[NEVENTS] = {PAPI_L3_TCR, PAPI_L3_TCW};
+    char *events_str[NEVENTS] = {"PAPI_L3_TCR", "PAPI_L3_TCW"};
+    //int events[NEVENTS] = {PAPI_VEC_DP};
+    //char *events_str[NEVENTS] = {"PAPI_VEC_DP"};
+    
+	ret = PAPI_add_events(eventset, events, NEVENTS);
     if (ret != PAPI_OK)
     {
         fprintf(stderr, "PAPI_create_eventset error: %s\n", PAPI_strerror(ret));
@@ -70,11 +72,18 @@ int main(int argc, char *argv[])
     if (ret != PAPI_OK)
         printf("PAPI stop problem\n");
 
+    printf("type,");
     for (int i = 0; i < NEVENTS; i++)
     {
-        printf("Compute bound : %s = %llu\n", events_str[i], values[i]);
+        printf("%s,", events_str[i]);
     }
-
+	printf("\n");
+ 	printf("compute,");
+ 	for (int i = 0; i < NEVENTS; i++)
+    {
+        printf("%llu,", values[i]);
+    }
+	printf("\n");
     // Reset PAPI
     PAPI_reset(eventset);
 
@@ -91,12 +100,14 @@ int main(int argc, char *argv[])
     ret = PAPI_stop(eventset, values);
     if (ret != PAPI_OK)
         printf("PAPI stop problem\n");
-
-    for (int i = 0; i < NEVENTS; i++)
+    
+ 	printf("memory,");
+ 	for (int i = 0; i < NEVENTS; i++)
     {
-        printf("Memory bound: %s = %llu\n", events_str[i], values[i]);
+        printf("%llu,", values[i]);
     }
-
+	printf("\n");
+     
     PAPI_destroy_eventset(&eventset);
     PAPI_shutdown();
 
