@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
+from matplotlib.patches import Patch
+from matplotlib.legend import Legend
 
 marker_symbols = {
     1: "o",
@@ -224,3 +227,123 @@ def plot_predictions(predictions, df, architecture):
                 f"predictions_{architecture}_{algorithm}_{matrix_size}_robust.png"
             )
             plt.show()
+
+
+def plot_best_predictions(predictions, df, architecture):
+    models = predictions["model"].unique()
+    algorithms = predictions["algorithm"].unique()
+    matrix_sizes = predictions["matrix_size"].unique()
+    tile_sizes = predictions["tile_size"].unique()
+    width = 0.35 / len(tile_sizes)  # Adjust width of the bars
+
+    df["time_energy_product"] = df["time"] * df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(
+        axis=1
+    )
+
+    # Use seaborn styles
+    sns.set_theme()
+    plt.figure(figsize=(10, 7))  # Adjust as needed
+    fig, ax = plt.subplots()
+
+    # Increase font size
+    plt.rcParams.update({"font.size": 14})
+
+    # Generate color palette
+    palette = sns.color_palette("hls", len(models))
+
+    color_dict = dict(zip(models, palette))
+
+    # Predefined hatch patterns
+    hatch_patterns = ["///", "\\\\\\", "|||", "+", "-", "x", "o", "O", ".", "*"]
+    tile_hatch_dict = dict(zip(tile_sizes, hatch_patterns))
+
+    legend_patches = {}  # Initialize dictionary for legend patches
+
+    for algorithm in algorithms:
+        for idx, matrix_size in enumerate(matrix_sizes):
+            offset = (len(tile_sizes) - 1) / 2 * width
+
+            for tile_pos, tile_size in enumerate(tile_sizes):
+                best_improvement = None
+                best_model = None
+
+                for model in models:
+                    model_predictions = predictions[
+                        (predictions["model"] == model)
+                        & (predictions["algorithm"] == algorithm)
+                        & (predictions["matrix_size"] == matrix_size)
+                        & (predictions["tile_size"] == tile_size)
+                    ]
+
+                    default_case = df[
+                        (df["case"] == 1)
+                        & (df["algorithm"] == algorithm)
+                        & (df["matrix_size"] == matrix_size)
+                        & (df["tile_size"] == tile_size)
+                    ]
+                    default_case_value = default_case["time_energy_product"].values[0]
+
+                    best_case_value = model_predictions["time"] * model_predictions[
+                        ["PKG1", "PKG2", "DRAM1", "DRAM2"]
+                    ].sum(axis=1)
+
+                    if not best_case_value.empty:
+                        current_improvement = (
+                            (default_case_value - best_case_value.iloc[0])
+                            / default_case_value
+                        ) * 100
+
+                        if (
+                            best_improvement is None
+                            or current_improvement > best_improvement
+                        ):
+                            best_improvement = current_improvement
+                            best_model = model
+
+                if best_improvement is not None:
+                    bar_pos = idx - offset + tile_pos * width  # calculate bar position
+                    bar = ax.bar(
+                        bar_pos,
+                        best_improvement,
+                        width=width,
+                        color=color_dict[best_model],
+                        hatch=tile_hatch_dict[tile_size],
+                    )  # Add hatch pattern based on tile size
+                    legend_patches[best_model] = Patch(
+                        color=color_dict[best_model]
+                    )  # Create patch for legend
+
+    ax.set_title("Best improvement for each matrix and tile sizes", pad=20)
+    ax.set_ylabel("Improvement % over Default Case", labelpad=15)
+    ax.set_xlabel("Matrix Size", labelpad=15)
+    ax.set_xticks(np.arange(len(matrix_sizes)))
+    ax.set_xticklabels(matrix_sizes)
+
+    legend1 = ax.legend(
+        legend_patches.values(),
+        legend_patches.keys(),
+        title="Models",
+        title_fontsize="13",
+        loc="upper left",
+    )
+    ax.add_artist(legend1)
+
+    legend_patches_tile = [
+        Patch(facecolor="gray", hatch=tile_hatch_dict[size], edgecolor="black")
+        for size in tile_sizes
+    ]
+    legend2 = Legend(
+        ax,
+        legend_patches_tile,
+        labels=tile_sizes,
+        title="Tile Sizes",
+        loc="upper right",
+        frameon=True,
+    )
+    ax.add_artist(legend2)
+
+    ax.grid(True, linestyle="--", alpha=0.6)
+
+    fig.tight_layout()
+    plt.savefig(f"predictions_{architecture}_robust.png")
+    plt.show()
