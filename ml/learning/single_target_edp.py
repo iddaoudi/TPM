@@ -73,14 +73,14 @@ def single_target_model_regression(
             Lasso(),
             {"estimator__alpha": [0.1, 1.0, 10.0]},
         ),
-        "GB": (
-            GradientBoostingRegressor(random_state=1),
-            {
-                "estimator__n_estimators": [50, 100, 150],
-                "estimator__learning_rate": [0.01, 0.1, 1],
-                "estimator__max_depth": [3, 5, 7],
-            },
-        ),
+        # "GB": (
+        #     GradientBoostingRegressor(random_state=1),
+        #     {
+        #         "estimator__n_estimators": [50, 100, 150],
+        #         "estimator__learning_rate": [0.01, 0.1, 1],
+        #         "estimator__max_depth": [3, 5, 7],
+        #     },
+        # ),
         "XGBoost": (
             xgb.XGBRegressor(objective="reg:squarederror"),
             {
@@ -110,7 +110,7 @@ def single_target_model_regression(
         best_cases = pd.DataFrame()
         # Train
         pipeline = Pipeline([("scaler", scaler), ("estimator", model)])
-        cv = KFold(n_splits=10)
+        cv = KFold(n_splits=16)
         grid_search = GridSearchCV(
             pipeline, params, cv=cv, scoring="neg_mean_squared_error"
         )
@@ -118,7 +118,7 @@ def single_target_model_regression(
 
         print(f"Best parameters for {name}: ", grid_search.best_params_)
         # print(f"Best score for {name}     : ", -grid_search.best_score_)
-        
+
         best_model = grid_search.best_estimator_
         if hasattr(best_model[-1], "feature_importances_"):
             importance = best_model[-1].feature_importances_
@@ -171,3 +171,4 @@ def single_target_model_regression(
         print(best_cases)
 
     # plot.plot_predictions(all_predictions, df, architecture)
+    plot.plot_best_predictions(all_predictions, df, architecture)

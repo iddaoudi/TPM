@@ -1,3 +1,18 @@
+lu,2,getrfpiv
+lu,3,gemm
+lu,4,getrfpiv,gemm
+lu,5,trsmswp
+lu,6,getrfpiv,trsmswp
+lu,7,trsmswp,gemm
+lu,8,getrfpiv,gemm,trsmswp
+lu,9,geswp
+lu,10,getrfpiv,geswp
+lu,11,gemm,geswp
+lu,12,getrfpiv,gemm,geswp
+lu,13,trsmswp,geswp
+lu,14,getrfpiv,trsmswp,geswp
+lu,15,trsmswp,gemm,geswp
+lu,16,getrfpiv,trsmswp,gemm,geswp
 
 dgram,2,laset
 dgram,3,syssq
