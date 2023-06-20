@@ -1,4 +1,5 @@
 .vscode/
+benchmarks_tpm/tpm_benchmark
 tracelib/CMakeCache.txt
 tracelib/CMakeFiles/
 tracelib/Makefile
