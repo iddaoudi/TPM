@@ -12,8 +12,7 @@ export TPM_POWER_SET=1
 export TPM_TASK_TIME=0
 export TPM_TASK_TIME_TASK="gemm"
 
-if [ $TEST -eq 1 ];
-then
+if [ $TEST -eq 1 ]; then
     MATRIX=(4000)
     TILE=(1000)
     NCASES=1
@@ -40,8 +39,7 @@ cd -
 TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
 OPENMP_PRELOAD=${ROOT}/llvm-project/build-openmp/lib/libomp.so
 
-if [ $TPM_PAPI_SET -eq 1 ];
-then
+if [ $TPM_PAPI_SET -eq 1 ]; then
     TPM_THREADS=1
     CASE=(1)
 fi
@@ -50,26 +48,21 @@ export TPM_THREADS=$TPM_THREADS
 lowest_freq=$(cpufreq-info -l | awk '{print $1}')
 default_freq=$(cpufreq-info -l | awk '{print $2}')
 
-for algorithm in ${ALGORITHMS[*]}
-do
-    for matrix in ${MATRIX[*]}
-    do
-        for tile in ${TILE[*]}
-        do
-            for iteration in ${ITER[*]}
-            do
+ulimit -s unlimited
+
+for algorithm in ${ALGORITHMS[*]}; do
+    for matrix in ${MATRIX[*]}; do
+        for tile in ${TILE[*]}; do
+            for iteration in ${ITER[*]}; do
                 export TPM_ALGORITHM=$algorithm
                 export TPM_MATRIX=$matrix
                 export TPM_TILE=$tile
                 export TPM_ITER=$iteration
-                if [ $TPM_PAPI_SET -eq 1 ];
-                then
+                if [ $TPM_PAPI_SET -eq 1 ]; then
                     echo "*** TPM: Measuring PAPI counters"
                     FREQUENCIES=(MIN DEFAULT)
-                    for frequency in ${FREQUENCIES[*]};
-                    do
-                        if [ $frequency = "MIN" ];
-                        then
+                    for frequency in ${FREQUENCIES[*]}; do
+                        if [ $frequency = "MIN" ]; then
                             export TPM_FREQUENCY=$lowest_freq
                             sudo cpufreq-set -c 0 -u $lowest_freq
                         else
@@ -79,16 +72,14 @@ do
                         LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${TPM_BENCHMARKS}/tpm_benchmark -a $algorithm -m $matrix -b $tile
                     done
                     echo "*** TPM: Measuring PAPI done" $algorithm "with parameters" $matrix $tile
-                elif [ $TPM_POWER_SET -eq 1 ];
-                then
-                    for ((case=1; case<=$NCASES; case++))
-                    do  
+                elif [ $TPM_POWER_SET -eq 1 ]; then
+                    for ((case = 1; case <= $NCASES; case++)); do
                         echo "*** TPM: Measuring energy/case"
 
                         sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
                         sleep 0.1
                         echo "*** TPM: Power server launched"
-                    
+
                         LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0-$(expr $TPM_THREADS - 1) --membind=0 ${TPM_BENCHMARKS}/tpm_benchmark -a $algorithm -m $matrix -b $tile
                         echo "*** TPM: Measuring energy/case done" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
                     done
