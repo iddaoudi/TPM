@@ -236,9 +236,9 @@ def plot_best_predictions(predictions, df, architecture):
     tile_sizes = predictions["tile_size"].unique()
     width = 0.35 / len(tile_sizes)  # Adjust width of the bars
 
-    df["time_energy_product"] = df["time"] * df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(
-        axis=1
-    )
+    # df["time_energy_product"] = df["time"] * df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(
+    #     axis=1
+    # )
 
     # Use seaborn styles
     sns.set_theme()
@@ -281,11 +281,13 @@ def plot_best_predictions(predictions, df, architecture):
                         & (df["matrix_size"] == matrix_size)
                         & (df["tile_size"] == tile_size)
                     ]
-                    default_case_value = default_case["time_energy_product"].values[0]
+                    default_case_value = default_case["edp"].values[0]
+                    # default_case_value = default_case["time_energy_product"].values[0]
 
-                    best_case_value = model_predictions["time"] * model_predictions[
-                        ["PKG1", "PKG2", "DRAM1", "DRAM2"]
-                    ].sum(axis=1)
+                    # best_case_value = model_predictions["time"] * model_predictions[
+                    #     ["PKG1", "PKG2", "DRAM1", "DRAM2"]
+                    # ].sum(axis=1)
+                    best_case_value = model_predictions["edp"]
 
                     if not best_case_value.empty:
                         current_improvement = (
@@ -345,5 +347,5 @@ def plot_best_predictions(predictions, df, architecture):
     ax.grid(True, linestyle="--", alpha=0.6)
 
     fig.tight_layout()
-    plt.savefig(f"predictions_{architecture}_robust.png")
+    plt.savefig(f"predictions_{architecture}_{algorithm}_robust.png")
     plt.show()

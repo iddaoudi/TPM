@@ -32,6 +32,8 @@ if __name__ == "__main__":
         # Make the correspondance between cases and counters (depending on the frequency) and multiply by the weight
         final_df = merge.logic(df_energy, df_counters)
 
+        final_df = utils.normalize(final_df)
+
         # Perform Shapiro-Wilk test
         # utils.shapiro_wilk_test(final_df)
         # exit(0)
@@ -58,9 +60,9 @@ if __name__ == "__main__":
     # Try models
     if command == 1:
         train_algorithms = [algo]
-        train_matrix_sizes = [12288]
+        train_matrix_sizes = [8192, 12288, 16384]
         test_algorithms = [algo]
-        test_matrix_sizes = [16384]
+        test_matrix_sizes = [20480, 24576, 28672]
 
         stm_var = 0
         edp_var = 1

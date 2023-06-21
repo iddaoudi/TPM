@@ -20,16 +20,64 @@ def calculate_new_columns(df_counters):
     df_counters["cmr"] = df_counters["PAPI_L3_TCM"] / df_counters["PAPI_L3_TCR"]
     df_counters["vr"] = df_counters["PAPI_VEC_DP"] / df_counters["PAPI_TOT_INS"]
     df_counters["scr"] = df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_CYC"]
-    
-    df_counters["PAPI_VEC_DP"] = df_counters["PAPI_VEC_DP"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_L2_TCR"] = df_counters["PAPI_L2_TCR"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_L3_TCR"] = df_counters["PAPI_L3_TCR"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_RES_STL"] = df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_L2_TCW"] = df_counters["PAPI_L2_TCW"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_L3_TCW"] = df_counters["PAPI_L3_TCW"] / df_counters["PAPI_TOT_INS"]
-    df_counters["PAPI_L3_TCM"] = df_counters["PAPI_L3_TCM"] / df_counters["PAPI_TOT_INS"]
-    
+
+    df_counters["PAPI_VEC_DP"] = (
+        df_counters["PAPI_VEC_DP"] / df_counters["PAPI_TOT_INS"]
+    )
+    df_counters["PAPI_L2_TCR"] = (
+        df_counters["PAPI_L2_TCR"] / df_counters["PAPI_TOT_INS"]
+    )
+    df_counters["PAPI_L3_TCR"] = (
+        df_counters["PAPI_L3_TCR"] / df_counters["PAPI_TOT_INS"]
+    )
+    df_counters["PAPI_RES_STL"] = (
+        df_counters["PAPI_RES_STL"] / df_counters["PAPI_TOT_INS"]
+    )
+    df_counters["PAPI_L2_TCW"] = (
+        df_counters["PAPI_L2_TCW"] / df_counters["PAPI_TOT_INS"].max()
+    )
+    df_counters["PAPI_L3_TCW"] = (
+        df_counters["PAPI_L3_TCW"] / df_counters["PAPI_TOT_INS"].max()
+    )
+    df_counters["PAPI_L3_TCM"] = (
+        df_counters["PAPI_L3_TCM"] / df_counters["PAPI_TOT_INS"]
+    )
+
     return df_counters
+
+
+def normalize(df):
+    df["edp"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1) * df["time"]
+    algorithms = df["algorithm"].unique()
+    matrix_sizes = df["matrix_size"].unique()
+    tile_sizes = df["tile_size"].unique()
+    for algorithm in algorithms:
+        for matrix in matrix_sizes:
+            for tile in tile_sizes:
+                default_case = df[
+                    (df["case"] == 1)
+                    & (df["algorithm"] == algorithm)
+                    & (df["matrix_size"] == matrix)
+                    & (df["tile_size"] == tile)
+                ]
+                if not default_case.empty:
+                    default_edp = default_case["edp"].iloc[0]
+                    df.loc[
+                        (df["algorithm"] == algorithm)
+                        & (df["matrix_size"] == matrix)
+                        & (df["tile_size"] == tile),
+                        "edp",
+                    ] /= default_edp
+
+    df["matrix_size_normalized"] = df["matrix_size"] / df["matrix_size"].max()
+    df["tile_size_normalized"] = df["tile_size"] / df["tile_size"].max()
+    df["number_of_tasks_normalized"] = (
+        df["number_of_tasks"] / df["number_of_tasks"].max()
+    )
+    df["case_normalized"] = df["case"] / df["case"].max()
+    df["frequency_normalized"] = df["frequency"] / df["frequency"].max()
+
+    return df
 
 
 def mean_of_files(folder):
