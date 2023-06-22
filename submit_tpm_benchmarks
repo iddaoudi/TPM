@@ -60,7 +60,7 @@ for algorithm in ${ALGORITHMS[*]}; do
                 export TPM_TILE=$tile
                 export TPM_ITER=$iteration
                 if [ $TPM_PAPI_SET -eq 1 ]; then
-                    for papi_events in ${[PAPI_EVENTSET[*]]}; do
+                    for papi_events in ${PAPI_EVENTSET[*]}; do
                         export TPM_PAPI_COUNTERS=$papi_events
                         echo "*** TPM: Measuring PAPI counters for eventset" $papi_events
                         FREQUENCIES=(MIN DEFAULT)
