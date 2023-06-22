@@ -55,7 +55,7 @@ extern void TPM_trace_start()
             fprintf(stderr, "PAPI_create_eventset error: %s\n", PAPI_strerror(ret));
             exit(EXIT_FAILURE);
         }
-        int TPM_PAPI_COUNTERS = atoi(getenv("TPM_PAPI_COUNTERS"));
+        TPM_PAPI_COUNTERS = atoi(getenv("TPM_PAPI_COUNTERS"));
         if (TPM_PAPI_COUNTERS == 1)
         {
             events[0] = PAPI_L3_TCM;

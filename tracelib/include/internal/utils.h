@@ -5,6 +5,7 @@
 int TPM_PAPI = 0;
 int TPM_POWER = 0;
 int TPM_TASK_TIME = 0;
+int TPM_PAPI_COUNTERS = 0;
 
 char *TPM_ALGORITHM = NULL;
 char *TPM_TASK_TIME_TASK = NULL;

@@ -12,7 +12,7 @@ void dump(long l3_cache_size)
     }
 
     char filename[TPM_FILENAME_SIZE];
-    sprintf(filename, "counters_%s_%d.csv", TPM_ALGORITHM, TPM_ITER);
+    sprintf(filename, "counters_%s_%d_%d.csv", TPM_ALGORITHM, TPM_ITER, TPM_PAPI_COUNTERS);
 
     FILE *file;
     if ((file = fopen(filename, "a+")) == NULL)
