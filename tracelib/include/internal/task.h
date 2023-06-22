@@ -4,18 +4,6 @@ int events[MAX_EVENTS];
 char *events_strings[MAX_EVENTS];
 int NEVENTS;
 
-// int events[MAX_EVENTS] = {PAPI_L3_TCM, PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_RES_STL};
-// char *events_strings[MAX_EVENTS] = {"PAPI_L3_TCM", "PAPI_TOT_INS", "PAPI_TOT_CYC", "PAPI_RES_STL"};
-
-// int events[MAX_EVENTS] = {PAPI_L2_TCR, PAPI_L2_TCW};
-// char *events_strings[MAX_EVENTS] = {"PAPI_L2_TCR", "PAPI_L2_TCW"};
-
-// int events[MAX_EVENTS] = {PAPI_L3_TCR, PAPI_L3_TCW};
-// char *events_strings[MAX_EVENTS] = {"PAPI_L3_TCR", "PAPI_L3_TCW"};
-
-// int events[MAX_EVENTS] = {PAPI_VEC_FP};
-// char *events_strings[MAX_EVENTS] = {"PAPI_VEC_FP"};
-
 int eventset;
 long long values[MAX_EVENTS];
 
