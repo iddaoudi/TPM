@@ -55,6 +55,41 @@ extern void TPM_trace_start()
             fprintf(stderr, "PAPI_create_eventset error: %s\n", PAPI_strerror(ret));
             exit(EXIT_FAILURE);
         }
+        int TPM_PAPI_COUNTERS = atoi(getenv("TPM_PAPI_COUNTERS"));
+        if (TPM_PAPI_COUNTERS == 1)
+        {
+            events[0] = PAPI_L3_TCM;
+            events[1] = PAPI_TOT_INS;
+            events[2] = PAPI_TOT_CYC;
+            events[3] = PAPI_RES_STL;
+            events_strings[0] = "PAPI_L3_TCM";
+            events_strings[1] = "PAPI_TOT_INS";
+            events_strings[2] = "PAPI_TOT_CYC";
+            events_strings[3] = "PAPI_RES_STL";
+            NEVENTS = 4;
+        }
+        else if (TPM_PAPI_COUNTERS == 2)
+        {
+            events[0] = PAPI_L2_TCR;
+            events[1] = PAPI_L2_TCW;
+            events_strings[0] = "PAPI_L2_TCR";
+            events_strings[1] = "PAPI_L2_TCW";
+            NEVENTS = 2;
+        }
+        else if (TPM_PAPI_COUNTERS == 3)
+        {
+            events[0] = PAPI_L3_TCR;
+            events[1] = PAPI_L3_TCW;
+            events_strings[0] = "PAPI_L3_TCR";
+            events_strings[1] = "PAPI_L3_TCW";
+            NEVENTS = 2;
+        }
+        else if (TPM_PAPI_COUNTERS == 4)
+        {
+            events[0] = PAPI_VEC_FP;
+            events_strings[0] = "PAPI_VEC_FP";
+            NEVENTS = 1;
+        }
         ret = PAPI_add_events(eventset, events, NEVENTS);
         if (ret != PAPI_OK)
         {
