@@ -86,8 +86,8 @@ extern void TPM_trace_start()
         }
         else if (TPM_PAPI_COUNTERS == 4)
         {
-            events[0] = PAPI_VEC_FP;
-            events_strings[0] = "PAPI_VEC_FP";
+            events[0] = PAPI_VEC_DP;
+            events_strings[0] = "PAPI_VEC_DP";
             NEVENTS = 1;
         }
         ret = PAPI_add_events(eventset, events, NEVENTS);
