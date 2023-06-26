@@ -7,7 +7,7 @@ void dump(long l3_cache_size)
 
     if (strcmp(TPM_ALGORITHM, "sylsvd") == 0)
     {
-        TPM_MATRIX = TPM_TILE * 10; // FIXME hardcoded number of iterations
+        TPM_MATRIX = TPM_MATRIX * TPM_TILE; // FIXME hardcoded number of iterations
     }
 
     int file_desc;
