@@ -143,10 +143,13 @@ int main(int argc, char *argv[])
   }
 
   // Check matrix size divisibility by tile size
-  if (MSIZE % BSIZE != 0)
+  if (algo_type != ALGO_SYLSVD)
   {
-    printf("Tile size does not divide the matrix size. Aborting.\n");
-    exit(EXIT_FAILURE);
+    if (MSIZE % BSIZE != 0)
+    {
+      printf("Tile size does not divide the matrix size. Aborting.\n");
+      exit(EXIT_FAILURE);
+    }
   }
 
   // PAPI library initialization
