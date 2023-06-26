@@ -143,10 +143,13 @@ int main(int argc, char *argv[])
   }
 
   // Check matrix size divisibility by tile size
-  if (MSIZE % BSIZE != 0)
+  if (algo_type != ALGO_SYLSVD)
   {
-    printf("Tile size does not divide the matrix size. Aborting.\n");
-    exit(EXIT_FAILURE);
+    if (MSIZE % BSIZE != 0)
+    {
+      printf("Tile size does not divide the matrix size. Aborting.\n");
+      exit(EXIT_FAILURE);
+    }
   }
 
   // PAPI library initialization
@@ -277,7 +280,24 @@ int main(int argc, char *argv[])
   {
     // Number of iterations is constant, we only vary the size of the whole matrix
     // which is the input tile size
-    int iter = 20;
+    int iter;
+    if (BSIZE == 1024)
+    {
+      iter = MSIZE / 2;
+    }
+    else if (BSIZE == 1024)
+    {
+      iter = MSIZE / 4;
+    }
+    else if (BSIZE == 512)
+    {
+      iter = MSIZE;
+    }
+    else
+    {
+      fprintf(stderr, "SylSVD parameters problem\n");
+      exit(EXIT_FAILURE);
+    }
     // Array of matrices
     double *As[iter];
     double *Bs[iter];
