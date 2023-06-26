@@ -4,7 +4,6 @@ void cholesky(tpm_desc A)
 
   TPM_application_start();
   double time_start = omp_get_wtime();
-  printf("Time start %f\n", time_start);
 
   int k = 0, m = 0, n = 0;
 
