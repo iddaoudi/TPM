@@ -83,7 +83,5 @@ depend(in : tileA[0 : A.tile_size * A.tile_size], \
 #pragma omp taskwait
 
   double time_finish = omp_get_wtime();
-  printf("Time finish %f\n", time_finish);
-  printf("Time total %f\n", time_finish - time_start);
   TPM_application_finalize(time_finish - time_start);
 }
