@@ -5,6 +5,11 @@ void dump(long l3_cache_size)
     int TPM_MATRIX = atoi(getenv("TPM_MATRIX"));
     int TPM_TILE = atoi(getenv("TPM_TILE"));
 
+    if (strcmp(TPM_ALGORITHM, "sylsvd") == 0)
+    {
+        TPM_MATRIX = TPM_TILE * 10; // FIXME hardcoded number of iterations
+    }
+
     int file_desc;
     for (file_desc = 3; file_desc < 1024; ++file_desc)
     {

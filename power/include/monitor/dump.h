@@ -5,7 +5,10 @@ void dump(int active_packages,
           uint64_t *dram_energy_finish,
           double exec_time, const char **list_of_tasks)
 {
-
+    if (strcmp(ALGORITHM, "sylsvd") == 0)
+    {
+        MATRIX = TILE * 10; // FIXME hardcoded number of iterations
+    }
     char filename[TPM_FILENAME_SIZE];
     int TPM_ITER = atoi(getenv("TPM_ITER"));
     sprintf(filename, "energy_data_%s_%d_%d.csv", ALGORITHM, MATRIX, TPM_ITER);
