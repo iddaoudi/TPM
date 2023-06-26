@@ -1,6 +1,7 @@
 .vscode/
 ml/data_treatment/__pycache__/
 ml/learning/__pycache__/
+ml/plot/__pycache__/
 benchmarks_tpm/tpm_benchmark
 tracelib/CMakeCache.txt
 tracelib/CMakeFiles/
