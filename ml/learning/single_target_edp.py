@@ -39,22 +39,24 @@ def single_target_model_regression(
     ].copy()
 
     # Preprocess data
-    train["total_energy"] = train[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
-    test["total_energy"] = test[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
+    # train["total_energy"] = train[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
+    # test["total_energy"] = test[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
 
-    # Compute the targets as energy * time for both train and test data
-    train["target"] = train["total_energy"] * train["time"]
-    test["target"] = test["total_energy"] * test["time"]
+    # # Compute the targets as energy * time for both train and test data
+    # train["target"] = train["total_energy"] * train["time"]
+    # test["target"] = test["total_energy"] * test["time"]
+    # train["target"] = train["edp"]
+    # test["target"] = test["edp"]
 
     # Features
     feature_cols = (
         # App metrics
-        ["number_of_tasks"]  # Represents the algorithm type
-        + ["matrix_size"]
-        + ["tile_size"]
-        + ["case"]
-        # System metrics (L3 size is in the dict)
-        + ["frequency"]
+        ["number_of_tasks_normalized"]  # Represents the algorithm type
+        + ["matrix_size_normalized"]
+        + ["tile_size_normalized"]
+        + ["case_normalized"]
+        # System metrics
+        + ["frequency_normalized"]
         # Hardware metrics
         + dict.metrics
     )
@@ -73,22 +75,22 @@ def single_target_model_regression(
             Lasso(),
             {"estimator__alpha": [0.1, 1.0, 10.0]},
         ),
-        # "GB": (
-        #     GradientBoostingRegressor(random_state=1),
-        #     {
-        #         "estimator__n_estimators": [50, 100, 150],
-        #         "estimator__learning_rate": [0.01, 0.1, 1],
-        #         "estimator__max_depth": [3, 5, 7],
-        #     },
-        # ),
-        "XGBoost": (
-            xgb.XGBRegressor(objective="reg:squarederror"),
+        "GB": (
+            GradientBoostingRegressor(random_state=1),
             {
                 "estimator__n_estimators": [50, 100, 150],
                 "estimator__learning_rate": [0.01, 0.1, 1],
                 "estimator__max_depth": [3, 5, 7],
             },
         ),
+        # "XGBoost": (
+        #     xgb.XGBRegressor(objective="reg:squarederror", tree_method="hist"),
+        #     {
+        #         "estimator__n_estimators": [50, 100, 150],
+        #         "estimator__learning_rate": [0.01, 0.1, 1],
+        #         "estimator__max_depth": [3, 5, 7],
+        #     },
+        # ),
         "CatBoost": (
             CatBoostRegressor(verbose=0),  # verbose=0 to disable training output
             {
@@ -103,8 +105,8 @@ def single_target_model_regression(
     all_predictions = pd.DataFrame()
 
     # Scale features
-    scaler = MinMaxScaler()
-    # scaler = RobustScaler()
+    # scaler = MinMaxScaler()
+    scaler = RobustScaler()
     # scaler = StandardScaler()
     for name, (model, params) in models.items():
         best_cases = pd.DataFrame()
@@ -114,7 +116,7 @@ def single_target_model_regression(
         grid_search = GridSearchCV(
             pipeline, params, cv=cv, scoring="neg_mean_squared_error"
         )
-        grid_search.fit(train[feature_cols], train["target"])
+        grid_search.fit(train[feature_cols], train["edp"])
 
         print(f"Best parameters for {name}: ", grid_search.best_params_)
         # print(f"Best score for {name}     : ", -grid_search.best_score_)
@@ -155,7 +157,7 @@ def single_target_model_regression(
             "tile_size",
             "case",
             "predicted_value",
-            "target",
+            "edp",
             "time",
             "PKG1",
             "PKG2",
