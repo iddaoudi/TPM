@@ -15,6 +15,11 @@ export TPM_POWER_SET=0
 export TPM_TASK_TIME=0
 export TPM_TASK_TIME_TASK="potrf"
 
+if [ $TPM_PAPI_SET -eq 1 ]; then
+    TPM_THREADS=1
+    CASE=(1)
+fi
+
 export OMP_NUM_THREADS=$TPM_THREADS
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
@@ -46,11 +51,6 @@ cd -
 
 TRACELIB_PRELOAD=${TPM}/tracelib/libTPMLibrary.so
 OPENMP_PRELOAD=${ROOT}/llvm-project/build-openmp/lib/libomp.so
-
-if [ $TPM_PAPI_SET -eq 1 ]; then
-    TPM_THREADS=1
-    CASE=(1)
-fi
 
 export TPM_THREADS=$TPM_THREADS
 lowest_freq=$(cpufreq-info -l | awk '{print $1}')
