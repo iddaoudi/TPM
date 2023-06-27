@@ -1,17 +1,17 @@
 #!/bin/bash
 
-ALGORITHMS=(cholesky qr lu invert sylsvd)
+ALGORITHMS=($1)
 MATRIX=(8192 12288 16384 20480 24576 28672 32768 36864 40960)
-# MATRIX=(8192 10240 12288 14336 16384 18432 20480 22528 24576) # 28672 32768 36864 40960)
 TILE=(512 1024 2048)
-TPM_THREADS=
-MEMBIND=
+TPM_THREADS=$2
+MEMBIND=2
 ITER=({1..3})
 NCASES=16
 PAPI_EVENTSET=({1..4})
-TEST=1
-export TPM_PAPI_SET=0
-export TPM_POWER_SET=0
+TEST=0
+
+export TPM_PAPI_SET=$3
+export TPM_POWER_SET=$4
 export TPM_TASK_TIME=0
 export TPM_TASK_TIME_TASK="potrf"
 
@@ -85,7 +85,7 @@ for algorithm in ${ALGORITHMS[*]}; do
                     done
                 elif [ $TPM_POWER_SET -eq 1 ]; then
                     for ((case = 1; case <= $NCASES; case++)); do
-                        echo "*** TPM: Measuring energy/case"
+                        echo "*** TPM: Measuring energy/case" $algorithm "case" $case "with parameters" $TPM_THREADS $matrix $tile
 
                         sudo -E ${TPM}/power/TPMpower $case $lowest_freq $default_freq &
                         sleep 0.1
@@ -97,7 +97,6 @@ for algorithm in ${ALGORITHMS[*]}; do
                 else
                     LD_PRELOAD=$OPENMP_PRELOAD:$TRACELIB_PRELOAD numactl --physcpubind=0 --membind=0 ${TPM_BENCHMARKS}/tpm_benchmark -a $algorithm -m $matrix -b $tile
                 fi
-
             done
         done
     done
