@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
     {
       iter = MSIZE / 2;
     }
-    else if (BSIZE == 1024)
+    else if (BSIZE == 2048)
     {
       iter = MSIZE / 4;
     }
