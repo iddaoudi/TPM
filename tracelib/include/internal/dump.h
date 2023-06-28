@@ -7,7 +7,23 @@ void dump(long l3_cache_size)
 
     if (strcmp(TPM_ALGORITHM, "sylsvd") == 0)
     {
-        TPM_MATRIX = TPM_MATRIX * TPM_TILE; // FIXME hardcoded number of iterations
+        if (TPM_TILE == 1024)
+        {
+            TPM_MATRIX = TPM_TILE * TPM_MATRIX / 2;
+        }
+        else if (TPM_TILE == 2048)
+        {
+            TPM_MATRIX = TPM_TILE * TPM_MATRIX / 4;
+        }
+        else if (TPM_TILE == 512)
+        {
+            TPM_MATRIX = TPM_TILE * TPM_MATRIX;
+        }
+        else
+        {
+            fprintf(stderr, "SylSVD parameters problem in trace\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     int file_desc;
