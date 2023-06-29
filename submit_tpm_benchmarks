@@ -21,8 +21,6 @@ if [ $TPM_PAPI_SET -eq 1 ]; then
 fi
 
 export OMP_NUM_THREADS=$TPM_THREADS
-export OMP_PLACES=cores
-export OMP_PROC_BIND=close
 
 if [ $TEST -eq 1 ]; then
     ALGORITHMS=(cholesky)
