@@ -189,6 +189,7 @@ int main(int argc, char *argv[])
   }
 
   int error, ret;
+  double time_start, time_finish;
 
   // Launch algorithms
   switch (algo_type)
@@ -216,13 +217,13 @@ int main(int argc, char *argv[])
     case ALGO_CHOLESKY:
 
       TPM_application_start();
-      double time_start = omp_get_wtime();
+      time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
       {
         cholesky(*A);
       }
-      double time_finish = omp_get_wtime();
+      time_finish = omp_get_wtime();
       TPM_application_finalize(time_finish - time_start);
       break;
 
@@ -233,13 +234,13 @@ int main(int argc, char *argv[])
       assert(ret == 0);
 
       TPM_application_start();
-      double time_start = omp_get_wtime();
+      time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
       {
         qr(*A, *S);
       }
-      double time_finish = omp_get_wtime();
+      time_finish = omp_get_wtime();
       TPM_application_finalize(time_finish - time_start);
 
       free(S->matrix);
@@ -268,13 +269,13 @@ int main(int argc, char *argv[])
     }
 
     TPM_application_start();
-    double time_start = omp_get_wtime();
+    time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       lu(MSIZE, BSIZE, A, ipiv, hA);
     }
-    double time_finish = omp_get_wtime();
+    time_finish = omp_get_wtime();
     TPM_application_finalize(time_finish - time_start);
 
     tpm_matrix_to_tile(hA, A, MSIZE, MSIZE, BSIZE, MSIZE);
@@ -336,13 +337,13 @@ int main(int argc, char *argv[])
     }
 
     TPM_application_start();
-    double time_start = omp_get_wtime();
+    time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       sylsvd(As, Bs, Xs, Us, Ss, VTs, EVs, Ms, BSIZE, iter);
     }
-    double time_finish = omp_get_wtime();
+    time_finish = omp_get_wtime();
     TPM_application_finalize(time_finish - time_start);
 
     for (int i = 0; i < iter; i++)
@@ -366,13 +367,13 @@ int main(int argc, char *argv[])
     tpm_dense_generator(A, MSIZE);
 
     TPM_application_start();
-    double time_start = omp_get_wtime();
+    time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       invert(A, ipiv, MSIZE, BSIZE);
     }
-    double time_finish = omp_get_wtime();
+    time_finish = omp_get_wtime();
     TPM_application_finalize(time_finish - time_start);
 
     free(A);
