@@ -214,17 +214,16 @@ int main(int argc, char *argv[])
     {
     // Cholesky algorithm
     case ALGO_CHOLESKY:
-
+	    
+    //TPM_application_start();
+    //double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
-      TPM_application_start();
-      double time_start = omp_get_wtime();
       cholesky(*A);
-      double time_finish = omp_get_wtime();
-      TPM_application_finalize(time_finish - time_start);
     }
-
+    //double time_finish = omp_get_wtime();
+    //TPM_application_finalize(time_finish - time_start);
     break;
 
     // QR algorithm

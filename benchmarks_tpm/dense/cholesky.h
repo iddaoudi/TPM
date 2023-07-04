@@ -2,8 +2,8 @@
 void cholesky(tpm_desc A)
 {
 
-  // TPM_application_start();
-  // double time_start = omp_get_wtime();
+  TPM_application_start();
+  double time_start = omp_get_wtime();
 
   int k = 0, m = 0, n = 0;
 
@@ -79,8 +79,8 @@ depend(in : tileA[0 : A.tile_size * A.tile_size], \
     }
   }
 
-  // #pragma omp taskwait
+  #pragma omp taskwait
 
-  //   double time_finish = omp_get_wtime();
-  //   TPM_application_finalize(time_finish - time_start);
+  double time_finish = omp_get_wtime();
+  TPM_application_finalize(time_finish - time_start);
 }
