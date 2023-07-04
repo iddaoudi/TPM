@@ -214,17 +214,17 @@ int main(int argc, char *argv[])
     {
     // Cholesky algorithm
     case ALGO_CHOLESKY:
-	    
-    //TPM_application_start();
-    //double time_start = omp_get_wtime();
+
+      TPM_application_start();
+      double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
-    {
-      cholesky(*A);
-    }
-    //double time_finish = omp_get_wtime();
-    //TPM_application_finalize(time_finish - time_start);
-    break;
+      {
+        cholesky(*A);
+      }
+      double time_finish = omp_get_wtime();
+      TPM_application_finalize(time_finish - time_start);
+      break;
 
     // QR algorithm
     case ALGO_QR:
@@ -232,11 +232,15 @@ int main(int argc, char *argv[])
       ret = tpm_allocate_tile(MSIZE, &S, BSIZE);
       assert(ret == 0);
 
+      TPM_application_start();
+      double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
       {
         qr(*A, *S);
       }
+      double time_finish = omp_get_wtime();
+      TPM_application_finalize(time_finish - time_start);
 
       free(S->matrix);
       tpm_matrix_desc_destroy(&S);
@@ -263,11 +267,16 @@ int main(int argc, char *argv[])
       ipiv[i] = i;
     }
 
+    TPM_application_start();
+    double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       lu(MSIZE, BSIZE, A, ipiv, hA);
     }
+    double time_finish = omp_get_wtime();
+    TPM_application_finalize(time_finish - time_start);
+
     tpm_matrix_to_tile(hA, A, MSIZE, MSIZE, BSIZE, MSIZE);
 #ifdef LOG
     tpm_default_print_matrix("A", A, MSIZE);
@@ -326,11 +335,15 @@ int main(int argc, char *argv[])
       tpm_dense_generator(Xs[i], BSIZE);
     }
 
+    TPM_application_start();
+    double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       sylsvd(As, Bs, Xs, Us, Ss, VTs, EVs, Ms, BSIZE, iter);
     }
+    double time_finish = omp_get_wtime();
+    TPM_application_finalize(time_finish - time_start);
 
     for (int i = 0; i < iter; i++)
     {
@@ -352,11 +365,15 @@ int main(int argc, char *argv[])
     int *ipiv = malloc(MSIZE * sizeof(int));
     tpm_dense_generator(A, MSIZE);
 
+    TPM_application_start();
+    double time_start = omp_get_wtime();
 #pragma omp parallel
 #pragma omp master
     {
       invert(A, ipiv, MSIZE, BSIZE);
     }
+    double time_finish = omp_get_wtime();
+    TPM_application_finalize(time_finish - time_start);
 
     free(A);
     free(ipiv);

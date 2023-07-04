@@ -1,9 +1,5 @@
-
 void invert(double *A, int *ipiv, int matrix_size, int tile_size)
 {
-    TPM_application_start();
-    double time_start = omp_get_wtime();
-
     int lda = matrix_size;
 
     for (int i = 0; i < matrix_size; i += tile_size)
@@ -74,7 +70,4 @@ depend(in : A[i * tile_size + j], A[k * tile_size + i]) \
             TPM_application_task_finish("getri");
         }
     }
-
-    double time_finish = omp_get_wtime();
-    TPM_application_finalize(time_finish - time_start);
 }

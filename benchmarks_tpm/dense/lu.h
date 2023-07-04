@@ -1,12 +1,6 @@
-
 void lu(int matrix_size, int tile_size, double *pA, int *ipiv, double *A)
 {
-
-    TPM_application_start();
-    double time_start = omp_get_wtime();
-
     double alpha = 1., neg = -1.;
-
     for (int k = 0; k < matrix_size / tile_size; k++)
     {
         int m = matrix_size - k * tile_size;
@@ -87,9 +81,4 @@ depend(in : ipiv[((matrix_size / tile_size) - 1) * tile_size : tile_size]) \
             TPM_application_task_finish("geswp");
         }
     }
-
-#pragma omp taskwait
-
-    double time_finish = omp_get_wtime();
-    TPM_application_finalize(time_finish - time_start);
 }

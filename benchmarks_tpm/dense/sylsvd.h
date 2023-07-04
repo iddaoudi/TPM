@@ -1,15 +1,7 @@
-
-// #define LOG 1
-
 void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[], double *VTs[],
             double *EVs[], double *Ms[], int matrix_size, int iter)
 {
-
-    TPM_application_start();
-    double time_start = omp_get_wtime();
-
     int info;
-
     for (int i = 0; i < iter; i++)
     {
 
@@ -25,9 +17,6 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
 
 #pragma omp task depend(in : Xs[i]) depend(out : Us[i], Ss[i], VTs[i])
         {
-#ifdef LOG
-            tpm_default_print_matrix("X", Xs[i], matrix_size);
-#endif
             TPM_application_task_start("gesvd");
 
             double *superb = (double *)malloc((matrix_size - 1) * sizeof(double));
@@ -60,28 +49,4 @@ void sylsvd(double *As[], double *Bs[], double *Xs[], double *Us[], double *Ss[]
             TPM_application_task_finish("gemm");
         }
     }
-
-#pragma omp taskwait
-
-    if (info != 0)
-    {
-        printf("Info error code: %d\n", info);
-    }
-#ifdef LOG
-    else
-    {
-        for (int i = 0; i < iter; i++)
-        {
-
-            tpm_default_print_matrix("U", Us[i], matrix_size);
-            tpm_default_print_matrix("S", Ss[i], matrix_size);
-            tpm_default_print_matrix("VT", VTs[i], matrix_size);
-            tpm_default_print_matrix("EV", EVs[i], matrix_size);
-            tpm_default_print_matrix("M", Ms[i], matrix_size);
-        }
-    }
-#endif
-
-    double time_finish = omp_get_wtime();
-    TPM_application_finalize(time_finish - time_start);
 }
