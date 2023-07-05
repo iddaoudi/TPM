@@ -9,7 +9,7 @@ def plot_graphs(csv_file):
 
     plt.style.use("ggplot")
     # create a figure and a 3x3 subplot layout
-    fig, ax = plt.subplots(3, 3, figsize=(20, 15))
+    fig, ax = plt.subplots(3, 4, figsize=(25, 15))
 
     # loop over the unique tile_sizes
     for i, tile_size in enumerate(data["tile_size"].unique()):
@@ -63,7 +63,7 @@ def plot_graphs(csv_file):
         ax[2, i].legend()
         ax[2, i].grid(True)
 
-    # plt.savefig("plot.png")
+    plt.savefig("cholesky_cascade_24.png")
     plt.show()
 
 
