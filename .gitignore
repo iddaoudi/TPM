@@ -1,5 +1,6 @@
 .vscode/
 misc/plot/nested*
+misc/plot/v1
 ml/data_treatment/__pycache__/
 ml/learning/__pycache__/
 ml/plot/__pycache__/
