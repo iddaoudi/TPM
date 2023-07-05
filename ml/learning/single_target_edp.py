@@ -9,7 +9,10 @@ from sklearn.exceptions import ConvergenceWarning
 import warnings
 import xgboost as xgb
 from catboost import CatBoostRegressor
-from lightgbm import LGBMRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.linear_model import ElasticNet
+
 
 import data_treatment.dictionaries as dict
 import plot.plot as plot
@@ -42,11 +45,9 @@ def single_target_model_regression(
     # train["total_energy"] = train[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
     # test["total_energy"] = test[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
 
-    # # Compute the targets as energy * time for both train and test data
-    # train["target"] = train["total_energy"] * train["time"]
-    # test["target"] = test["total_energy"] * test["time"]
-    # train["target"] = train["edp"]
-    # test["target"] = test["edp"]
+    # # # Compute the targets as energy * time for both train and test data
+    # train["target"] = train["total_energy"]
+    # test["target"] = test["total_energy"]
 
     # Features
     feature_cols = (
@@ -99,6 +100,35 @@ def single_target_model_regression(
                 "estimator__depth": [3, 5, 7],
             },
         ),
+        "RF": (
+            RandomForestRegressor(),
+            {
+                "estimator__n_estimators": [50, 100, 150],
+                "estimator__max_depth": [3, 5, 7],
+            },
+        ),
+        "ExtraTrees": (
+            ExtraTreesRegressor(),
+            {
+                "estimator__n_estimators": [50, 100, 150],
+                "estimator__max_depth": [3, 5, 7],
+            },
+        ),
+        "SVM": (
+            SVR(),
+            {
+                "estimator__C": [0.1, 1, 10],
+                "estimator__gamma": ["scale", "auto"],
+            },
+        ),
+        "KNN": (
+            KNeighborsRegressor(),
+            {"estimator__n_neighbors": [3, 5, 7]},
+        ),
+        "ElasticNet": (
+            ElasticNet(),
+            {"estimator__alpha": [0.1, 1, 10]},
+        ),
     }
 
     warnings.filterwarnings("ignore", category=ConvergenceWarning)
@@ -117,6 +147,7 @@ def single_target_model_regression(
             pipeline, params, cv=cv, scoring="neg_mean_squared_error"
         )
         grid_search.fit(train[feature_cols], train["edp"])
+        # grid_search.fit(train[feature_cols], train["edp"])
 
         print(f"Best parameters for {name}: ", grid_search.best_params_)
         # print(f"Best score for {name}     : ", -grid_search.best_score_)
@@ -135,7 +166,7 @@ def single_target_model_regression(
         test["predicted_value"] = test_pred
 
         min_targets = (
-            test.groupby(["algorithm", "matrix_size", "tile_size"])["predicted_value"]
+            test[test["case"] != 1].groupby(["algorithm", "matrix_size", "tile_size"])["predicted_value"]
             .min()
             .reset_index()
         )
@@ -159,10 +190,13 @@ def single_target_model_regression(
             "predicted_value",
             "edp",
             "time",
-            "PKG1",
-            "PKG2",
-            "DRAM1",
-            "DRAM2",
+            # "PKG1",
+            # "PKG2",
+            # "DRAM1",
+            # "DRAM2",
+            "energy",
+            "normalized_time",
+            "normalized_energy",
         ]
         best_cases = best_cases[columns_to_keep]
 

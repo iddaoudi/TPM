@@ -60,9 +60,9 @@ if __name__ == "__main__":
     # Try models
     if command == 1:
         train_algorithms = [algo]
-        train_matrix_sizes = [8192, 12288, 16384]
+        train_matrix_sizes = [8192, 10240, 12288, 14336]
         test_algorithms = [algo]
-        test_matrix_sizes = [20480, 24576, 28672]
+        test_matrix_sizes = [16384, 18432, 20480, 22528, 24576]
 
         stm_var = 0
         edp_var = 1

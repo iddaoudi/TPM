@@ -48,6 +48,10 @@ def calculate_new_columns(df_counters):
 
 def normalize(df):
     df["edp"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1) * df["time"]
+    df["energy"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
+    df["normalized_energy"] = df["energy"]
+    df["normalized_time"] = df["time"]
+
     algorithms = df["algorithm"].unique()
     matrix_sizes = df["matrix_size"].unique()
     tile_sizes = df["tile_size"].unique()
@@ -61,6 +65,9 @@ def normalize(df):
                     & (df["tile_size"] == tile)
                 ]
                 if not default_case.empty:
+                    # default_case.loc[:, "edp"] *= 1.15
+                    # default_case.loc[:, "time"] *= 1.15
+                    # EDP
                     default_edp = default_case["edp"].iloc[0]
                     df.loc[
                         (df["algorithm"] == algorithm)
@@ -68,6 +75,23 @@ def normalize(df):
                         & (df["tile_size"] == tile),
                         "edp",
                     ] /= default_edp
+                    # Total energy
+                    default_energy = default_case["energy"].iloc[0]
+                    df.loc[
+                        (df["algorithm"] == algorithm)
+                        & (df["matrix_size"] == matrix)
+                        & (df["tile_size"] == tile),
+                        "normalized_energy",
+                    ] /= default_energy
+                    # Time
+                    default_time = default_case["time"].iloc[0]
+                    df.loc[
+                        (df["algorithm"] == algorithm)
+                        & (df["matrix_size"] == matrix)
+                        & (df["tile_size"] == tile),
+                        "normalized_time",
+                    ] /= default_time
+
 
     df["matrix_size_normalized"] = df["matrix_size"] / df["matrix_size"].max()
     df["tile_size_normalized"] = df["tile_size"] / df["tile_size"].max()
