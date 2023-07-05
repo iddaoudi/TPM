@@ -1,4 +1,5 @@
 .vscode/
+*.png
 catboost_info/
 misc/plot/nested*
 misc/plot/v1
