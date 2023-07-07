@@ -296,15 +296,15 @@ int main(int argc, char *argv[])
     int iter;
     if (BSIZE == 1024)
     {
-      iter = MSIZE / 2;
+      iter = MSIZE / 4; // Number of tasks occurrences in SylSVD is the same, so divide by 2 otherwise it will be too much
     }
     else if (BSIZE == 2048)
     {
-      iter = MSIZE / 4;
+      iter = MSIZE / 8;
     }
     else if (BSIZE == 512)
     {
-      iter = MSIZE;
+      iter = MSIZE / 2;
     }
     else
     {

@@ -7,7 +7,18 @@ void dump(int active_packages,
 {
     if (strcmp(ALGORITHM, "sylsvd") == 0)
     {
-        MATRIX = MATRIX * TILE; // FIXME hardcoded number of iterations
+        if (TILE == 1024)
+        {
+            MATRIX = TILE * MATRIX / 2;
+        }
+        else if (TILE == 2048)
+        {
+            MATRIX = TILE * MATRIX / 4;
+        }
+        else if (TILE == 512)
+        {
+            MATRIX = TILE * MATRIX;
+        }
     }
     char filename[TPM_FILENAME_SIZE];
     int TPM_ITER = atoi(getenv("TPM_ITER"));
