@@ -5,21 +5,6 @@ void dump(int active_packages,
           uint64_t *dram_energy_finish,
           double exec_time, const char **list_of_tasks)
 {
-    if (strcmp(ALGORITHM, "sylsvd") == 0)
-    {
-        if (TILE == 1024)
-        {
-            MATRIX = TILE * MATRIX / 2;
-        }
-        else if (TILE == 2048)
-        {
-            MATRIX = TILE * MATRIX / 4;
-        }
-        else if (TILE == 512)
-        {
-            MATRIX = TILE * MATRIX;
-        }
-    }
     char filename[TPM_FILENAME_SIZE];
     int TPM_ITER = atoi(getenv("TPM_ITER"));
     sprintf(filename, "energy_data_%s_%d_%d.csv", ALGORITHM, MATRIX, TPM_ITER);

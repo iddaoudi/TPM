@@ -291,26 +291,8 @@ int main(int argc, char *argv[])
   // Sylvester-SVD algorithm
   case ALGO_SYLSVD:
   {
-    // Number of iterations is constant, we only vary the size of the whole matrix
-    // which is the input tile size
-    int iter;
-    if (BSIZE == 1024)
-    {
-      iter = MSIZE / 4; // Number of tasks occurrences in SylSVD is the same, so divide by 2 otherwise it will be too much
-    }
-    else if (BSIZE == 2048)
-    {
-      iter = MSIZE / 8;
-    }
-    else if (BSIZE == 512)
-    {
-      iter = MSIZE / 2;
-    }
-    else
-    {
-      fprintf(stderr, "SylSVD parameters problem\n");
-      exit(EXIT_FAILURE);
-    }
+    int iter = MSIZE / BSIZE;
+
     // Array of matrices
     double *As[iter];
     double *Bs[iter];
