@@ -11,6 +11,12 @@ NCASES=16
 PAPI_EVENTSET=({1..4})
 TEST=0
 
+if [ $ALGORITHMS == "sparselu"];
+then
+    MATRIX=(64 96 128 160 192 224 256 288 320)
+    TILE=(16 24 32 48)
+fi
+
 export TPM_PAPI_SET=$3
 export TPM_POWER_SET=$4
 export TPM_TASK_TIME=0
