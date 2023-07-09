@@ -163,47 +163,23 @@ def single_target_model_regression(
 
         test["predicted_value"] = test_pred
 
-        # Get unique combinations of algorithm, matrix_size, and tile_size
-        unique_combinations = test[["algorithm", "matrix_size", "tile_size"]].drop_duplicates()
+        min_targets = (
+            test.groupby(["algorithm", "matrix_size", "tile_size"])["predicted_value"]
+            .min()
+            .reset_index()
+        )
 
-        for _, row in unique_combinations.iterrows():
-            # Filter rows based on the current combination and case 1
-            case1_row = test[
-                (test["algorithm"] == row["algorithm"])
-                & (test["matrix_size"] == row["matrix_size"])
-                & (test["tile_size"] == row["tile_size"])
-                & (test["case"] == 1)
-            ]
+        best_cases = pd.merge(
+            test,
+            min_targets,
+            on=[
+                "algorithm",
+                "matrix_size",
+                "tile_size",
+                "predicted_value",
+            ],
+        )
 
-            if case1_row.empty:
-                continue
-
-            energy_case1 = case1_row["energy"].values[0]
-            time_case1 = case1_row["time"].values[0] * TOLERANCE
-
-            # Filter rows based on energy and time conditions
-            filtered_test = test[
-                (test["algorithm"] == row["algorithm"])
-                & (test["matrix_size"] == row["matrix_size"])
-                & (test["tile_size"] == row["tile_size"])
-                & (test["energy"] < energy_case1)
-                & (test["time"] < time_case1)
-                & (test["case"] != 1)
-            ]
-
-        #     print(case1_row[["matrix_size", "tile_size", "case", "edp", "predicted_value", "time", "energy"]])
-        #     print("Tolerance: time :", time_case1, "energy: ", energy_case1)
-        #     print(filtered_test[["matrix_size", "tile_size", "case", "edp", "predicted_value", "time", "energy"]])
-
-        # exit(0)
-
-            # Find case with the minimum predicted value
-            min_target = filtered_test["predicted_value"].min()
-
-            best_case = filtered_test[filtered_test["predicted_value"] == min_target]
-            best_cases = pd.concat([best_cases, best_case])
-
-        # Keep certain columns
         columns_to_keep = [
             "algorithm",
             "matrix_size",
@@ -212,12 +188,9 @@ def single_target_model_regression(
             "predicted_value",
             "edp",
             "time",
-            "energy",
-            "normalized_time",
-            "normalized_energy",
+            "energy"
         ]
         best_cases = best_cases[columns_to_keep]
-        best_cases = best_cases.reset_index(drop=True)
 
         best_cases["model"] = name
         all_predictions = pd.concat([all_predictions, best_cases])
@@ -225,5 +198,61 @@ def single_target_model_regression(
         print(f"Predicted best cases for {name}:")
         print(best_cases)
 
+        # unique_combinations = test[["algorithm", "matrix_size", "tile_size"]].drop_duplicates()
+        # for _, row in unique_combinations.iterrows():
+        #     # Filter rows based on the current combination and case 1
+        #     case1_row = test[
+        #         (test["algorithm"] == row["algorithm"])
+        #         & (test["matrix_size"] == row["matrix_size"])
+        #         & (test["tile_size"] == row["tile_size"])
+        #         & (test["case"] == 1)
+        #     ]
+
+        #     if case1_row.empty:
+        #         continue
+
+        #     energy_case1 = case1_row["energy"].values[0]
+        #     time_case1 = case1_row["time"].values[0] * TOLERANCE
+
+        #     # Filter rows based on energy and time conditions
+        #     filtered_test = test[
+        #         (test["algorithm"] == row["algorithm"])
+        #         & (test["matrix_size"] == row["matrix_size"])
+        #         & (test["tile_size"] == row["tile_size"])
+        #         & (test["energy"] < energy_case1)
+        #         & (test["time"] < time_case1)
+        #         & (test["case"] != 1)
+        #     ]
+
+        #     # Find case with the minimum predicted value
+        #     min_target = filtered_test["predicted_value"].min()
+
+        #     best_case = filtered_test[filtered_test["predicted_value"] == min_target]
+        #     best_cases = pd.concat([best_cases, best_case])
+
+        # # Keep certain columns
+        # columns_to_keep = [
+        #     "algorithm",
+        #     "matrix_size",
+        #     "tile_size",
+        #     "case",
+        #     "predicted_value",
+        #     "edp",
+        #     "time",
+        #     "energy",
+        #     "normalized_time",
+        #     "normalized_energy",
+        # ]
+        # best_cases = best_cases[columns_to_keep]
+        # best_cases = best_cases.reset_index(drop=True)
+
+        # best_cases["model"] = name
+        # all_predictions = pd.concat([all_predictions, best_cases])
+
+        # print(f"Predicted best cases for {name}:")
+        # print(best_cases)
+
     # plot.plot_predictions(all_predictions, df, architecture)
-    plot.plot_best_predictions(all_predictions, df, architecture)
+    # plot.plot_best_predictions(all_predictions, df, architecture)
+    df.to_csv(f"misc/results/data/data_{architecture}_{train_algorithms[0]}_{TOLERANCE}_{TARGET}.csv")
+    all_predictions.to_csv(f"misc/results/data/predictions_{architecture}_{train_algorithms[0]}_{TOLERANCE}_{TARGET}.csv")
