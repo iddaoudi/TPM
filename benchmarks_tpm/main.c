@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   }
 
   // Check matrix size divisibility by tile size
-  if (algo_type != ALGO_SYLSVD)
+  if (algo_type != ALGO_SYLSVD || algo_type != ALGO_SPARSELU)
   {
     if (MSIZE % BSIZE != 0)
     {
