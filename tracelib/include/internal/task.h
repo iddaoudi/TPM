@@ -55,6 +55,7 @@ static const char *qr_tasks[] = {"geqrt", "ormqr", "tsmqr", "tsqrt"};
 static const char *lu_tasks[] = {"getrfpiv", "gemm", "trsmswp", "geswp"};
 static const char *sylsvd_tasks[] = {"trsyl", "gesvd", "geev", "gemm"};
 static const char *invert_tasks[] = {"getrf", "gemm", "trsm", "getri"};
+static const char *sparselu_tasks[] = {"lu0", "fwd", "bdiv", "bmod"};
 
 Algorithm algorithms[] = {
     {"dgram", dgram_tasks, sizeof(dgram_tasks) / sizeof(dgram_tasks[0]), NULL, NULL},
@@ -85,6 +86,7 @@ Algorithm algorithms[] = {
     {"lu", lu_tasks, sizeof(lu_tasks) / sizeof(lu_tasks[0]), NULL, NULL},
     {"invert", invert_tasks, sizeof(invert_tasks) / sizeof(invert_tasks[0]), NULL, NULL},
     {"sylsvd", sylsvd_tasks, sizeof(sylsvd_tasks) / sizeof(sylsvd_tasks[0]), NULL, NULL},
+    {"sparselu", sparselu_tasks, sizeof(sparselu_tasks) / sizeof(sparselu_tasks[0]), NULL, NULL},
 };
 
 Algorithm *algorithm = NULL;
