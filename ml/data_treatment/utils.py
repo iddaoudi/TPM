@@ -47,8 +47,8 @@ def calculate_new_columns(df_counters):
 
 
 def normalize(df):
-    df["edp"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1) * df["time"]
-    df["energy"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
+    df["edp"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1) * df["time"] / 1e6
+    df["energy"] = df[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1) / 1e6
     df["normalized_energy"] = df["energy"]
     df["normalized_time"] = df["time"]
 
@@ -65,9 +65,6 @@ def normalize(df):
                     & (df["tile_size"] == tile)
                 ]
                 if not default_case.empty:
-                    # default_case.loc[:, "edp"] *= 1.15
-                    # default_case.loc[:, "time"] *= 1.15
-                    # EDP
                     default_edp = default_case["edp"].iloc[0]
                     df.loc[
                         (df["algorithm"] == algorithm)

@@ -10,15 +10,15 @@ import sys
 
 if __name__ == "__main__":
     command = int(sys.argv[1])
-    algo = sys.argv[2]
 
     array_of_df = []
     architecture = ""
 
-    for i in range(3, len(sys.argv)):
+    for i in range(2, len(sys.argv)):
         folder = sys.argv[i]
         tmp = folder.split("/")
         architecture = tmp[1]
+        algo = tmp[2]
 
         # Compute the mean of the input files
         df_energy, df_counters = utils.mean_of_files(folder)
@@ -32,6 +32,7 @@ if __name__ == "__main__":
         # Make the correspondance between cases and counters (depending on the frequency) and multiply by the weight
         final_df = merge.logic(df_energy, df_counters)
 
+        # Normalize
         final_df = utils.normalize(final_df)
 
         # Perform Shapiro-Wilk test
@@ -60,9 +61,9 @@ if __name__ == "__main__":
     # Try models
     if command == 1:
         train_algorithms = [algo]
-        train_matrix_sizes = [8192, 10240, 12288, 14336]
+        train_matrix_sizes = [8192, 10240, 12288]
         test_algorithms = [algo]
-        test_matrix_sizes = [16384, 18432, 20480, 22528, 24576]
+        test_matrix_sizes = [14336, 16384, 18432, 20480, 22528, 24576]
 
         stm_var = 0
         edp_var = 1

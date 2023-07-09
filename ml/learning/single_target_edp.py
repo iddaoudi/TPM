@@ -12,7 +12,8 @@ from catboost import CatBoostRegressor
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import ElasticNet
-
+import os
+import sys
 
 import data_treatment.dictionaries as dict
 import plot.plot as plot
@@ -40,14 +41,6 @@ def single_target_model_regression(
         (df["matrix_size"].isin(test_matrix_sizes))
         # & (df["algorithm"].isin(test_algorithms))
     ].copy()
-
-    # Preprocess data
-    # train["total_energy"] = train[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
-    # test["total_energy"] = test[["PKG1", "PKG2", "DRAM1", "DRAM2"]].sum(axis=1)
-
-    # # # Compute the targets as energy * time for both train and test data
-    # train["target"] = train["total_energy"]
-    # test["target"] = test["total_energy"]
 
     # Features
     feature_cols = (
@@ -84,14 +77,14 @@ def single_target_model_regression(
                 "estimator__max_depth": [3, 5, 7],
             },
         ),
-        # "XGBoost": (
-        #     xgb.XGBRegressor(objective="reg:squarederror", tree_method="hist"),
-        #     {
-        #         "estimator__n_estimators": [50, 100, 150],
-        #         "estimator__learning_rate": [0.01, 0.1, 1],
-        #         "estimator__max_depth": [3, 5, 7],
-        #     },
-        # ),
+        "XGBoost": (
+            xgb.XGBRegressor(objective="reg:squarederror", tree_method="hist"),
+            {
+                "estimator__n_estimators": [50, 100, 150],
+                "estimator__learning_rate": [0.01, 0.1, 1],
+                "estimator__max_depth": [3, 5, 7],
+            },
+        ),
         "CatBoost": (
             CatBoostRegressor(verbose=0),  # verbose=0 to disable training output
             {
@@ -138,50 +131,79 @@ def single_target_model_regression(
     # scaler = MinMaxScaler()
     scaler = RobustScaler()
     # scaler = StandardScaler()
+
+    TOLERANCE = float(os.getenv('TOLERANCE'))
+    if TOLERANCE == None:
+        sys.exit("TOLERANCE not defined")
+
+    TARGET = os.getenv('TARGET')
+    if TARGET == None:
+        sys.exit("TARGET not defined")
+    
     for name, (model, params) in models.items():
         best_cases = pd.DataFrame()
+        
         # Train
         pipeline = Pipeline([("scaler", scaler), ("estimator", model)])
         cv = KFold(n_splits=16)
         grid_search = GridSearchCV(
             pipeline, params, cv=cv, scoring="neg_mean_squared_error"
         )
-        grid_search.fit(train[feature_cols], train["edp"])
-        # grid_search.fit(train[feature_cols], train["edp"])
+
+        if TARGET == "edp":
+            grid_search.fit(train[feature_cols], train["edp"])
+        elif TARGET == "energy":
+            grid_search.fit(train[feature_cols], train["energy"])
+        else:
+            sys.exit("TARGET option unknown")
 
         print(f"Best parameters for {name}: ", grid_search.best_params_)
-        # print(f"Best score for {name}     : ", -grid_search.best_score_)
 
-        best_model = grid_search.best_estimator_
-        if hasattr(best_model[-1], "feature_importances_"):
-            importance = best_model[-1].feature_importances_
-            print(f"Feature importance for {name}:")
-            for i, j in enumerate(importance):
-                print(f"{feature_cols[i]}: {j}")
-
-        # Evaluate
         test_pred = grid_search.predict(test[feature_cols])
 
-        # Predict
         test["predicted_value"] = test_pred
 
-        min_targets = (
-            test[test["case"] != 1].groupby(["algorithm", "matrix_size", "tile_size"])["predicted_value"]
-            .min()
-            .reset_index()
-        )
+        # Get unique combinations of algorithm, matrix_size, and tile_size
+        unique_combinations = test[["algorithm", "matrix_size", "tile_size"]].drop_duplicates()
 
-        best_cases = pd.merge(
-            test,
-            min_targets,
-            on=[
-                "algorithm",
-                "matrix_size",
-                "tile_size",
-                "predicted_value",
-            ],
-        )
+        for _, row in unique_combinations.iterrows():
+            # Filter rows based on the current combination and case 1
+            case1_row = test[
+                (test["algorithm"] == row["algorithm"])
+                & (test["matrix_size"] == row["matrix_size"])
+                & (test["tile_size"] == row["tile_size"])
+                & (test["case"] == 1)
+            ]
 
+            if case1_row.empty:
+                continue
+
+            energy_case1 = case1_row["energy"].values[0]
+            time_case1 = case1_row["time"].values[0] * TOLERANCE
+
+            # Filter rows based on energy and time conditions
+            filtered_test = test[
+                (test["algorithm"] == row["algorithm"])
+                & (test["matrix_size"] == row["matrix_size"])
+                & (test["tile_size"] == row["tile_size"])
+                & (test["energy"] < energy_case1)
+                & (test["time"] < time_case1)
+                & (test["case"] != 1)
+            ]
+
+        #     print(case1_row[["matrix_size", "tile_size", "case", "edp", "predicted_value", "time", "energy"]])
+        #     print("Tolerance: time :", time_case1, "energy: ", energy_case1)
+        #     print(filtered_test[["matrix_size", "tile_size", "case", "edp", "predicted_value", "time", "energy"]])
+
+        # exit(0)
+
+            # Find case with the minimum predicted value
+            min_target = filtered_test["predicted_value"].min()
+
+            best_case = filtered_test[filtered_test["predicted_value"] == min_target]
+            best_cases = pd.concat([best_cases, best_case])
+
+        # Keep certain columns
         columns_to_keep = [
             "algorithm",
             "matrix_size",
@@ -190,15 +212,12 @@ def single_target_model_regression(
             "predicted_value",
             "edp",
             "time",
-            # "PKG1",
-            # "PKG2",
-            # "DRAM1",
-            # "DRAM2",
             "energy",
             "normalized_time",
             "normalized_energy",
         ]
         best_cases = best_cases[columns_to_keep]
+        best_cases = best_cases.reset_index(drop=True)
 
         best_cases["model"] = name
         all_predictions = pd.concat([all_predictions, best_cases])
