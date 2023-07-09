@@ -62,6 +62,22 @@ invert,14,getrf,trsm,getri
 invert,15,trsm,gemm,getri
 invert,16,getrf,getri,trsm,gemm
 
+sylsvd,2,trsyl
+sylsvd,3,gesvd
+sylsvd,4,trsyl,gesvd
+sylsvd,5,geev
+sylsvd,6,trsyl,geev
+sylsvd,7,gesvd,geev
+sylsvd,8,trsyl,geev,gesvd
+sylsvd,9,gemm
+sylsvd,10,trsyl,gemm
+sylsvd,11,gesvd,gemm
+sylsvd,12,trsyl,gesvd,gemm
+sylsvd,13,geev,gemm
+sylsvd,14,trsyl,geev,gemm
+sylsvd,15,geev,gesvd,gemm
+sylsvd,16,trsyl,geev,gesvd,gemm
+
 dgram,2,laset
 dgram,3,syssq
 dgram,4,laset,syssq
