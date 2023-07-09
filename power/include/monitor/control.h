@@ -15,6 +15,7 @@ const char **TPM_power_control(int selected_case, const char *task, unsigned int
         {"lu", lu_tasks, sizeof(lu_tasks) / sizeof(lu_tasks[0])},
         {"invert", invert_tasks, sizeof(invert_tasks) / sizeof(invert_tasks[0])},
         {"sylsvd", sylsvd_tasks, sizeof(sylsvd_tasks) / sizeof(sylsvd_tasks[0])},
+        {"sparselu", sparselu_tasks, sizeof(sparselu_tasks) / sizeof(sparselu_tasks[0])},
         {"dgram", dgram_tasks, sizeof(dgram_tasks) / sizeof(dgram_tasks[0])},
         {"dcesca", dcesca_tasks, sizeof(dcesca_tasks) / sizeof(dcesca_tasks[0])},
         {"dgetrs_nopiv", dgetrs_nopiv_tasks, sizeof(dgetrs_nopiv_tasks) / sizeof(dgetrs_nopiv_tasks[0])},

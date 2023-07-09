@@ -12,6 +12,7 @@ static const char *qr_tasks[] = {"geqrt", "ormqr", "tsmqr", "tsqrt"};
 static const char *lu_tasks[] = {"getrfpiv", "gemm", "trsmswp", "geswp"};
 static const char *sylsvd_tasks[] = {"trsyl", "gesvd", "geev", "gemm"};
 static const char *invert_tasks[] = {"getrf", "gemm", "trsm", "getri"};
+static const char *sparselu_tasks[] = {"lu0", "fwd", "bdiv", "bmod"};
 static const char *dgram_tasks[] = {"laset", "syssq", "gessq", "gram", "plssq", "plssq2"};
 static const char *dcesca_tasks[] = {"laset", "gesum", "gessq", "geadd", "cesca", "plssq", "plssq2"};
 static const char *dgetrs_nopiv_tasks[] = {"trsm", "gemm"};
