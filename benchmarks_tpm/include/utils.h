@@ -67,12 +67,12 @@ long l3_cache_size;
 #include "srclu/geswp.h"
 #include "lu.h"
 
-// #include "srcslu/empty_block.h"
-// #include "srcslu/bdiv.h"
-// #include "srcslu/bmod.h"
-// #include "srcslu/lu0.h"
-// #include "srcslu/fwd.h"
-// #include "sparselu.h"
+#include "srcslu/empty_block.h"
+#include "srcslu/bdiv.h"
+#include "srcslu/bmod.h"
+#include "srcslu/lu0.h"
+#include "srcslu/fwd.h"
+#include "sparselu.h"
 
 // #include "srcpoisson/jacobi.h"
 // #include "poisson.h"

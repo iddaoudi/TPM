@@ -374,28 +374,25 @@ int main(int argc, char *argv[])
     //     break;
     //   }
 
-    //   // SparseLU algorithm
-    //   case ALGO_SPARSELU:
-    //   {
-    //     double **M;
-    //     if (TPM_PAPI)
-    //     {
-    //       tpm_sparse_allocate(&M, MSIZE, BSIZE);
-    //       sparselu(M, MSIZE, BSIZE);
-    //       free(M);
-    //     }
-    //     else
-    //     {
-    // #pragma omp parallel
-    // #pragma omp master
-    //       tpm_sparse_allocate(&M, MSIZE, BSIZE);
+  // SparseLU algorithm
+  case ALGO_SPARSELU:
+  {
+    double **M;
 
-    //       sparselu(M, MSIZE, BSIZE);
+    TPM_application_start();
+    time_start = omp_get_wtime();
+#pragma omp parallel
+#pragma omp master
+    {
+      tpm_sparse_allocate(&M, MSIZE, BSIZE);
+      sparselu(M, MSIZE, BSIZE);
+    }
+    time_finish = omp_get_wtime();
+    TPM_application_finalize(time_finish - time_start);
 
-    //       free(M);
-    //     }
-    //     break;
-    //   }
+    free(M);
+    break;
+  }
 
   default:
     printf("Invalid algorithm. Aborting.\n");
