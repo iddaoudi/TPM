@@ -153,7 +153,9 @@ def single_target_model_regression(
         if TARGET == "edp":
             grid_search.fit(train[feature_cols], train["edp"])
         elif TARGET == "energy":
-            grid_search.fit(train[feature_cols], train["energy"])
+            grid_search.fit(train[feature_cols], train["normalized_energy"])
+        elif TARGET == "time":
+            grid_search.fit(train[feature_cols], train["normalized_time"])
         else:
             sys.exit("TARGET option unknown")
 
@@ -254,5 +256,5 @@ def single_target_model_regression(
 
     # plot.plot_predictions(all_predictions, df, architecture)
     # plot.plot_best_predictions(all_predictions, df, architecture)
-    df.to_csv(f"misc/results/data/data_{architecture}_{train_algorithms[0]}_{TOLERANCE}_{TARGET}.csv")
-    all_predictions.to_csv(f"misc/results/data/predictions_{architecture}_{train_algorithms[0]}_{TOLERANCE}_{TARGET}.csv")
+    df.to_csv(f"misc/results/data/{TARGET}/data_{architecture}_{train_algorithms[0]}_{TOLERANCE}.csv")
+    all_predictions.to_csv(f"misc/results/data/{TARGET}/predictions_{architecture}_{train_algorithms[0]}_{TOLERANCE}.csv")

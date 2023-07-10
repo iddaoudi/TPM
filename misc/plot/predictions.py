@@ -68,41 +68,58 @@ def plot_best_predictions(predictions, df, architecture):
                         & (df["matrix_size"] == matrix_size)
                         & (df["tile_size"] == tile_size)
                     ]
-                    default_case_edp = default_case["edp"].values[0]
-                    default_case_energy = default_case["energy"].values[0]
-                    default_case_time = default_case["time"].values[0]
+                    # default_case_edp = default_case["edp"].values[0]
+                    # default_case_energy = default_case["energy"].values[0]
+                    # default_case_time = default_case["time"].values[0]
 
-                    case_edp = model_predictions["edp"]
-                    case_energy = model_predictions["energy"]
+                    default_case_predicted_value = default_case["predicted_value"].values[0]
 
-                    if TARGET == "edp":
-                        if not case_edp.empty:
-                            current_improvement = (
-                                (default_case_edp - case_edp.iloc[0])
-                                / default_case_edp
-                            ) * 100
+                    # case_edp = model_predictions["edp"]
+                    # case_energy = model_predictions["energy"]
+                    
+                    predicted_value = model_predictions["predicted_value"]
 
-                            if (
-                                best_improvement is None
-                                or current_improvement > best_improvement
-                            ):
-                                best_improvement = current_improvement
-                                best_model = model
-                    elif TARGET == "energy":
-                        if not case_energy.empty:
-                            current_improvement = (
-                                (default_case_energy - case_energy.iloc[0])
-                                / default_case_energy
-                            ) * 100
+                    if not predicted_value.empty:
+                        current_improvement = (
+                            (default_case_predicted_value - predicted_value.iloc[0])
+                            / default_case_predicted_value
+                        ) * 100
 
-                            if (
-                                best_improvement is None
-                                or current_improvement > best_improvement
-                            ):
-                                best_improvement = current_improvement
-                                best_model = model
-                    else:
-                        sys.exit("TARGET option unknown")
+                        if (
+                            best_improvement is None
+                            or current_improvement > best_improvement
+                        ):
+                            best_improvement = current_improvement
+                            best_model = model
+
+                    # if TARGET == "edp":
+                    #     if not case_edp.empty:
+                    #         current_improvement = (
+                    #             (default_case_edp - case_edp.iloc[0])
+                    #             / default_case_edp
+                    #         ) * 100
+
+                    #         if (
+                    #             best_improvement is None
+                    #             or current_improvement > best_improvement
+                    #         ):
+                    #             best_improvement = current_improvement
+                    #             best_model = model
+                    # elif TARGET == "energy":
+                    #     if not case_energy.empty:
+                    #         current_improvement = (
+                    #             (default_case_energy - case_energy.iloc[0])
+                    #             / default_case_energy
+                    #         ) * 100
+
+                    #         if (
+                    #             best_improvement is None
+                    #             or current_improvement > best_improvement
+                    #         ):
+                    #             best_improvement = current_improvement
+                    #             best_model = model
+                    # else:
+                    #     sys.exit("TARGET option unknown")
 
                 if best_improvement is not None:
                     best_model_df = predictions[
@@ -177,16 +194,16 @@ def plot_best_predictions(predictions, df, architecture):
 
     fig.tight_layout(rect=[0, 0, 0.85, 1])
 
-    plt.savefig(f"misc/results/graphs/predictions/predictions_{TARGET}_{architecture}_{algorithm}_{TOLERANCE}_{PLOT}.png")
+    plt.savefig(f"misc/results/graphs/predictions/{TARGET}/predictions_{architecture}_{algorithm}_{TOLERANCE}_{PLOT}.png")
     # plt.show()
 
 if __name__ == "__main__":
-    file1 = sys.argv[1]
-    file2 = sys.argv[2]
-    tmp = file1.split("_")
+    file_data = sys.argv[1]
+    file_pred = sys.argv[2]
+    tmp = file_data.split("_")
     architecture = tmp[1]
 
-    df = pd.read_csv(file1)
-    predictions = pd.read_csv(file2)
+    df = pd.read_csv(file_data)
+    predictions = pd.read_csv(file_pred)
 
     plot_best_predictions(predictions, df, architecture)
