@@ -30,8 +30,12 @@ void invert(double *A, int *ipiv, int matrix_size, int tile_size)
 #pragma omp task depend(in : A[i * tile_size + i]) \
     depend(inout : A[j * tile_size + i])
             {
+                TPM_application_task_start("trsm");
+
                 cblas_dtrsm(CblasRowMajor, CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, tile_size,
                             tile_size, 1.0, &A[i * matrix_size + i], lda, &A[j * matrix_size + i], lda);
+
+                TPM_application_task_finish("trsm");
             }
         }
 
